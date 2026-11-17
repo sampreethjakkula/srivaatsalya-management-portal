@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus & Hostel Facilities | Sri Vaatsalya</title>
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --primary-blue: #0d4e78;
+            --secondary-blue: #1a75b5;
+            --accent-gold: #d4af37;
+            --text-dark: #333;
+            --bg-light: #f4f7f9;
+            --white: #ffffff;
+        }
+
+        /* --- GLOBAL --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { color: var(--text-dark); background-color: var(--bg-light); line-height: 1.6; }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 40px 0; }
+
+        /* --- HEADER NAVIGATION --- */
+        header { background-color: var(--primary-blue); color: white; padding: 15px 0; position: sticky; top: 0; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.2); width: 100%; }
+        .nav-container { display: flex; justify-content: space-between; align-items: center; width: 100%; padding-left: 20px; padding-right: 5%; height: 80px; }
+        .logo-container { display: flex; align-items: center; gap: 15px; }
+        .logo-container img { height: 70px; width: 70px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent-gold); background-color: white; }
+        .logo-text { font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; line-height: 1.2; }
+        .logo-text span { color: var(--accent-gold); display: block; font-size: 0.85rem; letter-spacing: 1px; }
+        
+        nav { display: flex; align-items: center; }
+        nav ul { list-style: none; display: flex; align-items: center; gap: 20px; }
+        nav a { color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: color 0.3s; white-space: nowrap; display: block; padding: 10px 0; }
+        nav a:hover, nav a.active { color: var(--accent-gold); }
+
+        /* --- DROPDOWN MENU --- */
+        .dropdown { position: relative; }
+        .dropdown-content { display: none; position: absolute; background-color: white; min-width: 280px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.3); border-radius: 8px; top: 100%; left: 0; z-index: 10000; border-top: 4px solid var(--accent-gold); overflow: hidden; }
+        .dropdown:hover .dropdown-content { display: block; }
+        .dropdown-content a { color: var(--primary-blue); padding: 15px 20px; text-decoration: none; display: block; font-size: 1rem; border-bottom: 1px solid #eee; transition: background 0.3s; }
+        .dropdown-content a:last-child { border-bottom: none; }
+        .dropdown-content a:hover { background-color: #f1f1f1; color: var(--primary-blue); }
+        .dropdown-content a span { display: block; font-size: 0.8rem; color: #777; font-weight: 400; margin-top: 2px; }
+
+        /* --- PAGE HEADER --- */
+        .page-header { text-align: center; padding: 60px 20px; background: linear-gradient(to right, #1d4f73, #317399, #1d4f73); color: white; margin-bottom: 40px; }
+        .page-header h1 { font-size: 3rem; margin-bottom: 10px; text-transform: uppercase; }
+        .page-header p { font-size: 1.2rem; color: #e0e0e0; }
+
+        /* --- SECTION TITLES --- */
+        .section-title { text-align: center; color: var(--primary-blue); font-size: 2.2rem; margin-bottom: 10px; text-transform: uppercase; }
+        .section-subtitle { text-align: center; color: #666; margin-bottom: 40px; font-size: 1.1rem; }
+
+        /* --- CAMPUS CARDS --- */
+        .campus-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .campus-card { background: var(--white); border-radius: 10px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.08); transition: transform 0.3s; scroll-margin-top: 100px; display: flex; flex-direction: column; }
+        .campus-card:hover { transform: translateY(-5px); }
+        .campus-img { width: 100%; height: 220px; object-fit: cover; border-bottom: 4px solid var(--accent-gold); background-color: #ddd; }
+        
+        .campus-content { padding: 25px; display: flex; flex-direction: column; flex-grow: 1; }
+        .campus-content h3 { color: var(--primary-blue); font-size: 1.5rem; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .campus-content p { color: #555; margin-bottom: 10px; font-size: 0.95rem; }
+        
+        /* Map iframe styling */
+        .map-container { margin: 15px 0; border-radius: 8px; overflow: hidden; height: 180px; border: 1px solid #eee; }
+        .map-container iframe { width: 100%; height: 100%; border: 0; }
+
+        /* Card Contact Button */
+        .campus-btn { display: block; text-align: center; background: var(--primary-blue); color: white; text-decoration: none; padding: 12px; border-radius: 6px; font-weight: bold; margin-top: auto; transition: background 0.3s; }
+        .campus-btn:hover { background: var(--accent-gold); color: var(--primary-blue); }
+
+        /* --- HOSTEL SECTION --- */
+        .hostel-section { background-color: var(--white); padding: 50px 0; border-radius: 10px; margin-bottom: 60px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .hostel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; padding: 0 30px; }
+        .hostel-card { border: 1px solid #eee; border-radius: 8px; overflow: hidden; background: var(--bg-light); }
+        .hostel-card img { width: 100%; height: 220px; object-fit: cover; }
+        .hostel-info { padding: 20px; text-align: center; }
+        .hostel-info h4 { color: var(--primary-blue); font-size: 1.3rem; margin-bottom: 10px; }
+        .hostel-info p { color: #666; font-size: 0.95rem; }
+
+        /* --- FACILITIES ICONS ROW --- */
+        .amenities-row { display: flex; justify-content: center; flex-wrap: wrap; gap: 40px; margin-top: 40px; text-align: center; }
+        .amenity-item { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .amenity-icon { font-size: 2.5rem; background: var(--primary-blue); color: white; width: 70px; height: 70px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(13, 78, 120, 0.3); }
+        .amenity-item span { font-weight: bold; color: var(--primary-blue); font-size: 1rem; }
+
+        /* --- FOOTER --- */
+        footer { background-color: #082d45; color: white; text-align: center; padding: 20px 0; font-size: 0.9rem; }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 1050px) {
+            .nav-container { flex-direction: column; height: auto; padding: 15px; gap: 15px; }
+            nav ul { flex-wrap: wrap; justify-content: center; gap: 15px; }
+            .page-header h1 { font-size: 2rem; }
+            .dropdown-content { position: static; box-shadow: none; background: rgba(255,255,255,0.1); border: none; min-width: 100%; text-align: center; }
+            .dropdown-content a { color: white; border-bottom: 1px solid rgba(255,255,255,0.1); }
+            .dropdown-content a span { color: #ccc; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER NAVIGATION -->
+    <header>
+        <div class="nav-container">
+            <div class="logo-container">
+                <img src="logo.png" alt="Sri Vaatsalya Logo">
+                <div class="logo-text">
+                    SRI VAATSALYA
+                    <span>JEE / NEET ACADEMY</span>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li class="dropdown">
+                        <a href="campus.html">Branches ▼</a>
+                        <div class="dropdown-content">
+                            <a href="#vaibhav">Sri Vaibhav Campus <span>Day Scholar Campus</span></a>
+                            <a href="#vaarahi">Sri Vaarahi Bhavan <span>Girls Campus</span></a>
+                            <a href="#virinchi">Sri Virinchi Bhavan <span>Boys Campus & Hostel</span></a>
+                        </div>
+                    </li>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="results.html">Results</a></li>
+                    <li><a href="programs.html">Programs</a></li>
+                    <li><a href="campus.html" class="active">Hostel & Campus</a></li>
+                    <li><a href="index.html#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1>Our Campus & Hostels</h1>
+        <p>A Safe, Disciplined, and Conducive Environment for Learning</p>
+    </div>
+
+    <div class="container">
+        
+        <!-- CAMPUS BUILDINGS SECTION -->
+        <h2 class="section-title">Our Campuses</h2>
+        <p class="section-subtitle">Separate, secure, and well-equipped campuses for Day Scholars, Boys, and Girls.</p>
+        
+        <div class="campus-grid">
+            
+            <!-- Campus 1: Day Scholar -->
+            <div class="campus-card" id="vaibhav">
+                <img src="sri%20vaibhav.png" alt="Sri Vaibhav Campus" class="campus-img" onerror="this.src='https://via.placeholder.com/400x250?text=Image+Not+Found'">
+                <div class="campus-content">
+                    <h3>🏫 Sri Vaibhav Campus</h3>
+                    <p><strong>Day Scholar Campus</strong></p>
+                    <p><strong>Address:</strong> 45-2-45/2, Narasimha Nagar, Akkayyapalem, Visakhapatnam, Andhra Pradesh 530024</p>
+                    <p><strong>Contact:</strong> 📞 7997711665 | 📞 6303076525</p>
+                    
+                    <!-- Google Map for Vaibhav Campus -->
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=45-2-45/2,%20Narasimha%20Nagar,%20Akkayyapalem,%20Visakhapatnam&t=&z=16&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+
+                    <a href="index.html#contact" class="campus-btn">Contact Admissions</a>
+                </div>
+            </div>
+
+            <!-- Campus 2: Girls Campus -->
+            <div class="campus-card" id="vaarahi">
+                <img src="Sri%20Vaarahi%20Bhavan.png" alt="Sri Vaarahi Bhavan" class="campus-img" onerror="this.src='https://via.placeholder.com/400x250?text=Image+Not+Found'">
+                <div class="campus-content">
+                    <h3>👩‍🎓 Sri Vaarahi Bhavan</h3>
+                    <p><strong>Girls Campus & Hostel</strong></p>
+                    <p><strong>Address:</strong> Bakkannapalem, Visakhapatnam, Andhra Pradesh</p>
+                    <p><strong>Contact:</strong> 📞 8519945894</p>
+                    
+                    <!-- Google Map for Vaarahi Campus -->
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=Sri%20Vaarahi%20Bhavan%20Bakkannapalem%20Visakhapatnam&t=&z=15&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+
+                    <a href="index.html#contact" class="campus-btn">Contact Admissions</a>
+                </div>
+            </div>
+
+            <!-- Campus 3: Boys Campus -->
+            <div class="campus-card" id="virinchi">
+                <img src="Sri%20Virinchi%20Bhavan.png" alt="Sri Virinchi Bhavan" class="campus-img" onerror="this.src='https://via.placeholder.com/400x250?text=Image+Not+Found'">
+                <div class="campus-content">
+                    <h3>👨‍🎓 Sri Virinchi Bhavan</h3>
+                    <p><strong>Boys Campus & Hostel</strong></p>
+                    <p><strong>Address:</strong> Number 7, Gayatri Nagar Road, Pothimallayapalem, Visakhapatnam, Andhra Pradesh 530041</p>
+                    <p><strong>Contact:</strong> 📞 9491571268</p>
+                    
+                    <!-- Google Map for Virinchi Campus (FIXED WITH YOUR EXACT ADDRESS) -->
+                    <div class="map-container">
+                        <!-- This uses a direct Google Maps search URL to guarantee the red pin drops on the address -->
+                        <iframe src="https://maps.google.com/maps?q=Number+7,+Gayatri+Nagar+Road,+Pothimallayapalem,+Visakhapatnam,+Andhra+Pradesh+530041&t=&z=16&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+
+                    <a href="index.html#contact" class="campus-btn">Contact Admissions</a>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- HOSTEL ROOMS SECTION -->
+        <div class="hostel-section">
+            <h2 class="section-title">Hostel Facilities</h2>
+            <p class="section-subtitle">Clean, comfortable, and safe dormitories for focused learning.</p>
+
+            <div class="hostel-grid">
+                <div class="hostel-card">
+                    <img src="Hostel%20Room.png" alt="Hostel Dormitory" onerror="this.src='https://via.placeholder.com/400x250?text=Image+Not+Found'">
+                    <div class="hostel-info">
+                        <h4>Spacious Dormitories</h4>
+                        <p>Our hostels feature sturdy bunk beds, personal storage lockers, and ample space to ensure students get proper rest after long study hours.</p>
+                    </div>
+                </div>
+
+                <div class="hostel-card">
+                    <img src="classroom.png" alt="Study Hall" onerror="this.src='https://via.placeholder.com/400x250?text=Image+Not+Found'">
+                    <div class="hostel-info">
+                        <h4>Dedicated Study Halls</h4>
+                        <p>Beyond regular classes, hostellers have access to quiet, air-conditioned study halls monitored by faculty to ensure a distraction-free environment.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="amenities-row">
+                <div class="amenity-item"><div class="amenity-icon">🍲</div><span>Hygienic Mess</span></div>
+                <div class="amenity-item"><div class="amenity-icon">🛡️</div><span>24/7 Security</span></div>
+                <div class="amenity-item"><div class="amenity-icon">📚</div><span>Study Halls</span></div>
+                <div class="amenity-item"><div class="amenity-icon">🏥</div><span>First Aid</span></div>
+                <div class="amenity-item"><div class="amenity-icon">🚌</div><span>Transport</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2024 Sri Vaatsalya Educational Institutions. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>

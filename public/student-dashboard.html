@@ -1,0 +1,1346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - Sri Vaatsalya Academy</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- html2pdf library for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        :root {
+            --primary-blue: #0a3d62;
+            --accent-gold: #d4af37;
+            --bg-light: #f4f7f9;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --sidebar-width: 260px;
+            --success-green: #10b981;
+            --danger-red: #ef4444;
+            --warning-orange: #f59e0b;
+            --border-color: #e2e8f0;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-light); color: var(--text-dark); display: flex; min-height: 100vh; }
+
+        /* --- SIDEBAR --- */
+        .sidebar { 
+            width: var(--sidebar-width); 
+            background: var(--primary-blue); 
+            color: var(--white); 
+            position: fixed; 
+            top: 0; left: 0; bottom: 0; 
+            padding: 30px 20px; 
+            display: flex; 
+            flex-direction: column; 
+            z-index: 1000; 
+        }
+        .sidebar-logo { text-align: center; margin-bottom: 40px; font-size: 22px; font-weight: 800; letter-spacing: 1px; color: var(--white); text-decoration: none; display: block; }
+        .sidebar-logo span { color: var(--accent-gold); }
+        
+        .nav-links { list-style: none; flex-grow: 1; }
+        .nav-links li { margin-bottom: 10px; }
+        .nav-links a { 
+            color: #cbd5e1; 
+            text-decoration: none; 
+            padding: 14px 18px; 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            font-size: 15px; 
+            font-weight: 500; 
+            transition: 0.3s; 
+            cursor: pointer; 
+        }
+        .nav-links a:hover, .nav-links a.active { 
+            background: rgba(255, 255, 255, 0.1); 
+            color: var(--white); 
+            border-left: 4px solid var(--accent-gold); 
+        }
+        .nav-links a i { width: 20px; text-align: center; }
+        
+        .logout-btn { 
+            margin-top: auto; 
+            background: transparent; 
+            color: var(--danger-red); 
+            text-align: center; 
+            padding: 12px; 
+            border-radius: 8px; 
+            text-decoration: none; 
+            font-weight: 600; 
+            transition: 0.3s; 
+            cursor: pointer; 
+            border: 1px solid var(--danger-red); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 15px; 
+        }
+        .logout-btn:hover { background: var(--danger-red); color: white; }
+
+        /* --- MAIN CONTENT --- */
+        .main-content { margin-left: var(--sidebar-width); width: calc(100% - var(--sidebar-width)); padding: 40px; }
+        
+        /* HEADER */
+        .top-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            background: var(--white); 
+            padding: 20px 30px; 
+            border-radius: 16px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04); 
+        }
+        .top-header h1 { color: var(--primary-blue); font-size: 24px; font-weight: 800; }
+        .top-header p { color: var(--text-muted); font-size: 14px; }
+        
+        .header-actions { display: flex; align-items: center; gap: 15px; }
+        .download-btn { 
+            background: var(--success-green); 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 14px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: 0.3s; 
+        }
+        .download-btn:hover { background: #059669; }
+        
+        .user-avatar { 
+            width: 45px; height: 45px; 
+            background: var(--accent-gold); 
+            color: var(--primary-blue); 
+            border-radius: 50%; 
+            display: flex; justify-content: center; align-items: center; 
+            font-weight: 800; font-size: 18px; 
+        }
+
+        /* --- TAB SWITCHING --- */
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ========================================= */
+        /* NOTICE BOARD STYLES                       */
+        /* ========================================= */
+        .notice-card { 
+            background: #f8fafc; 
+            border: 1px solid var(--border-color); 
+            border-left: 5px solid var(--primary-blue); 
+            border-radius: 12px; 
+            padding: 20px 25px; 
+            margin-bottom: 20px; 
+            transition: 0.3s;
+        }
+        .notice-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .notice-card.important { border-left-color: var(--danger-red); background: #fffafb; }
+        
+        .notice-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+        .notice-title { font-size: 18px; font-weight: 800; color: var(--primary-blue); }
+        .notice-title.important { color: var(--danger-red); }
+        .notice-date { font-size: 13px; font-weight: 600; color: var(--text-muted); background: #e2e8f0; padding: 4px 10px; border-radius: 20px; }
+        
+        .notice-body { font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 15px; }
+        
+        .notice-footer { display: flex; align-items: center; gap: 15px; font-size: 13px; font-weight: 600; color: var(--text-muted); border-top: 1px dashed var(--border-color); padding-top: 15px; }
+        .notice-sender { display: flex; align-items: center; gap: 6px; color: var(--primary-blue); }
+        .notice-target { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 20px; font-size: 11px; text-transform: uppercase; }
+
+        /* ========================================= */
+        /* TAB 1: DASHBOARD STYLES                   */
+        /* ========================================= */
+        .top-summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-bottom: 25px; }
+        .summary-card { 
+            background: var(--white); 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03); 
+            border-left: 4px solid var(--primary-blue); 
+        }
+        .summary-card.campus-highlight { border-left-color: var(--accent-gold); background: #fffbeb; }
+        .summary-card .label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; display: block; }
+        .summary-card .value { font-size: 16px; font-weight: 800; color: var(--primary-blue); }
+
+        .info-card { background: var(--white); padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 25px; }
+        .info-card h3 { font-size: 18px; color: var(--primary-blue); margin-bottom: 25px; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 10px; }
+        
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 30px; }
+        .info-item { display: flex; flex-direction: column; padding-bottom: 15px; border-bottom: 1px dashed var(--border-color); }
+        .info-item .label { color: var(--text-muted); font-size: 13px; font-weight: 600; text-transform: uppercase; margin-bottom: 5px; }
+        .info-item .value { color: var(--text-dark); font-size: 16px; font-weight: 600; }
+        .info-item.full-width { grid-column: span 2; border-bottom: none; padding-bottom: 0; }
+
+        .previous-year-box {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 1px solid #86efac;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 20px;
+            display: none; 
+        }
+        .previous-year-box h4 { color: #166534; font-size: 16px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
+        .prev-result-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px dashed #86efac; font-size: 15px; font-weight: 600; color: #14532d; }
+        .prev-result-row:last-child { border-bottom: none; padding-bottom: 0; }
+
+        /* ========================================= */
+        /* TAB 2: MY COURSES                         */
+        /* ========================================= */
+        .course-list-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .subject-card {
+            background: var(--white); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border-color); border-left: 4px solid var(--primary-blue); transition: transform 0.3s;
+        }
+        .subject-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .subject-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
+        .subject-card h4 { font-size: 18px; color: var(--primary-blue); font-weight: 800; }
+        .subject-card .code { font-size: 12px; background: #e0f2fe; color: var(--primary-blue); padding: 4px 10px; border-radius: 20px; font-weight: 700; }
+        .teacher-info { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+        .teacher-avatar { width: 35px; height: 35px; background: #f1f5f9; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--text-muted); font-size: 14px; }
+        .teacher-info p { font-size: 13px; color: var(--text-muted); }
+        .teacher-info strong { color: var(--text-dark); display: block; font-size: 14px; }
+        .syllabus-progress { margin-top: 15px; }
+        .syllabus-header { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+        .syllabus-header span:last-child { color: var(--primary-blue); }
+        .syllabus-bar { background: #e2e8f0; height: 8px; border-radius: 10px; overflow: hidden; }
+        .syllabus-fill { height: 100%; background: var(--accent-gold); border-radius: 10px; }
+
+        /* ========================================= */
+        /* TAB 3: ATTENDANCE STYLES                  */
+        /* ========================================= */
+        .att-dashboard-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 30px; }
+        .att-summary-card { background: var(--white); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); display: flex; flex-direction: column; justify-content: center; border-top: 4px solid var(--primary-blue); }
+        .att-summary-card.main { border-top-color: var(--success-green); background: #f0fdf4; }
+        .att-summary-card.present { border-top-color: var(--success-green); }
+        .att-summary-card.absent { border-top-color: var(--danger-red); }
+        .att-summary-card .label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+        .att-summary-card .value { font-size: 32px; font-weight: 800; color: var(--text-dark); line-height: 1; }
+        .att-summary-card.main .value { color: var(--success-green); }
+        .att-summary-card.absent .value { color: var(--danger-red); }
+
+        .attendance-details-card { background: var(--white); border-radius: 16px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); }
+        .attendance-details-card h3 { font-size: 18px; color: var(--primary-blue); margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        
+        .subject-att-row { display: flex; align-items: center; gap: 20px; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px dashed var(--border-color); }
+        .subject-att-row:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        
+        .subject-att-info { flex: 1; }
+        .subject-att-title { display: flex; justify-content: space-between; margin-bottom: 8px; }
+        .subject-att-name { font-size: 16px; font-weight: 600; color: var(--text-dark); }
+        .subject-att-percent { font-size: 16px; font-weight: 800; color: var(--success-green); }
+        .subject-att-percent.warning { color: var(--warning-orange); }
+        
+        .subject-att-bar { background: #e2e8f0; height: 10px; border-radius: 10px; overflow: hidden; }
+        .subject-att-fill { height: 100%; background: var(--success-green); border-radius: 10px; }
+        .subject-att-fill.warning { background: var(--warning-orange); }
+
+        .subject-status-badge { padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 700; text-align: center; min-width: 100px; }
+        .subject-status-badge.good { background: #dcfce7; color: #166534; }
+        .subject-status-badge.bad { background: #fef3c7; color: #92400e; }
+        .attendance-warning-banner { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 15px; border-radius: 8px; font-size: 14px; font-weight: 500; margin-top: 25px; display: flex; align-items: center; gap: 10px; }
+
+        /* --- MONTHLY CALENDAR STYLES (REDUCED SIZE) --- */
+        .calendar-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #f8fafc; padding: 10px 15px; border-radius: 10px; border: 1px solid var(--border-color); }
+        .month-selector { display: flex; gap: 10px; align-items: center; }
+        .month-selector select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); font-weight: 600; font-family: 'Inter', sans-serif; outline: none; color: var(--primary-blue); font-size: 14px; }
+        .nav-btn { background: white; border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: 600; color: var(--primary-blue); transition: 0.3s; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+        .nav-btn:hover { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+        .pdf-btn { background: var(--primary-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: 0.3s; font-size: 13px; }
+        .pdf-btn:hover { background: #072a44; }
+
+        .calendar-wrapper { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+        
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border-color); }
+        .cal-header { text-align: center; font-weight: 800; color: var(--text-muted); padding-bottom: 10px; font-size: 12px; text-transform: uppercase; }
+        
+        .cal-day { 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            border-radius: 6px; font-weight: 600; font-size: 13px; cursor: pointer; 
+            transition: 0.2s; position: relative; border: 2px solid transparent;
+            padding: 8px 4px; /* Reduced padding instead of aspect-ratio */
+        }
+        .cal-day:hover { transform: scale(1.05); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .cal-day.empty { background: transparent; cursor: default; border: none; padding: 0; }
+        .cal-day.empty:hover { transform: none; box-shadow: none; }
+        
+        /* Calendar Colors */
+        .cal-day.present { background: #dcfce7; color: #166534; }
+        .cal-day.absent { background: #fee2e2; color: #991b1b; }
+        .cal-day.holiday { background: #fef3c7; color: #92400e; }
+        .cal-day.sunday { background: #f1f5f9; color: #94a3b8; }
+        .cal-day.selected { border-color: var(--primary-blue); box-shadow: 0 0 0 2px var(--primary-blue); }
+        
+        .cal-day .status-dot { width: 4px; height: 4px; border-radius: 50%; margin-top: 3px; }
+        .cal-day.present .status-dot { background: #16a34a; }
+        .cal-day.absent .status-dot { background: #dc2626; }
+        .cal-day.holiday .status-dot { background: #d97706; }
+        .cal-day.sunday .status-dot { background: #94a3b8; }
+
+        .day-details-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border-color); display: flex; flex-direction: column; }
+        .day-details-panel h4 { color: var(--primary-blue); margin-bottom: 12px; font-size: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        .detail-row { margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; }
+        .detail-row span:first-child { color: var(--text-muted); font-weight: 500; }
+        .detail-row span:last-child { font-weight: 700; color: var(--text-dark); }
+        .subject-list-detail { background: #f8fafc; padding: 12px; border-radius: 6px; margin-top: 8px; font-size: 13px; color: var(--text-muted); text-align: center; border: 1px dashed var(--border-color); }
+
+        /* ========================================= */
+        /* TAB 5: FEE DETAILS                        */
+        /* ========================================= */
+        .fee-header-banner { background: var(--white); padding: 25px 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid var(--primary-blue); }
+        .fee-header-banner h3 { color: var(--primary-blue); font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+        .fee-header-banner p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
+
+        .fee-breakdown-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .fee-type-card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-top: 4px solid var(--primary-blue); text-align: center; }
+        .fee-type-card.hostel { border-top-color: #8b5cf6; }
+        .fee-type-card.transport { border-top-color: var(--warning-orange); }
+        .fee-type-icon { font-size: 24px; color: var(--text-muted); margin-bottom: 10px; }
+        .fee-type-card h4 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 5px; }
+        .fee-type-card .amount { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+        
+        .fee-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .fee-term-card { background: var(--white); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border-color); transition: transform 0.3s; }
+        .fee-term-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .fee-term-card.pending-card { border-color: #fca5a5; background: #fffafb; }
+        .term-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .term-title { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+        .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .status-pill.paid { background: #dcfce7; color: #166534; }
+        .status-pill.pending { background: #fee2e2; color: #991b1b; }
+        .term-amount { font-size: 28px; font-weight: 800; color: var(--primary-blue); margin-bottom: 5px; }
+        .fee-term-card.pending-card .term-amount { color: var(--danger-red); }
+        .term-due-date { font-size: 13px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 5px; }
+        .action-btn { display: block; width: 100%; text-align: center; padding: 12px; margin-top: 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: 0.3s; }
+        .action-btn.pay-now { background: var(--primary-blue); color: white; }
+        .action-btn.pay-now:hover { background: #072a44; }
+        .action-btn.receipt { background: #f1f5f9; color: var(--primary-blue); border: 1px solid #cbd5e1; }
+        .action-btn.receipt:hover { background: #e2e8f0; }
+
+        .total-due-box { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-radius: 16px; padding: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .total-due-text h3 { color: #e2e8f0; font-size: 16px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
+        .total-due-text p { color: #94a3b8; font-size: 13px; }
+        .total-due-box .amount { font-size: 42px; font-weight: 900; color: var(--accent-gold); }
+
+        /* ========================================= */
+        /* TAB 6: RESULTS & TAB 7: ACHIEVEMENTS      */
+        /* ========================================= */
+        .result-card { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .result-card h4 { color: var(--text-dark); font-size: 16px; margin-bottom: 5px; }
+        .result-card p { font-size: 13px; color: var(--text-muted); }
+        .score-badge { background: #e0f2fe; color: var(--primary-blue); font-weight: 800; font-size: 20px; padding: 10px 20px; border-radius: 8px; }
+
+        .achievement-card { background: #f8fafc; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 15px; transition: 0.3s; }
+        .achievement-card:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.05); border-color: var(--accent-gold); }
+        .ach-icon { width: 45px; height: 45px; background: #fef3c7; color: #d97706; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; flex-shrink: 0; }
+        .ach-info h4 { font-size: 15px; color: var(--primary-blue); margin-bottom: 5px; }
+        .ach-info p { font-size: 13px; color: var(--text-muted); line-height: 1.4; }
+
+        /* RESPONSIVE */
+        @media(max-width: 1200px) { .top-summary-grid { grid-template-columns: repeat(3, 1fr); } .calendar-wrapper { grid-template-columns: 1fr; } }
+        @media(max-width: 1100px) { .att-dashboard-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media(max-width: 1000px) { .top-summary-grid { grid-template-columns: repeat(2, 1fr); } .fee-breakdown-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media(max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; width: 100%; padding: 20px; }
+            .top-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .top-summary-grid { grid-template-columns: 1fr; }
+            .fee-breakdown-grid { grid-template-columns: 1fr; }
+            .info-grid { grid-template-columns: 1fr; }
+            .info-item.full-width { grid-column: span 1; }
+            .total-due-box { flex-direction: column; text-align: center; gap: 15px; }
+            .att-dashboard-grid { grid-template-columns: 1fr; }
+            .subject-att-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+            .calendar-controls { flex-direction: column; gap: 10px; align-items: flex-start; }
+            .calendar-grid { padding: 10px; gap: 4px; }
+            .cal-day { font-size: 12px; padding: 6px 2px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <a href="#" class="sidebar-logo">SRI <span>VAATSALYA</span></a>
+        <ul class="nav-links">
+            <li><a onclick="showTab('dashboard', this)" class="active"><i class="fa-solid fa-gauge"></i> Dashboard</a></li>
+            <li><a onclick="showTab('notices', this)"><i class="fa-solid fa-bullhorn"></i> Notice Board</a></li>
+            <li><a onclick="showTab('courses', this)"><i class="fa-solid fa-book-open"></i> My Courses</a></li>
+            <li><a onclick="showTab('attendance', this)"><i class="fa-solid fa-calendar-check"></i> Attendance</a></li>
+            <li><a onclick="showTab('fees', this)"><i class="fa-solid fa-file-invoice"></i> Fee Details</a></li>
+            <li><a onclick="showTab('results', this)"><i class="fa-solid fa-chart-line"></i> Exam Results</a></li>
+            <li><a onclick="showTab('achievements', this)"><i class="fa-solid fa-trophy"></i> Achievements</a></li>
+        </ul>
+        <button onclick="logout()" class="logout-btn"><i class="fa-solid fa-power-off"></i> Logout</button>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+        
+        <!-- TOP HEADER -->
+        <div class="top-header">
+            <div>
+                <h1 id="pageTitle">Student Dashboard</h1>
+                <p>Welcome back, <span id="headerName">Student</span></p>
+            </div>
+            <div class="header-actions">
+                <button class="download-btn" onclick="downloadCSV()">
+                    <i class="fa-solid fa-download"></i> Download Details
+                </button>
+                <div class="user-avatar" id="headerAvatar">?</div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 1: DASHBOARD                           -->
+        <!-- ========================================== -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="top-summary-grid">
+                <div class="summary-card">
+                    <span class="label">Student Name</span>
+                    <div class="value" id="dashStudentName">—</div>
+                </div>
+                <div class="summary-card">
+                    <span class="label">Course</span>
+                    <div class="value" id="dashCourse">—</div>
+                </div>
+                <div class="summary-card">
+                    <span class="label">Year</span>
+                    <div class="value" id="dashYear">—</div>
+                </div>
+                <div class="summary-card">
+                    <span class="label">Roll Number</span>
+                    <div class="value" id="dashRoll">—</div>
+                </div>
+                <div class="summary-card campus-highlight">
+                    <span class="label">Campus</span>
+                    <div class="value" id="dashCampus">—</div>
+                </div>
+            </div>
+
+            <div class="info-card">
+                <h3><i class="fa-solid fa-user-graduate" style="color: var(--accent-gold);"></i> Personal & Academic Information</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Date of Birth</span>
+                        <span class="value" id="dashDob">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Gender</span>
+                        <span class="value" id="dashGender">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Father's Name</span>
+                        <span class="value" id="dashFather">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Mother's Name</span>
+                        <span class="value" id="dashMother">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Contact Number</span>
+                        <span class="value" id="dashPhone">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Previous School</span>
+                        <span class="value" id="dashSchool">—</span>
+                    </div>
+                </div>
+
+                <div id="previousYearSection" class="previous-year-box">
+                    <h4><i class="fa-solid fa-clock-rotate-left"></i> 1st Year Performance Summary</h4>
+                    <div id="prevResultContainer"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 2: NOTICE BOARD                        -->
+        <!-- ========================================== -->
+        <div id="tab-notices" class="tab-content">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-bullhorn" style="color: var(--accent-gold);"></i> Notice Board</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">View the latest updates, announcements, and directives from the administration.</p>
+                
+                <div id="studentNoticeContainer">
+                    <!-- JS Populates this -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 3: MY COURSES                          -->
+        <!-- ========================================== -->
+        <div id="tab-courses" class="tab-content">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-book-open" style="color: var(--accent-gold);"></i> Enrolled Subjects & Faculty</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 14px;">Track your syllabus completion and assigned faculty members for the current academic year.</p>
+                
+                <div class="course-list-grid" id="courseCardsContainer"></div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 4: ATTENDANCE                          -->
+        <!-- ========================================== -->
+        <div id="tab-attendance" class="tab-content">
+            
+            <!-- Overall Stats Cards -->
+            <div class="att-dashboard-grid">
+                <div class="att-summary-card main">
+                    <span class="label">Overall Attendance</span>
+                    <div class="value" id="overallAttPercent">0%</div>
+                </div>
+                <div class="att-summary-card">
+                    <span class="label">Total Working Days</span>
+                    <div class="value" id="totalWorkingDays">150</div>
+                </div>
+                <div class="att-summary-card present">
+                    <span class="label">Days Present</span>
+                    <div class="value" id="totalPresentDays">0</div>
+                </div>
+                <div class="att-summary-card absent">
+                    <span class="label">Days Absent</span>
+                    <div class="value" id="totalAbsentDays">0</div>
+                </div>
+            </div>
+
+            <div class="attendance-details-card">
+                <h3><i class="fa-solid fa-list-check" style="color: var(--primary-blue);"></i> Subject-wise Attendance Details</h3>
+                <div id="subjectAttendanceList"></div>
+
+                <div class="attendance-warning-banner" id="attendanceWarning" style="display: none;">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>Note: Your overall attendance is below 90%. Please be regular to avoid exam debarment.</span>
+                </div>
+            </div>
+
+            <!-- MONTHLY CALENDAR SECTION -->
+            <div class="attendance-details-card" style="margin-top: 25px;" id="calendarContainer">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 0; border-bottom: none; padding-bottom: 0;"><i class="fa-regular fa-calendar-days" style="color: var(--accent-gold);"></i> Monthly Attendance Calendar</h3>
+                    <button class="pdf-btn" onclick="downloadMonthlyPDF()"><i class="fa-solid fa-file-pdf"></i> Download PDF</button>
+                </div>
+
+                <!-- Calendar Controls -->
+                <div class="calendar-controls">
+                    <button class="nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                    <div class="month-selector">
+                        <select id="attMonth" onchange="renderCalendar()"></select>
+                        <select id="attYear" onchange="renderCalendar()"></select>
+                    </div>
+                    <button class="nav-btn" onclick="changeMonth(1)">Next <i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+                <!-- Calendar Wrapper -->
+                <div class="calendar-wrapper">
+                    <!-- Calendar Grid -->
+                    <div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- JS will populate calendar days -->
+                        </div>
+                        
+                        <!-- Legend -->
+                        <div style="display: flex; gap: 15px; margin-top: 15px; font-size: 12px; font-weight: 600; color: var(--text-muted); justify-content: center;">
+                            <span><span style="display:inline-block; width:10px; height:10px; background:#dcfce7; border-radius:2px; margin-right:4px;"></span> Present</span>
+                            <span><span style="display:inline-block; width:10px; height:10px; background:#fee2e2; border-radius:2px; margin-right:4px;"></span> Absent</span>
+                            <span><span style="display:inline-block; width:10px; height:10px; background:#fef3c7; border-radius:2px; margin-right:4px;"></span> Holiday</span>
+                            <span><span style="display:inline-block; width:10px; height:10px; background:#f1f5f9; border-radius:2px; margin-right:4px;"></span> Sunday</span>
+                        </div>
+                    </div>
+
+                    <!-- Day Details Panel -->
+                    <div class="day-details-panel" id="dayDetailsPanel">
+                        <h4><i class="fa-regular fa-calendar-check"></i> Day Details</h4>
+                        <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Select a date on the calendar to view detailed attendance for that day.</p>
+                        
+                        <div id="selectedDayContent" style="display: none;">
+                            <div class="detail-row">
+                                <span>Date</span>
+                                <span id="detDate">—</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Status</span>
+                                <span id="detStatus">—</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Check-in Time</span>
+                                <span id="detCheckIn">—</span>
+                            </div>
+                            <div style="margin-top: 12px;">
+                                <span style="color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase;">Subjects Attended</span>
+                                <div class="subject-list-detail" id="detSubjects">—</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary Cards -->
+                <h4 style="margin: 20px 0 12px; color: var(--primary-blue); font-size: 15px;">Month Summary</h4>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                    <div class="summary-card" style="border-left-color: var(--primary-blue); padding: 15px;">
+                        <span class="label" style="font-size: 11px;">Total Days</span>
+                        <div class="value" id="mTotalDays" style="font-size: 18px;">0</div>
+                    </div>
+                    <div class="summary-card" style="border-left-color: var(--success-green); padding: 15px;">
+                        <span class="label" style="font-size: 11px;">Present</span>
+                        <div class="value" id="mPresentDays" style="font-size: 18px;">0</div>
+                    </div>
+                    <div class="summary-card" style="border-left-color: var(--danger-red); padding: 15px;">
+                        <span class="label" style="font-size: 11px;">Absent</span>
+                        <div class="value" id="mAbsentDays" style="font-size: 18px;">0</div>
+                    </div>
+                    <div class="summary-card" style="border-left-color: var(--accent-gold); padding: 15px;">
+                        <span class="label" style="font-size: 11px;">% Attendance</span>
+                        <div class="value" id="mAttPercent" style="font-size: 18px;">0%</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 5: FEE DETAILS                         -->
+        <!-- ========================================== -->
+        <div id="tab-fees" class="tab-content">
+            
+            <div class="fee-header-banner">
+                <div>
+                    <h3><i class="fa-solid fa-file-invoice"></i> Fee Structure</h3>
+                    <p>Academic Year 2024 - 2026 | <strong id="feeCampusName">Campus</strong></p>
+                </div>
+                <div style="text-align: right;">
+                    <p style="font-size: 12px; color: var(--text-muted); font-weight: 600;">COURSE</p>
+                    <p style="font-size: 16px; font-weight: 800; color: var(--primary-blue);" id="feeCourseName">—</p>
+                </div>
+            </div>
+
+            <div class="fee-breakdown-grid">
+                <div class="fee-type-card">
+                    <div class="fee-type-icon"><i class="fa-solid fa-book-open"></i></div>
+                    <h4>Tuition / Coaching Fee</h4>
+                    <div class="amount" id="tuitionAmountDisplay">₹0</div>
+                </div>
+                <div class="fee-type-card hostel" id="hostelFeeCard">
+                    <div class="fee-type-icon"><i class="fa-solid fa-bed"></i></div>
+                    <h4>Hostel Fee</h4>
+                    <div class="amount" id="hostelAmountDisplay">₹0</div>
+                </div>
+                <div class="fee-type-card transport" id="transportFeeCard">
+                    <div class="fee-type-icon"><i class="fa-solid fa-bus"></i></div>
+                    <h4>Transport Fee</h4>
+                    <div class="amount" id="transportAmountDisplay">₹0</div>
+                </div>
+            </div>
+
+            <!-- 10 Terms Grid -->
+            <div class="fee-cards-grid" id="feeTermsContainer"></div>
+
+            <div class="total-due-box">
+                <div class="total-due-text">
+                    <h3>Total Outstanding Balance</h3>
+                    <p id="dueDateMessage">Please clear your dues before the deadline.</p>
+                </div>
+                <div class="amount" id="fullPendingFee">₹0</div>
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 6: EXAM RESULTS                        -->
+        <!-- ========================================== -->
+        <div id="tab-results" class="tab-content">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-chart-line" style="color: var(--accent-gold); margin-right: 8px;"></i> Comprehensive Exam Results</h3>
+                <div id="fullResultsContainer"></div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- TAB 7: ACHIEVEMENTS                        -->
+        <!-- ========================================== -->
+        <div id="tab-achievements" class="tab-content">
+            <div class="info-card">
+                <h3><i class="fa-solid fa-trophy" style="color: var(--accent-gold); margin-right: 8px;"></i> Sri Vaatsalya Achievements</h3>
+                <div id="achievementsContainer"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script src="js/api.js"></script>
+    <script>
+        const COURSE_FEES = { 
+            "MPC - JEE Advanced": 150000, 
+            "MPC - JEE Mains": 125000, 
+            "MPC - AP EAPCET": 100000, 
+            "BiPC - NEET": 150000, 
+            "BiPC - AP EAPCET": 100000 
+        };
+        const HOSTEL_FEE = 60000;
+        const TRANSPORT_FEE = 15000;
+
+        const STREAM_SUBJECTS = {
+            "MPC": [
+                { name: "Mathematics", code: "MATH-01", teacher: "Mr. K. Srinivas", role: "Senior Faculty - JEE", progress: 75 },
+                { name: "Physics", code: "PHY-01", teacher: "Dr. R. Sharma", role: "HOD Physics", progress: 68 },
+                { name: "Chemistry", code: "CHEM-01", teacher: "Ms. L. Lakshmi", role: "Organic Chemistry Expert", progress: 82 }
+            ],
+            "BiPC": [
+                { name: "Biology", code: "BIO-01", teacher: "Dr. A. Verma", role: "HOD Biology - NEET", progress: 80 },
+                { name: "Physics", code: "PHY-02", teacher: "Mr. S. Rao", role: "Medical Physics Expert", progress: 72 },
+                { name: "Chemistry", code: "CHEM-02", teacher: "Ms. P. Reddy", role: "Inorganic Chemistry", progress: 78 }
+            ]
+        };
+
+        let currentStudentData = null;
+        let currentStudentFees = { termFee: 0, totalFee: 0, pending: 0 };
+        
+        // Global variables for Calendar
+        let currentSub = [];
+        let overallAtt = 0;
+        let selectedDateObj = null;
+        let currentMonthStatusData = {};
+
+        function showTab(tabName, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+            document.getElementById('tab-' + tabName).classList.add('active');
+            element.classList.add('active');
+
+            const titles = { 
+                dashboard: "Student Dashboard", 
+                notices: "Notice Board",
+                courses: "My Courses",
+                attendance: "Attendance Details", 
+                fees: "Fee Details", 
+                results: "Exam Results", 
+                achievements: "Achievements" 
+            };
+            document.getElementById('pageTitle').textContent = titles[tabName];
+        }
+
+        function logout() {
+            localStorage.removeItem('loggedInStudent');
+            window.location.href = "login.html";
+        }
+
+        function formatCurrency(amount) {
+            return '₹' + Number(amount).toLocaleString('en-IN');
+        }
+
+        window.onload = async function() {
+            if (window.SchoolAPI) {
+                await window.SchoolAPI.ensureAuth('student');
+            }
+            let loggedInId = localStorage.getItem('loggedInStudent') || 'STUDENT';
+            localStorage.setItem('loggedInStudent', loggedInId);
+
+            if (window.SchoolAPI) {
+                try {
+                    const [sData, fData, nots] = await Promise.all([
+                        window.SchoolAPI.getStudent(loggedInId).catch(() => null),
+                        window.SchoolAPI.getStudentFee(loggedInId).catch(() => null),
+                        window.SchoolAPI.getNotices('global').catch(() => [])
+                    ]);
+                    if (sData) {
+                        let allStus = JSON.parse(localStorage.getItem('adminStudentsData') || "[]");
+                        let idx = allStus.findIndex(x => x.id === sData.id);
+                        if (idx !== -1) allStus[idx] = sData; else allStus.push(sData);
+                        localStorage.setItem('adminStudentsData', JSON.stringify(allStus));
+                    }
+                    if (fData) {
+                        let curFees = JSON.parse(localStorage.getItem('adminFees') || "{}");
+                        curFees[loggedInId] = { total: fData.total, paid: fData.paid, history: fData.history };
+                        localStorage.setItem('adminFees', JSON.stringify(curFees));
+                    }
+                    if (nots && nots.length > 0) {
+                        localStorage.setItem('globalNotices', JSON.stringify(nots));
+                    }
+                } catch (e) {
+                    console.warn('Student sync error:', e);
+                }
+            }
+            const allStudents = JSON.parse(localStorage.getItem('adminStudentsData') || "[]");
+            const allFees = JSON.parse(localStorage.getItem('adminFees') || "{}");
+            const allAchievements = JSON.parse(localStorage.getItem('adminAchievements') || "[]");
+            
+            // Fetch Notices
+            const globalNotices = JSON.parse(localStorage.getItem("globalNotices") || "[]");
+            const adminNotices = JSON.parse(localStorage.getItem("adminNotices") || "[]");
+
+            currentStudentData = allStudents.find(s => s.id === loggedInId);
+
+            // SILENT REDIRECT IF NOT FOUND
+            if (!currentStudentData) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            const student = currentStudentData;
+
+            // --- HEADER ---
+            document.getElementById('headerName').textContent = student.name;
+            const initials = student.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase();
+            document.getElementById('headerAvatar').textContent = initials;
+
+            // --- DASHBOARD TAB ---
+            document.getElementById('dashStudentName').textContent = student.name;
+            document.getElementById('dashCourse').textContent = student.course;
+            document.getElementById('dashYear').textContent = student.year; 
+            document.getElementById('dashRoll').textContent = student.id; 
+            document.getElementById('dashCampus').textContent = student.campus; 
+            document.getElementById('dashDob').textContent = student.dob || "Not Provided";
+            document.getElementById('dashGender').textContent = student.gender || "Not Provided";
+            document.getElementById('dashFather').textContent = student.father || "Not Provided";
+            document.getElementById('dashMother').textContent = student.mother || "Not Provided";
+            document.getElementById('dashPhone').textContent = student.phone || "Not Provided";
+            document.getElementById('dashSchool').textContent = student.school || "Not Provided";
+
+            // 2nd Year Previous Results
+            if (student.year === "2nd Year" && student.results && student.results.length > 0) {
+                document.getElementById('previousYearSection').style.display = 'block';
+                const prevContainer = document.getElementById('prevResultContainer');
+                prevContainer.innerHTML = ''; 
+                student.results.forEach(res => {
+                    prevContainer.innerHTML += `
+                        <div class="prev-result-row">
+                            <span>${res.test}</span>
+                            <span>${res.score}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                document.getElementById('previousYearSection').style.display = 'none';
+            }
+
+            // --- NOTICE BOARD TAB ---
+            let allNotices = [...globalNotices, ...adminNotices];
+            let relevantNotices = allNotices.filter(n => {
+                if(n.target === "Campus Admins") return false;
+                if(n.target === "All Students") return true;
+                if(n.target === "MPC Students" && student.course.includes("MPC")) return true;
+                if(n.target === "BiPC Students" && student.course.includes("BiPC")) return true;
+                if(n.target === "1st Year" && student.year === "1st Year") return true;
+                if(n.target === "2nd Year" && student.year === "2nd Year") return true;
+                return false;
+            });
+            relevantNotices.sort((a, b) => b.id - a.id);
+
+            const noticeContainer = document.getElementById('studentNoticeContainer');
+            if(relevantNotices.length > 0) {
+                noticeContainer.innerHTML = relevantNotices.map(n => `
+                    <div class="notice-card ${n.priority === 'Important' ? 'important' : ''}">
+                        <div class="notice-header">
+                            <div class="notice-title ${n.priority === 'Important' ? 'important' : ''}">
+                                ${n.priority === 'Important' ? '🚨 ' : '📢 '}${n.title}
+                            </div>
+                            <div class="notice-date"><i class="fa-regular fa-calendar"></i> ${n.date}</div>
+                        </div>
+                        <div class="notice-body">${n.desc}</div>
+                        <div class="notice-footer">
+                            <span class="notice-sender"><i class="fa-solid fa-user-tie"></i> ${n.sender}</span>
+                            <span class="notice-target">${n.target}</span>
+                        </div>
+                    </div>
+                `).join("");
+            } else {
+                noticeContainer.innerHTML = "<p style='color: #64748b; text-align: center; padding: 20px;'>No new notices at this time.</p>";
+            }
+
+            // --- MY COURSES TAB ---
+            const stream = student.course.includes("MPC") ? "MPC" : "BiPC";
+            currentSub = STREAM_SUBJECTS[stream];
+            const courseCardsContainer = document.getElementById('courseCardsContainer');
+            courseCardsContainer.innerHTML = ''; 
+
+            currentSub.forEach(sub => {
+                courseCardsContainer.innerHTML += `
+                    <div class="subject-card">
+                        <div class="subject-card-header">
+                            <h4>${sub.name}</h4>
+                            <span class="code">${sub.code}</span>
+                        </div>
+                        <div class="teacher-info">
+                            <div class="teacher-avatar"><i class="fa-solid fa-chalkboard-user"></i></div>
+                            <div>
+                                <strong>${sub.teacher}</strong>
+                                <p>${sub.role}</p>
+                            </div>
+                        </div>
+                        <div class="syllabus-progress">
+                            <div class="syllabus-header">
+                                <span>Syllabus Covered</span>
+                                <span>${sub.progress}%</span>
+                            </div>
+                            <div class="syllabus-bar"><div class="syllabus-fill" style="width: ${sub.progress}%;"></div></div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // --- ATTENDANCE TAB ---
+            overallAtt = parseInt(student.att) || 0;
+            const totalDays = 150;
+            const presentDays = Math.round(overallAtt * totalDays / 100);
+            const absentDays = totalDays - presentDays;
+            
+            document.getElementById('overallAttPercent').textContent = overallAtt + "%";
+            document.getElementById('totalWorkingDays').textContent = totalDays;
+            document.getElementById('totalPresentDays').textContent = presentDays;
+            document.getElementById('totalAbsentDays').textContent = absentDays;
+
+            const subjectAttendanceList = document.getElementById('subjectAttendanceList');
+            subjectAttendanceList.innerHTML = ''; 
+
+            currentSub.forEach(sub => {
+                // Generate mock consistent subject attendance based on overall
+                let subAtt = overallAtt + (sub.name.length % 5 - 2); 
+                if(subAtt > 100) subAtt = 100;
+                if(subAtt < 0) subAtt = 0;
+                
+                const isWarning = subAtt < 90;
+                
+                subjectAttendanceList.innerHTML += `
+                    <div class="subject-att-row">
+                        <div class="subject-att-info">
+                            <div class="subject-att-title">
+                                <span class="subject-att-name">${sub.name}</span>
+                                <span class="subject-att-percent ${isWarning ? 'warning' : ''}">${subAtt}%</span>
+                            </div>
+                            <div class="subject-att-bar">
+                                <div class="subject-att-fill ${isWarning ? 'warning' : ''}" style="width: ${subAtt}%;"></div>
+                            </div>
+                        </div>
+                        <div class="subject-status-badge ${isWarning ? 'bad' : 'good'}">
+                            ${isWarning ? 'Needs Attention' : 'Good'}
+                        </div>
+                    </div>
+                `;
+            });
+
+            if(overallAtt < 90) {
+                document.getElementById('attendanceWarning').style.display = 'flex';
+            } else {
+                document.getElementById('attendanceWarning').style.display = 'none';
+            }
+
+            // Initialize Calendar
+            initCalendarControls();
+
+            // --- FEES TAB ---
+            document.getElementById('feeCampusName').textContent = student.campus;
+            document.getElementById('feeCourseName').textContent = student.course;
+            
+            let isHostel = student.campus.includes("Campus"); 
+            let hasTransport = student.transport;
+
+            let currentTuition = COURSE_FEES[student.course] || 100000;
+            let currentHostel = isHostel ? HOSTEL_FEE : 0;
+            let currentTransport = hasTransport ? TRANSPORT_FEE : 0;
+            let totalAnnualFee = currentTuition + currentHostel + currentTransport;
+
+            document.getElementById('tuitionAmountDisplay').textContent = formatCurrency(currentTuition);
+            
+            if (isHostel) {
+                document.getElementById('hostelAmountDisplay').textContent = formatCurrency(currentHostel);
+                document.getElementById('hostelFeeCard').style.display = "block"; 
+            } else {
+                document.getElementById('hostelFeeCard').style.display = "none"; 
+            }
+
+            if (hasTransport) {
+                document.getElementById('transportAmountDisplay').textContent = formatCurrency(currentTransport);
+                document.getElementById('transportFeeCard').style.display = "block"; 
+            } else {
+                document.getElementById('transportFeeCard').style.display = "none"; 
+            }
+
+            const termFeeAmount = totalAnnualFee / 10;
+            currentStudentFees.termFee = termFeeAmount;
+            currentStudentFees.totalFee = totalAnnualFee;
+
+            const studentFeeData = allFees[student.id];
+            let totalPaid = 0;
+            if (studentFeeData) { totalPaid = Number(studentFeeData.paid); }
+            
+            let remainingPaid = totalPaid;
+            const feeTermsContainer = document.getElementById('feeTermsContainer');
+            feeTermsContainer.innerHTML = '';
+
+            for (let term = 1; term <= 10; term++) {
+                const isPaid = remainingPaid >= termFeeAmount;
+                if(isPaid) remainingPaid -= termFeeAmount;
+                const termName = `Term ${term}`;
+
+                feeTermsContainer.innerHTML += `
+                    <div class="fee-term-card ${isPaid ? '' : 'pending-card'}">
+                        <div class="term-header">
+                            <span class="term-title">${termName} Fee</span>
+                            <span class="status-pill ${isPaid ? 'paid' : 'pending'}">${isPaid ? 'Paid' : 'Pending'}</span>
+                        </div>
+                        <div class="term-amount">${formatCurrency(termFeeAmount)}</div>
+                        <div class="term-due-date">
+                            <i class="fa-regular ${isPaid ? 'fa-calendar-check' : 'fa-clock'}"></i>
+                            ${isPaid ? `Paid` : 'Payment due as per schedule'}
+                        </div>
+                        ${isPaid
+                            ? `<button class="action-btn receipt" onclick="downloadReceipt('${termName}')">Download Receipt</button>`
+                            : `<button class="action-btn pay-now" type="button" onclick="alert('Please contact the accounts office to complete this payment.')">Pay Now</button>`}
+                    </div>
+                `;
+            }
+
+            let totalPendingFee = totalAnnualFee - totalPaid;
+            if(totalPendingFee < 0) totalPendingFee = 0;
+            currentStudentFees.pending = totalPendingFee;
+            document.getElementById('fullPendingFee').textContent = formatCurrency(totalPendingFee);
+
+            // --- RESULTS TAB ---
+            const resultsContainer = document.getElementById('fullResultsContainer');
+            resultsContainer.innerHTML = ""; 
+            if(student.results && student.results.length > 0) {
+                student.results.forEach(res => {
+                    resultsContainer.innerHTML += `
+                        <div class="result-card">
+                            <div>
+                                <h4>${res.test}</h4>
+                                <p>Academic Year 2024-2026</p>
+                            </div>
+                            <div class="score-badge">${res.score}</div>
+                        </div>
+                    `;
+                });
+            } else {
+                resultsContainer.innerHTML = "<p style='color: #64748b;'>No exam results published yet.</p>";
+            }
+
+            // --- ACHIEVEMENTS TAB ---
+            const achievementsContainer = document.getElementById('achievementsContainer');
+            achievementsContainer.innerHTML = '';
+            
+            if(allAchievements.length > 0) {
+                allAchievements.forEach(ach => {
+                    achievementsContainer.innerHTML += `
+                        <div class="achievement-card">
+                            <div class="ach-icon"><i class="fa-solid fa-medal"></i></div>
+                            <div class="ach-info">
+                                <h4>${ach.title}</h4>
+                                <p>${ach.description}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            } else {
+                achievementsContainer.innerHTML = `
+                    <div class="achievement-card">
+                        <div class="ach-icon"><i class="fa-solid fa-award"></i></div>
+                        <div class="ach-info">
+                            <h4>State Top Marks in Intermediate</h4>
+                            <p>N.V. Lehitha (467/470) and S. Pallavi (466/470) made us proud in AP Inter Exams 2026.</p>
+                        </div>
+                    </div>
+                `;
+            }
+        };
+
+        /* ================= CALENDAR FUNCTIONS ================= */
+        
+        function initCalendarControls() {
+            const monthSelect = document.getElementById('attMonth');
+            const yearSelect = document.getElementById('attYear');
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            
+            monthSelect.innerHTML = months.map((m, i) => `<option value="${i}">${m}</option>`).join("");
+            
+            let currentYear = new Date().getFullYear();
+            let yearsHtml = "";
+            for(let y = currentYear - 2; y <= currentYear + 2; y++) {
+                yearsHtml += `<option value="${y}">${y}</option>`;
+            }
+            yearSelect.innerHTML = yearsHtml;
+
+            // Set to current month/year
+            monthSelect.value = new Date().getMonth();
+            yearSelect.value = currentYear;
+
+            renderCalendar();
+        }
+
+        function changeMonth(dir) {
+            const monthSelect = document.getElementById('attMonth');
+            const yearSelect = document.getElementById('attYear');
+            let m = parseInt(monthSelect.value) + dir;
+            let y = parseInt(yearSelect.value);
+
+            if (m > 11) { m = 0; y++; }
+            else if (m < 0) { m = 11; y--; }
+
+            monthSelect.value = m;
+            yearSelect.value = y;
+            renderCalendar();
+        }
+
+        // Helper: Seeded random based on date + student ID to keep data consistent
+        function seededRandom(seed) {
+            var x = Math.sin(seed++) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function renderCalendar() {
+            if(!currentStudentData) return;
+            
+            const month = parseInt(document.getElementById('attMonth').value);
+            const year = parseInt(document.getElementById('attYear').value);
+            const grid = document.getElementById('calendarGrid');
+            
+            // Clear details panel
+            document.getElementById('selectedDayContent').style.display = 'none';
+            document.getElementById('dayDetailsPanel').querySelector('p').style.display = 'block';
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            // Headers
+            let html = `
+                <div class="cal-header">Sun</div>
+                <div class="cal-header">Mon</div>
+                <div class="cal-header">Tue</div>
+                <div class="cal-header">Wed</div>
+                <div class="cal-header">Thu</div>
+                <div class="cal-header">Fri</div>
+                <div class="cal-header">Sat</div>
+            `;
+
+            // Empty slots for first week
+            for (let i = 0; i < firstDay; i++) {
+                html += `<div class="cal-day empty"></div>`;
+            }
+
+            let presentCount = 0;
+            let absentCount = 0;
+            let workingDaysCount = 0;
+            currentMonthStatusData = {}; // Reset for selected month
+
+            const today = new Date();
+            const isCurrentMonth = today.getMonth() === month && today.getFullYear() === year;
+
+            // Populate days
+            for (let d = 1; d <= daysInMonth; d++) {
+                let dayOfWeek = new Date(year, month, d).getDay();
+                let dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                
+                let status = "";
+                let cssClass = "";
+                
+                if (dayOfWeek === 0) {
+                    // Sunday
+                    status = "Sunday";
+                    cssClass = "sunday";
+                    currentMonthStatusData[dateStr] = { status: status, display: "No Class" };
+                } else {
+                    workingDaysCount++;
+                    // Determine Present/Absent based on overall percentage (seeded for consistency)
+                    let seed = (year * 10000) + ((month + 1) * 100) + d + parseInt(currentStudentData.id.replace(/\D/g, '') || 0);
+                    let rand = seededRandom(seed);
+                    
+                    // Calculate a bias. If overallAtt is 90%, rand < 0.9 = present.
+                    if (rand < (overallAtt / 100)) {
+                        status = "Present";
+                        cssClass = "present";
+                        presentCount++;
+                    } else {
+                        status = "Absent";
+                        cssClass = "absent";
+                        absentCount++;
+                    }
+                    
+                    // Random Holiday (e.g., 2nd Saturday)
+                    if (dayOfWeek === 6 && d > 7 && d <= 14) {
+                        status = "Holiday";
+                        cssClass = "holiday";
+                        presentCount--; // Adjust count
+                        workingDaysCount--; // Holidays aren't working days
+                    }
+
+                    currentMonthStatusData[dateStr] = { status: status, display: status };
+                }
+
+                // Prevent marking future dates as absent
+                if (isCurrentMonth && d > today.getDate()) {
+                    cssClass = ""; // clear color
+                    currentMonthStatusData[dateStr].status = "Upcoming";
+                    currentMonthStatusData[dateStr].display = "—";
+                    if(status === "Present") { presentCount--; workingDaysCount--; }
+                    if(status === "Absent") { absentCount--; workingDaysCount--; }
+                }
+
+                html += `
+                    <div class="cal-day ${cssClass}" onclick="showDayDetails('${dateStr}', '${status}')">
+                        ${d}
+                        ${cssClass !== '' && cssClass !== 'sunday' ? '<div class="status-dot"></div>' : ''}
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = html;
+
+            // Update Summary
+            let mPercent = workingDaysCount > 0 ? Math.round((presentCount / workingDaysCount) * 100) : 0;
+            
+            document.getElementById('mTotalDays').textContent = workingDaysCount;
+            document.getElementById('mPresentDays').textContent = presentCount;
+            document.getElementById('mAbsentDays').textContent = absentCount;
+            document.getElementById('mAttPercent').textContent = mPercent + "%";
+        }
+
+        function showDayDetails(dateStr, status) {
+            // Highlight selected day
+            document.querySelectorAll('.cal-day').forEach(el => el.classList.remove('selected'));
+            event.currentTarget.classList.add('selected');
+
+            document.getElementById('selectedDayContent').style.display = 'block';
+            document.getElementById('dayDetailsPanel').querySelector('p').style.display = 'none';
+
+            // Format Date
+            const [y, m, d] = dateStr.split('-');
+            const dateObj = new Date(y, m - 1, d);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            
+            document.getElementById('detDate').textContent = dateObj.toLocaleDateString('en-US', options);
+            
+            let statusColor = "var(--text-dark)";
+            if(status === "Present") statusColor = "var(--success-green)";
+            if(status === "Absent") statusColor = "var(--danger-red)";
+            if(status === "Holiday") statusColor = "var(--warning-orange)";
+            if(status === "Sunday") statusColor = "var(--text-muted)";
+            
+            document.getElementById('detStatus').innerHTML = `<span style="color: ${statusColor};">${status}</span>`;
+
+            if(status === "Present") {
+                // Mock check-in time
+                let hr = 8 + (d % 2); // 8 or 9 AM
+                let min = (d * 7) % 60;
+                document.getElementById('detCheckIn').textContent = `${String(hr).padStart(2,'0')}:${String(min).padStart(2,'0')} AM`;
+                
+                // Mock subjects attended
+                let subjectNames = currentSub.map(s => s.name).join(", ");
+                document.getElementById('detSubjects').textContent = subjectNames;
+            } else if (status === "Absent") {
+                document.getElementById('detCheckIn').textContent = "—";
+                document.getElementById('detSubjects').textContent = "No classes attended.";
+            } else if (status === "Holiday") {
+                document.getElementById('detCheckIn').textContent = "—";
+                document.getElementById('detSubjects').textContent = "College Holiday (2nd Saturday).";
+            } else {
+                document.getElementById('detCheckIn').textContent = "—";
+                document.getElementById('detSubjects').textContent = "No Class.";
+            }
+        }
+
+        function downloadMonthlyPDF() {
+            if(!currentStudentData) return;
+            
+            const element = document.getElementById('calendarContainer');
+            const monthName = document.getElementById('attMonth').options[document.getElementById('attMonth').selectedIndex].text;
+            const yearVal = document.getElementById('attYear').value;
+            
+            const opt = {
+                margin:       0.5,
+                filename:     `${currentStudentData.name}_Attendance_${monthName}_${yearVal}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Temporarily hide the download button during rendering
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
+            btn.disabled = true;
+
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        }
+
+        /* ================= OTHER FUNCTIONS ================= */
+
+        function downloadReceipt(termName) {
+            if (!currentStudentData) return;
+
+            let receiptContent = "========================================\n";
+            receiptContent += "       SRI VAATSALYA ACADEMY\n";
+            receiptContent += "       FEE PAYMENT RECEIPT\n";
+            receiptContent += "========================================\n\n";
+            receiptContent += `Receipt No : RCPT-${Math.floor(Math.random() * 100000)}\n`;
+            receiptContent += `Date       : ${new Date().toLocaleDateString()}\n`;
+            receiptContent += `Term       : ${termName}\n\n`;
+            
+            receiptContent += "--- STUDENT DETAILS ---\n";
+            receiptContent += `Name       : ${currentStudentData.name}\n`;
+            receiptContent += `Roll No    : ${currentStudentData.id}\n`;
+            receiptContent += `Course     : ${currentStudentData.course}\n`;
+            receiptContent += `Campus     : ${currentStudentData.campus}\n\n`;
+
+            receiptContent += "--- PAYMENT DETAILS ---\n";
+            receiptContent += `Amount Paid: ${formatCurrency(currentStudentFees.termFee)}\n`;
+            receiptContent += `Status     : PAID\n\n`;
+
+            receiptContent += "========================================\n";
+            receiptContent += "Thank you for your payment!\n";
+            receiptContent += "This is a computer-generated receipt.\n";
+
+            const blob = new Blob([receiptContent], { type: 'text/plain' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `${currentStudentData.name}_${termName}_Receipt.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+        }
+
+        function downloadCSV() {
+            if (!currentStudentData) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            
+            csvContent += "--- STUDENT DETAILS ---\n";
+            csvContent += "Field,Value\n";
+            csvContent += `Name,${currentStudentData.name}\n`;
+            csvContent += `Course,${currentStudentData.course}\n`;
+            csvContent += `Year,${currentStudentData.year}\n`;
+            csvContent += `Roll Number,${currentStudentData.id}\n`;
+            csvContent += `Campus,${currentStudentData.campus}\n`;
+            csvContent += `Attendance,${currentStudentData.att}%\n\n`;
+
+            csvContent += "--- FEE DETAILS ---\n";
+            csvContent += `Total Annual Fee,${currentStudentFees.totalFee}\n`;
+            csvContent += `Fee Per Term,${currentStudentFees.termFee}\n`;
+            csvContent += `Total Outstanding Balance,${currentStudentFees.pending}\n`;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `${currentStudentData.name}_Details.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

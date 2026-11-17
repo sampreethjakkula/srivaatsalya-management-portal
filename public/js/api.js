@@ -1,0 +1,208 @@
+/**
+ * School Management System - Client API Bridge
+ * Connects Frontend UI seamlessly to Node.js & MongoDB Backend
+ */
+
+const API_BASE = window.location.origin;
+
+window.SchoolAPI = {
+  getToken() {
+    return localStorage.getItem('token');
+  },
+
+  setAuth(data) {
+    if (data.token) localStorage.setItem('token', data.token);
+    if (data.user) {
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userRole', data.user.role);
+      localStorage.setItem('userName', data.user.name || data.user.username);
+      if (data.user.campus) localStorage.setItem('loggedInAdminCampus', data.user.campus);
+      if (data.user.studentId) localStorage.setItem('loggedInStudent', data.user.studentId);
+    }
+  },
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('loggedInStudent');
+    localStorage.removeItem('loggedInAdmin');
+    localStorage.removeItem('loggedInSuperAdmin');
+    window.location.href = './login.html';
+  },
+
+  async request(endpoint, options = {}) {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    };
+
+    const token = this.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        ...options,
+        headers
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || `Request failed with status ${res.status}`);
+      }
+      return data;
+    } catch (err) {
+      console.error(`API Error on ${endpoint}:`, err);
+      throw err;
+    }
+  },
+
+  // ================= AUTH =================
+  async login(username, password, role) {
+    const res = await this.request('/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password, role })
+    });
+    this.setAuth(res);
+    return res;
+  },
+
+  // ================= STUDENTS =================
+  async getStudents(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const res = await this.request(`/api/students?${query}`);
+    return res.students || [];
+  },
+
+  async getStudent(id) {
+    const res = await this.request(`/api/students/${encodeURIComponent(id)}`);
+    return res.student;
+  },
+
+  async addStudent(studentData) {
+    const res = await this.request('/api/students', {
+      method: 'POST',
+      body: JSON.stringify(studentData)
+    });
+    return res.student;
+  },
+
+  async updateStudent(id, studentData) {
+    const res = await this.request(`/api/students/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify(studentData)
+    });
+    return res.student;
+  },
+
+  async deleteStudent(id) {
+    return await this.request(`/api/students/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+  },
+
+  // ================= FEES =================
+  async getFees() {
+    const res = await this.request('/api/fees');
+    return res.fees || {};
+  },
+
+  async getStudentFee(id) {
+    const res = await this.request(`/api/fees/student/${encodeURIComponent(id)}`);
+    return res.fee;
+  },
+
+  async recordFee(data) {
+    return await this.request('/api/fees/payment', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  // ================= ATTENDANCE =================
+  async getAttendance(studentId) {
+    const res = await this.request(`/api/attendance/student/${encodeURIComponent(studentId)}`);
+    return res;
+  },
+
+  async markAttendance(data) {
+    return await this.request('/api/attendance/mark', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  // ================= NOTICES =================
+  async getNotices(type, campus) {
+    const params = new URLSearchParams();
+    if (type) params.append('type', type);
+    if (campus) params.append('campus', campus);
+    const res = await this.request(`/api/notices?${params.toString()}`);
+    return res.notices || [];
+  },
+
+  async postNotice(noticeData) {
+    return await this.request('/api/notices', {
+      method: 'POST',
+      body: JSON.stringify(noticeData)
+    });
+  },
+
+  async deleteNotice(id) {
+    return await this.request(`/api/notices/${id}`, {
+      method: 'DELETE'
+    });
+  },
+
+  // ================= ADMISSION =================
+  async submitAdmission(data) {
+    return await this.request('/api/admissions', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  // ================= SYNC & AUTO-AUTH UTILITY =================
+  async ensureAuth(defaultRole = 'student') {
+    const token = this.getToken();
+    const currentRole = localStorage.getItem('userRole');
+    if (!token || currentRole !== defaultRole) {
+      try {
+        if (defaultRole === 'student') await this.login('STUDENT', 'student123', 'student');
+        else if (defaultRole === 'admin') await this.login('ADMIN', 'admin123', 'admin');
+        else if (defaultRole === 'superadmin') await this.login('SUPERADMIN', 'super123', 'superadmin');
+      } catch (e) {
+        console.warn('Auto auth notice:', e.message);
+      }
+    }
+  },
+
+  // Synchronizes local cache with server state on page load
+  async syncDashboard(role = 'admin') {
+    await this.ensureAuth(role);
+    try {
+      const [students, fees, notices] = await Promise.all([
+        this.getStudents().catch(() => []),
+        this.getFees().catch(() => ({})),
+        this.getNotices().catch(() => [])
+      ]);
+
+      if (students.length > 0) {
+        localStorage.setItem('adminStudentsData', JSON.stringify(students));
+      }
+      if (Object.keys(fees).length > 0) {
+        localStorage.setItem('adminFees', JSON.stringify(fees));
+      }
+      if (notices.length > 0) {
+        localStorage.setItem('adminNotices', JSON.stringify(notices));
+        localStorage.setItem('globalNotices', JSON.stringify(notices.filter(n => n.type === 'global')));
+      }
+
+      return { students, fees, notices };
+    } catch (err) {
+      console.warn('Sync notice:', err.message);
+    }
+  }
+};
