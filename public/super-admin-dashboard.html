@@ -749,31 +749,56 @@ function showPage(id, button) {
 }
 
 /* ================= MANAGE ADMINS ================= */
-function createAdminAccount() {
+async function loadAdminAccounts() {
+    if (!window.SchoolAPI) return;
+    try {
+        const data = await window.SchoolAPI.request('/api/auth/users');
+        const table = document.getElementById("adminAccountsTable");
+        if (!table) return;
+        table.innerHTML = '';
+        (data.users || []).forEach(admin => {
+            const row = document.createElement("tr");
+            row.setAttribute('data-username', admin.username);
+            row.innerHTML = `
+                <td>${admin.username}</td><td>${admin.campus || 'All Campuses'}</td>
+                <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Admin</span></td>
+                <td><button class="red" style="padding:5px 10px;font-size:12px;" onclick="deleteAdmin('${admin.username}', this)">Delete</button></td>
+            `;
+            table.appendChild(row);
+        });
+    } catch(e) { console.warn('Could not load admins:', e.message); }
+}
+
+async function deleteAdmin(username, btn) {
+    if (!confirm(`Delete admin "${username}"?`)) return;
+    try {
+        await window.SchoolAPI.request('/api/auth/users/' + username, { method: 'DELETE' });
+        btn.closest('tr').remove();
+        alert(`Admin "${username}" deleted.`);
+    } catch(e) { alert('Error: ' + e.message); }
+}
+
+async function createAdminAccount() {
     let user = document.getElementById("newAdminUser").value.trim();
     let campus = document.getElementById("newAdminCampus").value;
     let pass = document.getElementById("newAdminPass").value;
     let confirm = document.getElementById("newAdminConfirmPass").value;
     if (!user || !pass) { alert("Please fill in all fields."); return; }
     if (pass !== confirm) { alert("Passwords do not match."); return; }
-    let table = document.getElementById("adminAccountsTable");
-    let newRow = document.createElement("tr");
-    newRow.innerHTML = `
-        <td>${user}</td><td>${campus}</td>
-        <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Admin</span></td>
-        <td><button class="red" style="padding: 5px 10px; font-size: 12px;" onclick="this.parentElement.parentElement.remove()">Delete</button></td>
-    `;
-    table.appendChild(newRow);
-    if (window.SchoolAPI) {
-        window.SchoolAPI.request('/api/auth/register-admin', {
+    if (!window.SchoolAPI) { alert("API not available."); return; }
+    try {
+        await window.SchoolAPI.request('/api/auth/register-admin', {
             method: 'POST',
             body: JSON.stringify({ username: user, password: pass, campus: campus })
-        }).catch(err => alert('API Notice: ' + err.message));
+        });
+        document.getElementById("newAdminUser").value = "";
+        document.getElementById("newAdminPass").value = "";
+        document.getElementById("newAdminConfirmPass").value = "";
+        alert(`✅ Admin account for "${user.toUpperCase()}" created successfully!`);
+        await loadAdminAccounts(); // Reload from DB to show real data
+    } catch(err) {
+        alert('Error creating admin: ' + err.message);
     }
-    document.getElementById("newAdminUser").value = "";
-    document.getElementById("newAdminPass").value = "";
-    document.getElementById("newAdminConfirmPass").value = "";
-    alert(`✅ Admin account for "${user}" created successfully!`);
 }
 
 /* ================= NOTICES ================= */
@@ -1348,6 +1373,7 @@ window.onload = async function() {
     renderAll();
     initAnalyticsPage();
     initFeesPage();
+    await loadAdminAccounts(); // Load admins from DB on every page load
 };
 
 function renderAll() {

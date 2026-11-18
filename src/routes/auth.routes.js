@@ -122,4 +122,36 @@ router.post('/register-admin', protect, authorize('superadmin'), async (req, res
   }
 });
 
+// @route   GET /api/users  (Super Admin only - list all admins)
+router.get('/users', protect, authorize('superadmin'), async (req, res) => {
+  try {
+    const users = await Users.find({ role: 'admin' });
+    const safeUsers = users.map(u => ({
+      username: u.username,
+      name: u.name,
+      campus: u.campus,
+      role: u.role,
+      createdAt: u.createdAt
+    }));
+    res.json({ success: true, count: safeUsers.length, users: safeUsers });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   DELETE /api/users/:username  (Super Admin only)
+router.delete('/users/:username', protect, authorize('superadmin'), async (req, res) => {
+  try {
+    const username = req.params.username.toUpperCase();
+    if (username === 'SUPERADMIN') {
+      return res.status(403).json({ success: false, message: 'Cannot delete the super admin account.' });
+    }
+    await Users.remove({ username, role: 'admin' });
+    res.json({ success: true, message: `Admin ${username} deleted.` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;
+
