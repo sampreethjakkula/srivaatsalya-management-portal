@@ -668,6 +668,50 @@ function matchCampus(studentCampus, filterCampus) {
     return false;
 }
 
+function matchYear(studentYear, filterYear) {
+    if (!filterYear || filterYear === "All Years") return true;
+    if (!studentYear) return false;
+    
+    const sy = String(studentYear).toLowerCase().trim();
+    const fy = String(filterYear).toLowerCase().trim();
+    
+    if (sy === fy) return true;
+
+    // 2nd Year matcher (matches 2, 2nd, 2nd year, second, ii)
+    if (fy.includes("2") || fy.includes("second") || fy.includes("ii")) {
+        return sy.includes("2") || sy.includes("second") || sy.includes("ii");
+    }
+
+    // 1st Year matcher (matches 1, 1st, 1st year, first, i)
+    if (fy.includes("1") || fy.includes("first") || fy.includes("i")) {
+        return sy.includes("1") || sy.includes("first") || (sy.includes("i") && !sy.includes("ii"));
+    }
+
+    return false;
+}
+
+function matchGroup(courseOrGroup, filterGroup) {
+    if (!filterGroup || filterGroup === "All Groups") return true;
+    if (!courseOrGroup) return false;
+    const cg = String(courseOrGroup).toUpperCase().trim();
+    const fg = String(filterGroup).toUpperCase().trim();
+    return cg.includes(fg);
+}
+
+function matchExam(courseOrExam, filterExam) {
+    if (!filterExam || filterExam === "All Exams") return true;
+    if (!courseOrExam) return false;
+    const ce = String(courseOrExam).toUpperCase().trim();
+    const fe = String(filterExam).toUpperCase().trim();
+
+    if (fe.includes("JEE ADV") && ce.includes("ADV")) return true;
+    if (fe.includes("JEE MAIN") && ce.includes("MAIN")) return true;
+    if ((fe.includes("EAPCET") || fe.includes("EAMCET")) && (ce.includes("EAPCET") || ce.includes("EAMCET"))) return true;
+    if (fe.includes("NEET") && ce.includes("NEET")) return true;
+
+    return ce.includes(fe);
+}
+
 function getMyStudents() {
     if (currentAdminCampus === "All Campuses") return allStudents;
     return allStudents.filter(s => matchCampus(s.campus, currentAdminCampus));
@@ -1315,11 +1359,9 @@ function renderFilteredFees() {
     // Apply Filters
     let filtered = myStudents.filter(s => {
         if (!matchCampus(s.campus, fCampus)) return false;
-        if (fYear !== "All Years" && s.year !== fYear) return false;
-        
-        let parsed = getGroupAndCoaching(s.course);
-        if (fGroup !== "All Groups" && parsed.group !== fGroup) return false;
-        if (fExam !== "All Exams" && parsed.coaching !== fExam) return false;
+        if (!matchYear(s.year, fYear)) return false;
+        if (!matchGroup(s.course, fGroup)) return false;
+        if (!matchExam(s.course, fExam)) return false;
 
         // Fee Status Logic
         let f = fees[s.id] || { total: 0, paid: 0 };
@@ -1419,10 +1461,8 @@ function calculateTargets() {
 
     let filteredStudents = allStudents.filter(s => {
         if (!matchCampus(s.campus, campusFilter)) return false;
-        
-        let { group, coaching } = getGroupAndCoaching(s.course);
-        if (groupFilter !== "All Groups" && group !== groupFilter) return false;
-        if (coachingFilter !== "All Programs" && coaching !== coachingFilter) return false;
+        if (!matchGroup(s.course, groupFilter)) return false;
+        if (coachingFilter !== "All Programs" && !matchExam(s.course, coachingFilter)) return false;
 
         return true;
     });
@@ -1613,11 +1653,9 @@ function renderFilteredAttendance() {
     // Apply Dropdown Filters
     let filtered = myStudents.filter(s => {
         if (!matchCampus(s.campus, fCampus)) return false;
-        if (fYear !== "All Years" && s.year !== fYear) return false;
-        
-        let parsed = getGroupAndCoaching(s.course);
-        if (fGroup !== "All Groups" && parsed.group !== fGroup) return false;
-        if (fExam !== "All Exams" && parsed.coaching !== fExam) return false;
+        if (!matchYear(s.year, fYear)) return false;
+        if (!matchGroup(s.course, fGroup)) return false;
+        if (!matchExam(s.course, fExam)) return false;
 
         return true;
     });
