@@ -346,8 +346,10 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                         <th>Student ID</th>
                         <th>Student Name</th>
                         <th>Course</th>
-                        <th>Year</th>
                         <th>Campus</th>
+                        <th>Total Fee</th>
+                        <th>Paid</th>
+                        <th>Due</th>
                         <th>Fee Status</th>
                     </tr>
                 </thead>
@@ -874,49 +876,144 @@ function importExcel(event) {
 
 function downloadAttendanceTemplate() {
     const wb = XLSX.utils.book_new();
-    const data = [["Student ID", "Status"], ["STU101", "present"], ["STU102", "absent"], ["STU103", "present"]];
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    XLSX.utils.book_append_sheet(wb, ws, "Daily_Register");
-    XLSX.writeFile(wb, "Attendance_Daily_Template.xlsx");
+    let myStudents = getMyStudents();
+    let rows = [["Student ID", "Student Name", "Status / Attendance %"]];
+    if (myStudents && myStudents.length > 0) {
+        myStudents.forEach(s => {
+            rows.push([s.id, s.name, s.att ? s.att + "%" : "Present"]);
+        });
+    } else {
+        rows.push(["STUDENT", "Default Student", "Present"]);
+        rows.push(["STU101", "Sample Student", "Present"]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, "Attendance_Register");
+    XLSX.writeFile(wb, "Attendance_Template.xlsx");
 }
 
-function importAttendanceExcel(event) {
+async function importAttendanceExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array'});
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
-        let updatedCount = 0;
-        for (let i = 0; i < rows.length; i++) {
-            let row = rows[i];
-            if (!row || row.length === 0) continue; 
-            for (let j = 0; j < row.length; j++) {
-                let cellValue = String(row[j] || "").trim();
-                if (cellValue.toUpperCase().startsWith("STU")) {
-                    let studentId = cellValue.toUpperCase();
-                    let statusStr = row[j + 1] !== undefined ? String(row[j + 1]).trim().toLowerCase() : "";
-                    
-                    let sIndex = allStudents.findIndex(s => s.id === studentId);
-                    if (sIndex > -1) {
-                        if(currentAdminCampus === "All Campuses" || allStudents[sIndex].campus === currentAdminCampus) {
-                            let currentAtt = Number(allStudents[sIndex].att) || 0;
-                            if (statusStr.includes("present") || statusStr === "p" || statusStr === "1") {
-                                allStudents[sIndex].att = Math.min(100, currentAtt + 1); 
-                            } 
-                            updatedCount++;
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+
+            if (!rows || rows.length === 0) {
+                alert("❌ The uploaded file is empty.");
+                return;
+            }
+
+            let updatedCount = 0;
+            let recordsToSync = [];
+            const myStudents = getMyStudents();
+            const myStudentMap = new Map();
+            myStudents.forEach(s => myStudentMap.set(String(s.id).trim().toUpperCase(), s));
+            allStudents.forEach(s => {
+                if (!myStudentMap.has(String(s.id).trim().toUpperCase())) {
+                    myStudentMap.set(String(s.id).trim().toUpperCase(), s);
+                }
+            });
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                if (!row || row.length === 0) continue;
+
+                let matchedStudent = null;
+                let statusVal = null;
+
+                // Scan all cells in the row to find a matching Student ID
+                for (let j = 0; j < row.length; j++) {
+                    const cellStr = String(row[j] || "").trim().toUpperCase();
+                    if (!cellStr) continue;
+
+                    // Skip header labels
+                    if (["STUDENT ID", "ID", "STUDENT", "ROLL NO", "S.NO", "NAME", "STATUS"].includes(cellStr)) {
+                        continue;
+                    }
+
+                    if (myStudentMap.has(cellStr)) {
+                        matchedStudent = myStudentMap.get(cellStr);
+                        // Find status in subsequent columns
+                        for (let k = j + 1; k < row.length; k++) {
+                            const val = String(row[k] || "").trim();
+                            if (val && val !== matchedStudent.name) {
+                                statusVal = val;
+                                break;
+                            }
                         }
+                        break;
+                    }
+                }
+
+                // If not found in scan, try first column
+                if (!matchedStudent && row[0]) {
+                    const firstCell = String(row[0]).trim().toUpperCase();
+                    if (!["STUDENT ID", "ID", "STUDENT", "ROLL NO", "S.NO"].includes(firstCell)) {
+                        matchedStudent = allStudents.find(s => s.id === firstCell);
+                        statusVal = row[1] !== undefined ? String(row[1]).trim() : (row[2] !== undefined ? String(row[2]).trim() : "");
+                    }
+                }
+
+                if (matchedStudent) {
+                    const sIndex = allStudents.findIndex(s => s.id === matchedStudent.id);
+                    if (sIndex > -1) {
+                        let newAtt = Number(allStudents[sIndex].att) || 90;
+                        let statusText = "Present";
+
+                        if (statusVal) {
+                            const cleanVal = String(statusVal).toLowerCase().replace('%', '').trim();
+                            const numVal = parseFloat(cleanVal);
+                            if (!isNaN(numVal) && numVal >= 0 && numVal <= 100) {
+                                newAtt = Math.round(numVal);
+                                statusText = newAtt >= 75 ? "Present" : "Absent";
+                            } else if (cleanVal.includes("present") || cleanVal === "p" || cleanVal === "1") {
+                                statusText = "Present";
+                                newAtt = Math.min(100, (Number(allStudents[sIndex].att) || 90) + 1);
+                            } else if (cleanVal.includes("absent") || cleanVal === "a" || cleanVal === "0") {
+                                statusText = "Absent";
+                                newAtt = Math.max(0, (Number(allStudents[sIndex].att) || 90) - 2);
+                            }
+                        }
+
+                        allStudents[sIndex].att = newAtt;
+                        recordsToSync.push({
+                            studentId: matchedStudent.id,
+                            status: statusText,
+                            att: newAtt,
+                            campus: matchedStudent.campus
+                        });
+                        updatedCount++;
                     }
                 }
             }
+
+            if (updatedCount > 0) {
+                if (window.SchoolAPI) {
+                    try {
+                        await window.SchoolAPI.markAttendance({
+                            records: recordsToSync,
+                            date: new Date().toISOString().split('T')[0]
+                        });
+                    } catch (apiErr) {
+                        console.error("Attendance bulk sync error:", apiErr);
+                    }
+                }
+                persist();
+                renderAll();
+                alert(`✅ Success! Updated attendance for ${updatedCount} students in both browser and cloud database!`);
+            } else {
+                alert("❌ No matching student records found in the uploaded file.\n\nPlease ensure your file contains the Student ID (e.g., download the template above).");
+            }
+        } catch (err) {
+            console.error("Excel parse error:", err);
+            alert("❌ Failed to parse attendance file: " + err.message);
+        } finally {
+            document.getElementById('attendanceFileInput').value = '';
         }
-        if (updatedCount > 0) {
-            persist(); renderAll();
-            alert(`✅ Success! Updated attendance for ${updatedCount} students.`);
-        } else alert("❌ No valid data found for your campus.");
-        document.getElementById('attendanceFileInput').value = '';
     };
     reader.readAsArrayBuffer(file);
 }
@@ -1038,11 +1135,17 @@ function autofillFee() {
     let id = document.getElementById("feeStudent").value;
     let student = allStudents.find(s => s.id === id);
     if(!student) return;
-    let defaultTuition = COURSE_FEES[student.course] || 100000;
-    let defaultHostel = student.campus.includes("Campus") ? HOSTEL_FEE : 0;
-    let defaultTransport = student.transport ? TRANSPORT_FEE : 0;
-    document.getElementById("feeTotal").value = defaultTuition + defaultHostel + defaultTransport;
-    document.getElementById("feePaid").value = ""; 
+    let f = fees[id] || { total: 0, paid: 0 };
+    if (f && f.total > 0) {
+        document.getElementById("feeTotal").value = f.total;
+        document.getElementById("feePaid").value = f.paid !== undefined ? f.paid : 0;
+    } else {
+        let defaultTuition = COURSE_FEES[student.course] || 100000;
+        let defaultHostel = student.campus.includes("Campus") ? HOSTEL_FEE : 0;
+        let defaultTransport = student.transport ? TRANSPORT_FEE : 0;
+        document.getElementById("feeTotal").value = defaultTuition + defaultHostel + defaultTransport;
+        document.getElementById("feePaid").value = 0; 
+    }
 }
 
 async function saveFee() {
@@ -1128,15 +1231,19 @@ function renderFilteredFees() {
         if (paidForThisTerm <= 0) { badgeClass = "pending"; statusLabel = "Not Paid"; }
         else if (paidForThisTerm < termFee) { badgeClass = "warning"; statusLabel = "Partial"; }
 
+        let dueAmount = Math.max(0, f.total - f.paid);
+
         return `<tr>
-            <td>${s.id}</td>
+            <td><strong>${s.id}</strong></td>
             <td>${s.name}</td>
             <td>${s.course}</td>
-            <td>${s.year}</td>
             <td>${s.campus}</td>
+            <td>${money(f.total)}</td>
+            <td style="color:#169b6b; font-weight:bold;">${money(f.paid)}</td>
+            <td style="color:#dc4b4b; font-weight:bold;">${money(dueAmount)}</td>
             <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
         </tr>`;
-    }).join("") || `<tr><td colspan="6" style="text-align:center; padding:20px; color:#888;">No students found for the selected filters.</td></tr>`;
+    }).join("") || `<tr><td colspan="8" style="text-align:center; padding:20px; color:#888;">No students found for the selected filters.</td></tr>`;
 }
 
 function resetFeeFilters() {
