@@ -45,6 +45,96 @@ router.get('/:id', protect, async (req, res) => {
   }
 });
 
+// @route   POST /api/students/bulk (Batch import from Excel/CSV)
+router.post('/bulk', protect, authorize('admin', 'superadmin'), async (req, res) => {
+  try {
+    const { students: rawStudents } = req.body;
+    if (!Array.isArray(rawStudents) || rawStudents.length === 0) {
+      return res.status(400).json({ success: false, message: 'Array of students is required.' });
+    }
+
+    let createdCount = 0;
+    const defaultHashedPass = await bcrypt.hash('pass123', 10);
+
+    for (const s of rawStudents) {
+      if (!s.id || !s.name) continue;
+      const cleanId = String(s.id).trim().toUpperCase();
+      const studentPassword = s.pass || 'pass123';
+
+      const studentDoc = {
+        id: cleanId,
+        name: String(s.name).trim(),
+        course: s.course || 'BiPC - NEET',
+        year: s.year || '1st Year',
+        campus: s.campus || req.user.campus || 'Day Scholar',
+        dob: s.dob || 'Not Provided',
+        gender: s.gender || 'Not Provided',
+        father: s.father || 'Not Provided',
+        mother: s.mother || 'Not Provided',
+        phone: s.phone || 'Not Provided',
+        school: s.school || 'Not Provided',
+        transport: Boolean(s.transport),
+        att: s.att !== undefined ? Number(s.att) : 95,
+        pass: studentPassword,
+        results: Array.isArray(s.results) ? s.results : [],
+        updatedAt: new Date().toISOString()
+      };
+
+      // 1. Insert or update Student
+      const existingStudent = await Students.findOne({ id: cleanId });
+      if (existingStudent) {
+        await Students.update({ id: cleanId }, { $set: studentDoc });
+      } else {
+        studentDoc.createdAt = new Date().toISOString();
+        await Students.insert(studentDoc);
+      }
+
+      // 2. Ensure Login Account (User) exists and can authenticate
+      const userDoc = await Users.findOne({ username: cleanId });
+      if (!userDoc) {
+        const hashedPassword = studentPassword === 'pass123' ? defaultHashedPass : await bcrypt.hash(studentPassword, 10);
+        await Users.insert({
+          username: cleanId,
+          password: hashedPassword,
+          role: 'student',
+          name: studentDoc.name,
+          campus: studentDoc.campus,
+          studentId: cleanId,
+          createdAt: new Date().toISOString()
+        });
+      } else {
+        // Ensure student has a valid hashed password
+        if (s.pass && s.pass !== 'pass123') {
+          const updatedHashed = await bcrypt.hash(s.pass, 10);
+          await Users.update({ username: cleanId }, { $set: { password: updatedHashed } });
+        }
+      }
+
+      // 3. Ensure Fee profile exists
+      const feeDoc = await Fees.findOne({ studentId: cleanId });
+      if (!feeDoc) {
+        await Fees.insert({
+          studentId: cleanId,
+          total: 100000,
+          paid: 0,
+          history: [],
+          updatedAt: new Date().toISOString()
+        });
+      }
+
+      createdCount++;
+    }
+
+    res.json({
+      success: true,
+      count: createdCount,
+      message: `Successfully processed ${createdCount} students and created their login credentials.`
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @route   POST /api/students
 router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {

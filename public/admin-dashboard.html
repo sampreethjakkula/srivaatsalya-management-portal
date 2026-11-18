@@ -810,66 +810,98 @@ function downloadTemplate() {
     XLSX.writeFile(wb, "Student_Import_Template.xlsx");
 }
 
-function importExcel(event) {
+async function importExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    if(!confirm("⚠️ WARNING: This will delete current students and replace them. Continue?")) {
+    if(!confirm("⚠️ This will import students from the file and automatically create their login accounts. Continue?")) {
         document.getElementById('excelFileInput').value = ''; return;
     }
     const reader = new FileReader();
-    reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, {type: 'array', cellDates: true});
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false});
-        
-        let newStudents = [];
-        for (let i = 1; i < jsonData.length; i++) {
-            let row = jsonData[i];
-            if (!row || row.length < 4) continue;
-            let id = String(row[0] || "").trim().toUpperCase();
-            let name = String(row[1] || "").trim();
+    reader.onload = async function(e) {
+        try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array', cellDates: true});
+            const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false});
             
-            let rawDob = row[2];
-            let formattedDob = "";
-            if (rawDob) {
-                if (typeof rawDob === 'number') {
-                    let dateObj = new Date(Math.round((rawDob - 25569) * 86400 * 1000));
-                    let day = String(dateObj.getDate()).padStart(2, '0');
-                    let month = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    let year = dateObj.getFullYear();
-                    formattedDob = `${day}/${month}/${year}`;
-                } else {
-                    formattedDob = String(rawDob).trim();
+            let newStudents = [];
+            for (let i = 1; i < jsonData.length; i++) {
+                let row = jsonData[i];
+                if (!row || row.length < 2) continue;
+                let id = String(row[0] || "").trim().toUpperCase();
+                let name = String(row[1] || "").trim();
+                if (!id || !name || id === "STUDENT ID" || id === "ID") continue;
+                
+                let rawDob = row[2];
+                let formattedDob = "";
+                if (rawDob) {
+                    if (typeof rawDob === 'number') {
+                        let dateObj = new Date(Math.round((rawDob - 25569) * 86400 * 1000));
+                        let day = String(dateObj.getDate()).padStart(2, '0');
+                        let month = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        let year = dateObj.getFullYear();
+                        formattedDob = `${day}/${month}/${year}`;
+                    } else {
+                        formattedDob = String(rawDob).trim();
+                    }
+                }
+
+                let assignedCampus = currentAdminCampus === "All Campuses" 
+                    ? (row[10] ? String(row[10]).trim() : "Day Scholar") 
+                    : currentAdminCampus;
+                    
+                let assignedGender = row[3] ? String(row[3]).trim() : "Male";
+                if (currentAdminCampus === "Girls Campus") assignedGender = "Female";
+                if (currentAdminCampus === "Boys Campus") assignedGender = "Male";
+
+                let studentPass = row[13] ? String(row[13]).trim() : "pass123";
+
+                if (id && name && !newStudents.some(s => s.id === id)) {
+                    newStudents.push({
+                        id, name, dob: formattedDob, gender: assignedGender,
+                        father: row[4] ? String(row[4]).trim() : "", mother: row[5] ? String(row[5]).trim() : "",
+                        phone: row[6] ? String(row[6]).trim() : "", school: row[7] ? String(row[7]).trim() : "",
+                        course: row[8] ? String(row[8]).trim() : "BiPC - NEET", year: row[9] ? String(row[9]).trim() : "1st Year",
+                        campus: assignedCampus,
+                        transport: row[11] ? String(row[11]).trim().toLowerCase() === "true" : false,
+                        att: row[12] ? Number(row[12]) || 90 : 90, pass: studentPass, results: []
+                    });
                 }
             }
 
-            let assignedCampus = currentAdminCampus === "All Campuses" 
-                ? (row[10] ? String(row[10]).trim() : "Day Scholar") 
-                : currentAdminCampus;
-                
-            let assignedGender = row[3] ? String(row[3]).trim() : "Male";
-            if (currentAdminCampus === "Girls Campus") assignedGender = "Female";
-            if (currentAdminCampus === "Boys Campus") assignedGender = "Male";
+            if(newStudents.length > 0) {
+                // Upload batch to Cloud Database & provision login accounts
+                if (window.SchoolAPI) {
+                    try {
+                        await window.SchoolAPI.request('/api/students/bulk', {
+                            method: 'POST',
+                            body: JSON.stringify({ students: newStudents })
+                        });
+                    } catch (apiErr) {
+                        console.error("Bulk upload API error:", apiErr);
+                    }
+                }
 
-            if (id && name && !newStudents.some(s => s.id === id)) {
-                newStudents.push({
-                    id, name, dob: formattedDob, gender: assignedGender,
-                    father: row[4] ? String(row[4]).trim() : "", mother: row[5] ? String(row[5]).trim() : "",
-                    phone: row[6] ? String(row[6]).trim() : "", school: row[7] ? String(row[7]).trim() : "",
-                    course: row[8] ? String(row[8]).trim() : "", year: row[9] ? String(row[9]).trim() : "",
-                    campus: assignedCampus,
-                    transport: row[11] ? String(row[11]).trim().toLowerCase() === "true" : false,
-                    att: row[12] ? String(row[12]).trim() : "90", pass: "pass123", results: []
+                // Merge into local list
+                newStudents.forEach(stu => {
+                    const idx = allStudents.findIndex(s => s.id === stu.id);
+                    if (idx > -1) allStudents[idx] = stu;
+                    else allStudents.push(stu);
                 });
+
+                persist();
+                renderAll();
+                alert(`✅ Success! Imported ${newStudents.length} students into cloud database!\n\nAll imported students can now log in at login.html using their Student ID and password: pass123`);
+            } else {
+                alert("❌ No valid student records found in the file.");
             }
+        } catch (err) {
+            console.error("Student Excel import error:", err);
+            alert("❌ Failed to process student import file: " + err.message);
+        } finally {
+            document.getElementById('excelFileInput').value = '';
         }
-        if(newStudents.length > 0) {
-            allStudents = newStudents; persist(); renderAll();
-            alert(`Success! Database replaced with ${newStudents.length} new students.`);
-        } else alert("No valid students found in the file.");
-        document.getElementById('excelFileInput').value = '';
     };
     reader.readAsArrayBuffer(file);
 }
