@@ -647,9 +647,30 @@ function getGroupAndCoaching(courseString) {
     return { group, coaching };
 }
 
+function matchCampus(studentCampus, filterCampus) {
+    if (!filterCampus || filterCampus === "All Campuses") return true;
+    if (!studentCampus) return false;
+    
+    const sc = String(studentCampus).toLowerCase().trim();
+    const fc = String(filterCampus).toLowerCase().trim();
+
+    if (sc === fc) return true;
+
+    // Day Scholar / Sri Vaibhav
+    if ((fc.includes("day") || fc.includes("vaibhav")) && (sc.includes("day") || sc.includes("vaibhav"))) return true;
+    
+    // Girls Campus / Sri Vaarahi
+    if ((fc.includes("girl") || fc.includes("vaarahi")) && (sc.includes("girl") || sc.includes("vaarahi"))) return true;
+    
+    // Boys Campus / Sri Virinchi
+    if ((fc.includes("boy") || fc.includes("virinchi")) && (sc.includes("boy") || sc.includes("virinchi"))) return true;
+
+    return false;
+}
+
 function getMyStudents() {
     if (currentAdminCampus === "All Campuses") return allStudents;
-    return allStudents.filter(s => s.campus === currentAdminCampus);
+    return allStudents.filter(s => matchCampus(s.campus, currentAdminCampus));
 }
 
 function showPage(id, button) {
@@ -1293,7 +1314,7 @@ function renderFilteredFees() {
 
     // Apply Filters
     let filtered = myStudents.filter(s => {
-        if (fCampus !== "All Campuses" && s.campus !== fCampus) return false;
+        if (!matchCampus(s.campus, fCampus)) return false;
         if (fYear !== "All Years" && s.year !== fYear) return false;
         
         let parsed = getGroupAndCoaching(s.course);
@@ -1397,7 +1418,7 @@ function calculateTargets() {
     document.getElementById("tgtMonthLabel").textContent = monthFilter ? monthFilter : termLabel;
 
     let filteredStudents = allStudents.filter(s => {
-        if (campusFilter !== "All Campuses" && s.campus !== campusFilter) return false;
+        if (!matchCampus(s.campus, campusFilter)) return false;
         
         let { group, coaching } = getGroupAndCoaching(s.course);
         if (groupFilter !== "All Groups" && group !== groupFilter) return false;
@@ -1591,7 +1612,7 @@ function renderFilteredAttendance() {
 
     // Apply Dropdown Filters
     let filtered = myStudents.filter(s => {
-        if (fCampus !== "All Campuses" && s.campus !== fCampus) return false;
+        if (!matchCampus(s.campus, fCampus)) return false;
         if (fYear !== "All Years" && s.year !== fYear) return false;
         
         let parsed = getGroupAndCoaching(s.course);
