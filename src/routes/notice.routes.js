@@ -23,11 +23,16 @@ router.get('/', async (req, res) => {
     );
 
     const notices = (rawNotices || []).map(n => {
-      let finalSender = n.sender || n.postedBy || 'Administrator';
-      if (n.postedBy === 'SUPERADMIN' || n.sender === 'SUPERADMIN') {
+      let finalSender = n.sender;
+
+      // 1. If originated from Administrator, posted by SUPERADMIN, or forwarded from an Administrator directive
+      if (n.postedBy === 'SUPERADMIN' || n.sender === 'Administrator' || (n.title && adminDirectiveTitles.has(n.title.trim().toLowerCase()))) {
         finalSender = 'Administrator';
-      } else if (n.title && adminDirectiveTitles.has(n.title.trim().toLowerCase())) {
-        finalSender = 'Administrator';
+      } else if (n.type === 'admin' || n.postedBy === 'ADMIN' || n.sender === 'Campus Admin') {
+        // 2. If published directly by Campus Admin
+        finalSender = 'Campus Admin';
+      } else {
+        finalSender = finalSender || n.postedBy || 'Administrator';
       }
 
       return {
@@ -57,7 +62,7 @@ router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => 
       return res.status(400).json({ success: false, message: 'Title and content/description are required.' });
     }
 
-    const noticeSender = sender || req.user.name || req.user.username || 'Admin';
+    const noticeSender = sender || (req.user.role === 'superadmin' ? 'Administrator' : 'Campus Admin');
     const noticeCampus = campus || req.user.campus || 'All Campuses';
     const noticeTarget = target || noticeCampus || 'All Students';
 
