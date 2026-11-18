@@ -89,8 +89,25 @@ router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => 
 // @route   DELETE /api/notices/:id
 router.delete('/:id', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {
+    const notice = await Notices.findOne({ _id: req.params.id });
+    if (!notice) {
+      return res.status(404).json({ success: false, message: 'Notice not found.' });
+    }
+
+    // Super Admin can delete any notice (both Administrator directives and Campus Admin notices).
+    // Campus Admin can only delete notices created by themselves.
+    if (req.user.role !== 'superadmin') {
+      const isOwner = notice.postedBy && String(notice.postedBy).toUpperCase() === String(req.user.username).toUpperCase();
+      if (!isOwner && (notice.type === 'global' || notice.postedBy === 'SUPERADMIN' || notice.sender === 'Administrator')) {
+        return res.status(403).json({
+          success: false,
+          message: 'Permission denied: Campus Admins can only delete notices created by themselves. Directives from the Administrator can only be removed by the Administrator.'
+        });
+      }
+    }
+
     await Notices.remove({ _id: req.params.id });
-    res.json({ success: true, message: 'Notice removed.' });
+    res.json({ success: true, message: 'Notice removed successfully.' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

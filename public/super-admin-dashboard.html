@@ -721,6 +721,7 @@ let allStudents = JSON.parse(localStorage.getItem("adminStudentsData") || "[]");
 let fees = JSON.parse(localStorage.getItem("adminFees") || "{}");
 let results = JSON.parse(localStorage.getItem("adminResults") || "[]");
 let achievements = JSON.parse(localStorage.getItem("adminAchievements") || "[]");
+let allNotices = JSON.parse(localStorage.getItem("allNotices") || "[]");
 let globalNotices = JSON.parse(localStorage.getItem("globalNotices") || "[]");
 
 function persist() {
@@ -728,6 +729,7 @@ function persist() {
     localStorage.setItem("adminFees", JSON.stringify(fees));
     localStorage.setItem("adminResults", JSON.stringify(results));
     localStorage.setItem("adminAchievements", JSON.stringify(achievements));
+    localStorage.setItem("allNotices", JSON.stringify(allNotices));
     localStorage.setItem("globalNotices", JSON.stringify(globalNotices));
 }
 
@@ -897,6 +899,7 @@ async function postSuperNotice() {
     }
     
     globalNotices.unshift(newNotice);
+    allNotices.unshift(newNotice);
     persist(); renderNotices();
     document.getElementById("superNoticeTitle").value = "";
     document.getElementById("superNoticeDesc").value = "";
@@ -905,14 +908,64 @@ async function postSuperNotice() {
 
 function renderNotices() {
     let container = document.getElementById("superNoticeList");
-    if(globalNotices.length === 0) { container.innerHTML = "<p style='color:#888;'>No notices published yet.</p>"; return; }
-    container.innerHTML = globalNotices.map(n => `
-        <div class="notice-card" style="${n.priority === 'Important' ? 'border-left-color: #dc4b4b;' : ''}">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start;"><h4>${n.priority === 'Important' ? '🚨 ' : ''}${n.title}</h4></div>
-            <p>${n.desc}</p>
-            <div class="notice-meta"><span>👤 ${n.sender}</span><span>📅 ${n.date}</span><span class="notice-target">To: ${n.target}</span></div>
+    if (!container) return;
+    const list = (allNotices && allNotices.length > 0) ? allNotices : (globalNotices || []);
+    if (list.length === 0) {
+        container.innerHTML = "<p style='color:#888;'>No notices published yet.</p>";
+        return;
+    }
+    container.innerHTML = list.map(n => {
+        const safeId = String(n.id || n._id || '');
+        const isGlobal = (n.type === 'global' || n.postedBy === 'SUPERADMIN' || n.sender === 'Administrator');
+        const badgeText = isGlobal ? 'Administrator Directive' : `Campus Admin (${n.campus || 'Local'})`;
+        const badgeBg = isGlobal ? '#e0f2fe' : '#fef3c7';
+        const badgeColor = isGlobal ? '#0369a1' : '#92400e';
+
+        return `
+        <div class="notice-card" style="position: relative; padding-right: 48px; ${n.priority === 'Important' ? 'border-left-color: #dc4b4b;' : ''}">
+            <!-- Cross button on right upper part -->
+            <button onclick="deleteSuperNotice('${safeId}')" 
+                    title="Delete notice"
+                    style="position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 22px; font-weight: bold; color: #94a3b8; cursor: pointer; padding: 2px 8px; line-height: 1; border-radius: 4px; transition: all 0.2s;"
+                    onmouseover="this.style.color='#dc2626'; this.style.background='#fee2e2';"
+                    onmouseout="this.style.color='#94a3b8'; this.style.background='none';">
+                &times;
+            </button>
+
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 6px;">
+                <h4 style="margin: 0; color: #0d4e78; font-size: 16px;">
+                    ${n.priority === 'Important' ? '🚨 ' : ''}${n.title}
+                </h4>
+            </div>
+            <p style="margin: 8px 0; color: #555; line-height: 1.5;">${n.desc || n.content || ''}</p>
+            <div class="notice-meta" style="display: flex; gap: 15px; align-items: center; margin-top: 10px; font-size: 12px; color: #888; flex-wrap: wrap;">
+                <span>👤 <strong>${n.sender || 'Administrator'}</strong></span>
+                <span>📅 ${n.date || 'Recent'}</span>
+                <span class="notice-target">To: ${n.target || 'All Students'}</span>
+                <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-size: 11px; padding: 3px 8px;">${badgeText}</span>
+            </div>
         </div>
-    `).join("");
+        `;
+    }).join("");
+}
+
+async function deleteSuperNotice(id) {
+    if (!confirm("⚠️ Are you sure you want to delete this notice? This will permanently remove it for all students and admins.")) {
+        return;
+    }
+    try {
+        if (window.SchoolAPI) {
+            await window.SchoolAPI.deleteNotice(id);
+        }
+        allNotices = (allNotices || []).filter(n => String(n.id || n._id) !== String(id));
+        globalNotices = (globalNotices || []).filter(n => String(n.id || n._id) !== String(id));
+        persist();
+        renderNotices();
+        alert("✅ Notice deleted successfully.");
+    } catch (err) {
+        console.error("Delete notice error:", err);
+        alert("❌ Failed to delete notice: " + (err.message || err));
+    }
 }
 
 /* ================= TARGETS ================= */
@@ -1446,8 +1499,8 @@ window.onload = async function() {
             if (data && data.students && data.students.length > 0) allStudents = data.students;
             if (data && data.fees && Object.keys(data.fees).length > 0) fees = data.fees;
             if (data && data.notices && data.notices.length > 0) {
-                globalNotices = data.notices.filter(n => n.type === 'global' || !n.type);
-                if (globalNotices.length === 0) globalNotices = data.notices;
+                allNotices = data.notices;
+                globalNotices = data.notices;
             }
             if (data && data.achievements && data.achievements.length > 0) {
                 achievements = data.achievements;
