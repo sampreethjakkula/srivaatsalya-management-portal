@@ -138,16 +138,18 @@ const seedDB = async () => {
         history: [{ amount: 50000, date: new Date().toISOString().split('T')[0], receiptNo: 'REC-001024' }]
       });
 
-      await Notices.insert([
-        {
-          title: 'NEET & JEE Advanced Mock Test Series',
-          content: 'The statewide mock test series starts this coming Monday at 8:30 AM across all campuses.',
-          type: 'global',
-          campus: 'All Campuses',
-          postedBy: 'SUPERADMIN',
-          date: new Date().toISOString().split('T')[0]
-        }
-      ]);
+      await Notices.insert({
+        title: 'NEET & JEE Advanced Mock Test Series',
+        content: 'The statewide mock test series starts this coming Monday at 8:30 AM across all campuses.',
+        desc: 'The statewide mock test series starts this coming Monday at 8:30 AM across all campuses.',
+        type: 'global',
+        campus: 'All Campuses',
+        target: 'All Students',
+        priority: 'Important',
+        postedBy: 'SUPERADMIN',
+        sender: 'Administrator',
+        date: new Date().toISOString().split('T')[0]
+      });
       console.log('✓ Seeding complete.');
     }
   } catch (e) {

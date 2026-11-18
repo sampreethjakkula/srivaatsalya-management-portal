@@ -666,21 +666,38 @@ function toggleForwardBox(id) {
     box.style.display = box.style.display === "flex" ? "none" : "flex";
 }
 
-function sendDirective(id) {
-    let directive = globalNotices.find(n => n.id === id);
+async function sendDirective(id) {
+    let directive = globalNotices.find(n => n.id === id || n._id === id);
     if(!directive) return;
     let target = document.getElementById(`forwardTarget-${id}`).value;
 
     let newNotice = {
-        id: Date.now(), title: directive.title, desc: directive.desc,
-        target: target, priority: directive.priority, sender: "Campus Admin", date: new Date().toLocaleDateString()
+        title: directive.title,
+        desc: directive.desc || directive.content,
+        content: directive.desc || directive.content,
+        target: target,
+        priority: directive.priority || 'Normal',
+        sender: "Campus Admin",
+        type: 'admin',
+        campus: currentAdminCampus,
+        date: new Date().toLocaleDateString()
     };
+    
+    if (window.SchoolAPI) {
+        try {
+            const res = await window.SchoolAPI.postNotice(newNotice);
+            if (res && res.notice) newNotice = res.notice;
+        } catch (err) {
+            console.error("Notice forward error:", err);
+        }
+    }
+    
     adminNotices.unshift(newNotice);
     persist(); renderNotices();
     alert(`✅ Notice successfully sent to: ${target}`);
 }
 
-function postAdminNotice() {
+async function postAdminNotice() {
     let title = document.getElementById("adminNoticeTitle").value.trim();
     let desc = document.getElementById("adminNoticeDesc").value.trim();
     let target = document.getElementById("adminNoticeTarget").value;
@@ -689,8 +706,26 @@ function postAdminNotice() {
     if(!title || !desc) { alert("Please fill in both title and message."); return; }
 
     let newNotice = {
-        id: Date.now(), title: title, desc: desc, target: target, priority: priority, sender: "Campus Admin", date: new Date().toLocaleDateString()
+        title: title,
+        desc: desc,
+        content: desc,
+        target: target,
+        priority: priority,
+        sender: "Campus Admin",
+        type: 'admin',
+        campus: currentAdminCampus,
+        date: new Date().toLocaleDateString()
     };
+    
+    if (window.SchoolAPI) {
+        try {
+            const res = await window.SchoolAPI.postNotice(newNotice);
+            if (res && res.notice) newNotice = res.notice;
+        } catch (err) {
+            console.error("Notice post error:", err);
+        }
+    }
+    
     adminNotices.unshift(newNotice);
     persist(); renderNotices();
     document.getElementById("adminNoticeTitle").value = "";
@@ -886,7 +921,7 @@ function importAttendanceExcel(event) {
     reader.readAsArrayBuffer(file);
 }
 
-function saveStudent() {
+async function saveStudent() {
     let id = document.getElementById("sid").value.trim().toUpperCase();
     let name = document.getElementById("sname").value.trim();
     if (!id || !name) { alert("Please enter ID and Name."); return; }
@@ -926,18 +961,29 @@ function saveStudent() {
         student.results = allStudents[index].results || []; 
         allStudents[index] = student;
         if (window.SchoolAPI) {
-            window.SchoolAPI.updateStudent(edit, student).catch(err => console.error("API Sync Error:", err));
+            try {
+                await window.SchoolAPI.updateStudent(edit, student);
+            } catch (err) {
+                console.error("API Sync Error:", err);
+                alert("Warning: Could not update on cloud database: " + err.message);
+            }
         }
     } else {
         allStudents.push(student);
-        if (!fees[id]) {
-            let defaultTuition = COURSE_FEES[courseVal] || 100000;
-            let defaultHostel = campusVal.includes("Campus") ? HOSTEL_FEE : 0;
-            let defaultTransport = transportVal ? TRANSPORT_FEE : 0;
-            fees[id] = { total: defaultTuition + defaultHostel + defaultTransport, paid: 0 }; 
-        }
+        let defaultTuition = COURSE_FEES[courseVal] || 100000;
+        let defaultHostel = campusVal.includes("Campus") ? HOSTEL_FEE : 0;
+        let defaultTransport = transportVal ? TRANSPORT_FEE : 0;
+        let initFee = { total: defaultTuition + defaultHostel + defaultTransport, paid: 0 };
+        fees[id] = initFee;
+
         if (window.SchoolAPI) {
-            window.SchoolAPI.addStudent(student).catch(err => console.error("API Sync Error:", err));
+            try {
+                await window.SchoolAPI.addStudent(student);
+                await window.SchoolAPI.recordFee({ studentId: id, total: initFee.total, paid: 0 }).catch(() => {});
+            } catch (err) {
+                console.error("API Sync Error:", err);
+                alert("Warning: Could not save to cloud database: " + err.message);
+            }
         }
     }
     
@@ -999,7 +1045,7 @@ function autofillFee() {
     document.getElementById("feePaid").value = ""; 
 }
 
-function saveFee() {
+async function saveFee() {
     let id = document.getElementById("feeStudent").value;
     let total = Number(document.getElementById("feeTotal").value);
     let paid = Number(document.getElementById("feePaid").value);
@@ -1015,7 +1061,12 @@ function saveFee() {
     if (!id || total <= 0 || paid < 0 || paid > total) { alert("Please enter valid fee details."); return; }
     fees[id] = { total, paid };
     if (window.SchoolAPI) {
-        window.SchoolAPI.recordFee({ studentId: id, total, paid }).catch(err => console.error("Fee API error:", err));
+        try {
+            await window.SchoolAPI.recordFee({ studentId: id, total, paid });
+        } catch (err) {
+            console.error("Fee API error:", err);
+            alert("Warning: Could not save fee to cloud: " + err.message);
+        }
     }
     persist(); renderAll(); alert("Fee details updated.");
 }
@@ -1292,7 +1343,7 @@ function generateGroupBreakdown() {
 
 // --- END OF UPGRADED TARGET LOGIC ---
 
-function saveAttendance() {
+async function saveAttendance() {
     let id = document.getElementById("attendanceStudent").value;
     let percent = Number(document.getElementById("attPercent").value);
     if (!id || percent < 0 || percent > 100) { alert("Enter valid attendance percentage."); return; }
@@ -1305,7 +1356,11 @@ function saveAttendance() {
         }
         allStudents[sIndex].att = percent; 
         if (window.SchoolAPI) {
-            window.SchoolAPI.markAttendance({ studentId: id, att: percent }).catch(err => console.error("Attendance API error:", err));
+            try {
+                await window.SchoolAPI.markAttendance({ studentId: id, att: percent });
+            } catch (err) {
+                console.error("Attendance API error:", err);
+            }
         }
         persist(); renderAll(); alert("Attendance saved!"); 
     }
@@ -1384,7 +1439,7 @@ function resetAttFilters() {
 // ==================== END ATTENDANCE LOGIC ====================
 
 
-function saveResult() {
+async function saveResult() {
     let id = document.getElementById("resultStudent").value;
     let student = allStudents.find(s => s.id === id);
     let exam = document.getElementById("examName").value.trim();
@@ -1401,7 +1456,16 @@ function saveResult() {
     results.push({ id, name: student.name, exam, score });
     let sIndex = allStudents.findIndex(s => s.id === id);
     if(!allStudents[sIndex].results) allStudents[sIndex].results = [];
-    allStudents[sIndex].results.push({ test: exam, score: score });
+    allStudents[sIndex].results.push({ test: exam, score: score, exam: exam, marks: score });
+    
+    if (window.SchoolAPI) {
+        try {
+            await window.SchoolAPI.updateStudent(id, { results: allStudents[sIndex].results });
+        } catch (e) {
+            console.error("Result save error:", e);
+        }
+    }
+    
     persist(); renderAll(); alert("Result saved!");
     document.getElementById("examName").value = ""; document.getElementById("score").value = "";
 }
@@ -1414,11 +1478,21 @@ function renderResults() {
     <tr><td>${r.id}</td><td>${r.name}</td><td>${r.exam}</td><td>${r.score}</td></tr>`).join("");
 }
 
-function addAchievement() {
+async function addAchievement() {
     let title = document.getElementById("achievementTitle").value.trim();
     let description = document.getElementById("achievementDescription").value.trim();
     if (!title || !description) { alert("Enter achievement title and description."); return; }
-    achievements.push({ title, description });
+    
+    const newAch = { title, description };
+    if (window.SchoolAPI) {
+        try {
+            await window.SchoolAPI.addAchievement(newAch);
+        } catch (e) {
+            console.error("Achievement save error:", e);
+        }
+    }
+    
+    achievements.push(newAch);
     document.getElementById("achievementTitle").value = ""; document.getElementById("achievementDescription").value = "";
     persist(); renderAchievements();
 }
@@ -1455,11 +1529,32 @@ window.onload = async function() {
             const data = await window.SchoolAPI.syncDashboard('admin');
             if (data && data.students && data.students.length > 0) allStudents = data.students;
             if (data && data.fees && Object.keys(data.fees).length > 0) fees = data.fees;
-            if (data && data.notices && data.notices.length > 0) adminNotices = data.notices;
+            if (data && data.notices && data.notices.length > 0) {
+                adminNotices = data.notices;
+                globalNotices = data.notices.filter(n => n.type === 'global' || !n.type);
+            }
+            if (data && data.achievements && data.achievements.length > 0) {
+                achievements = data.achievements;
+            }
         } catch (e) {
             console.warn('Backend sync:', e.message);
         }
     }
+
+    // Reconstruct results table from student documents
+    results = [];
+    allStudents.forEach(s => {
+        if (s.results && Array.isArray(s.results)) {
+            s.results.forEach(r => {
+                results.push({
+                    id: s.id,
+                    name: s.name,
+                    exam: r.exam || r.test || 'Exam',
+                    score: r.marks || r.score || 'N/A'
+                });
+            });
+        }
+    });
 
     document.getElementById('adminCampusLabel').textContent = currentAdminCampus === "All Campuses" ? "Sri Vaatsalya Junior College" : `${currentAdminCampus} Administrator`;
 

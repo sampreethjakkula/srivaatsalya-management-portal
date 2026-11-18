@@ -8,12 +8,23 @@ router.get('/', async (req, res) => {
   try {
     const { type, campus } = req.query;
     let query = {};
-    if (type) query.type = type;
+    if (type && type !== 'all') query.type = type;
     if (campus && campus !== 'All Campuses') {
       query.$or = [{ campus: 'All Campuses' }, { campus }];
     }
 
-    const notices = await Notices.find(query);
+    const rawNotices = await Notices.find(query);
+    const notices = (rawNotices || []).map(n => ({
+      ...n,
+      desc: n.desc || n.content || '',
+      content: n.content || n.desc || '',
+      sender: n.sender || n.postedBy || 'Administrator',
+      postedBy: n.postedBy || n.sender || 'Administrator',
+      target: n.target || n.campus || 'All Students',
+      campus: n.campus || n.target || 'All Campuses',
+      priority: n.priority || 'Normal',
+      date: n.date || (n.createdAt ? new Date(n.createdAt).toLocaleDateString() : new Date().toLocaleDateString())
+    }));
     res.json({ success: true, count: notices.length, notices });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -23,17 +34,26 @@ router.get('/', async (req, res) => {
 // @route   POST /api/notices
 router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {
-    const { title, content, type, campus } = req.body;
-    if (!title || !content) {
-      return res.status(400).json({ success: false, message: 'Title and content are required.' });
+    const { title, content, desc, type, campus, target, priority, sender } = req.body;
+    const bodyText = (content || desc || '').trim();
+    if (!title || !bodyText) {
+      return res.status(400).json({ success: false, message: 'Title and content/description are required.' });
     }
+
+    const noticeSender = sender || req.user.name || req.user.username || 'Admin';
+    const noticeCampus = campus || req.user.campus || 'All Campuses';
+    const noticeTarget = target || noticeCampus || 'All Students';
 
     const notice = await Notices.insert({
       title: title.trim(),
-      content: content.trim(),
+      content: bodyText,
+      desc: bodyText,
       type: type || 'global',
-      campus: campus || req.user.campus || 'All Campuses',
+      campus: noticeCampus,
+      target: noticeTarget,
+      priority: priority || 'Normal',
       postedBy: req.user.username,
+      sender: noticeSender,
       date: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString()
     });

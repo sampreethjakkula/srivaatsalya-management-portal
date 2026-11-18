@@ -802,13 +802,34 @@ async function createAdminAccount() {
 }
 
 /* ================= NOTICES ================= */
-function postSuperNotice() {
+async function postSuperNotice() {
     let title = document.getElementById("superNoticeTitle").value.trim();
     let desc = document.getElementById("superNoticeDesc").value.trim();
     let target = document.getElementById("superNoticeTarget").value;
     let priority = document.getElementById("superNoticePriority").value;
     if(!title || !desc) { alert("Please fill in both title and message."); return; }
-    let newNotice = { id: Date.now(), title, desc, target, priority, sender: "Administrator", date: new Date().toLocaleDateString() };
+    
+    let newNotice = {
+        title,
+        desc,
+        content: desc,
+        target,
+        priority: priority || 'Normal',
+        sender: "Administrator",
+        type: 'global',
+        campus: 'All Campuses',
+        date: new Date().toLocaleDateString()
+    };
+    
+    if (window.SchoolAPI) {
+        try {
+            const res = await window.SchoolAPI.postNotice(newNotice);
+            if (res && res.notice) newNotice = res.notice;
+        } catch (err) {
+            console.error("Notice error:", err);
+        }
+    }
+    
     globalNotices.unshift(newNotice);
     persist(); renderNotices();
     document.getElementById("superNoticeTitle").value = "";
@@ -1359,13 +1380,32 @@ window.onload = async function() {
             if (data && data.students && data.students.length > 0) allStudents = data.students;
             if (data && data.fees && Object.keys(data.fees).length > 0) fees = data.fees;
             if (data && data.notices && data.notices.length > 0) {
-                adminNotices = data.notices;
-                globalNotices = data.notices.filter(n => n.type === 'global');
+                globalNotices = data.notices.filter(n => n.type === 'global' || !n.type);
+                if (globalNotices.length === 0) globalNotices = data.notices;
+            }
+            if (data && data.achievements && data.achievements.length > 0) {
+                achievements = data.achievements;
             }
         } catch (e) {
             console.warn('Backend sync:', e.message);
         }
     }
+
+    // Reconstruct results table from student records
+    results = [];
+    allStudents.forEach(s => {
+        if (s.results && Array.isArray(s.results)) {
+            s.results.forEach(r => {
+                results.push({
+                    id: s.id,
+                    name: s.name,
+                    exam: r.exam || r.test || 'Exam',
+                    score: r.marks || r.score || 'N/A'
+                });
+            });
+        }
+    });
+
     enrichAllStudents();
     persist();
     let now = new Date(); let monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');

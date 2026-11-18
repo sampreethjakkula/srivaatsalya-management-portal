@@ -8,11 +8,14 @@ const noticeSchema = new mongoose.Schema({
   },
   content: {
     type: String,
-    required: true
+    default: ''
+  },
+  desc: {
+    type: String,
+    default: ''
   },
   type: {
     type: String,
-    enum: ['global', 'admin'],
     default: 'global',
     index: true
   },
@@ -20,9 +23,21 @@ const noticeSchema = new mongoose.Schema({
     type: String,
     default: 'All Campuses'
   },
+  target: {
+    type: String,
+    default: 'All Students'
+  },
+  priority: {
+    type: String,
+    default: 'Normal'
+  },
   postedBy: {
     type: String,
-    default: 'Admin'
+    default: 'Administrator'
+  },
+  sender: {
+    type: String,
+    default: 'Administrator'
   },
   date: {
     type: String,
@@ -31,3 +46,4 @@ const noticeSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model('Notice', noticeSchema);
+

@@ -65,6 +65,29 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/notices', noticeRoutes);
 app.use('/api/admissions', admissionRoutes);
 
+// Achievements API (persisted in MongoDB Atlas via unified store)
+const { Notices } = require('./data/dbStore');
+const { protect: authProtect, authorize: authAuthorize } = require('./middleware/auth');
+app.get('/api/achievements', async (req, res) => {
+  try {
+    const list = await Notices.find({ type: 'achievement' });
+    const achievements = (list || []).map(a => ({ id: a._id, title: a.title, description: a.desc || a.content }));
+    res.json({ success: true, count: achievements.length, achievements });
+  } catch(e) { res.status(500).json({ success: false, message: e.message }); }
+});
+app.post('/api/achievements', authProtect, authAuthorize('admin', 'superadmin'), async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    if (!title || !description) return res.status(400).json({ success: false, message: 'Title and description required' });
+    const ach = await Notices.insert({
+      title, content: description, desc: description, type: 'achievement',
+      postedBy: req.user.username, sender: req.user.name || req.user.username,
+      date: new Date().toISOString().split('T')[0], createdAt: new Date().toISOString()
+    });
+    res.status(201).json({ success: true, achievement: { id: ach._id, title: ach.title, description: ach.desc } });
+  } catch(e) { res.status(500).json({ success: false, message: e.message }); }
+});
+
 // Health check endpoint for load balancers
 app.get('/api/health', (req, res) => {
   res.json({

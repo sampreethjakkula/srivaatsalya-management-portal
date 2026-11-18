@@ -750,10 +750,11 @@
 
             if (window.SchoolAPI) {
                 try {
-                    const [sData, fData, nots] = await Promise.all([
+                    const [sData, fData, nots, achs] = await Promise.all([
                         window.SchoolAPI.getStudent(loggedInId).catch(() => null),
                         window.SchoolAPI.getStudentFee(loggedInId).catch(() => null),
-                        window.SchoolAPI.getNotices('global').catch(() => [])
+                        window.SchoolAPI.getNotices().catch(() => []),
+                        window.SchoolAPI.getAchievements().catch(() => [])
                     ]);
                     if (sData) {
                         let allStus = JSON.parse(localStorage.getItem('adminStudentsData') || "[]");
@@ -767,7 +768,11 @@
                         localStorage.setItem('adminFees', JSON.stringify(curFees));
                     }
                     if (nots && nots.length > 0) {
-                        localStorage.setItem('globalNotices', JSON.stringify(nots));
+                        localStorage.setItem('globalNotices', JSON.stringify(nots.filter(n => n.type === 'global' || !n.type)));
+                        localStorage.setItem('adminNotices', JSON.stringify(nots.filter(n => n.type === 'admin')));
+                    }
+                    if (achs && achs.length > 0) {
+                        localStorage.setItem('adminAchievements', JSON.stringify(achs));
                     }
                 } catch (e) {
                     console.warn('Student sync error:', e);
@@ -809,16 +814,16 @@
             document.getElementById('dashPhone').textContent = student.phone || "Not Provided";
             document.getElementById('dashSchool').textContent = student.school || "Not Provided";
 
-            // 2nd Year Previous Results
-            if (student.year === "2nd Year" && student.results && student.results.length > 0) {
+            // Student Results Section
+            if (student.results && student.results.length > 0) {
                 document.getElementById('previousYearSection').style.display = 'block';
                 const prevContainer = document.getElementById('prevResultContainer');
                 prevContainer.innerHTML = ''; 
                 student.results.forEach(res => {
                     prevContainer.innerHTML += `
                         <div class="prev-result-row">
-                            <span>${res.test}</span>
-                            <span>${res.score}</span>
+                            <span>${res.test || res.exam || 'Exam / Test'}</span>
+                            <span><strong>${res.score || res.marks || 'N/A'}</strong></span>
                         </div>
                     `;
                 });
@@ -830,14 +835,13 @@
             let allNotices = [...globalNotices, ...adminNotices];
             let relevantNotices = allNotices.filter(n => {
                 if(n.target === "Campus Admins") return false;
-                if(n.target === "All Students") return true;
+                if(!n.target || n.target === "All Students" || n.target === "All Campuses") return true;
                 if(n.target === "MPC Students" && student.course.includes("MPC")) return true;
                 if(n.target === "BiPC Students" && student.course.includes("BiPC")) return true;
                 if(n.target === "1st Year" && student.year === "1st Year") return true;
                 if(n.target === "2nd Year" && student.year === "2nd Year") return true;
                 return false;
             });
-            relevantNotices.sort((a, b) => b.id - a.id);
 
             const noticeContainer = document.getElementById('studentNoticeContainer');
             if(relevantNotices.length > 0) {
@@ -847,12 +851,12 @@
                             <div class="notice-title ${n.priority === 'Important' ? 'important' : ''}">
                                 ${n.priority === 'Important' ? '🚨 ' : '📢 '}${n.title}
                             </div>
-                            <div class="notice-date"><i class="fa-regular fa-calendar"></i> ${n.date}</div>
+                            <div class="notice-date"><i class="fa-regular fa-calendar"></i> ${n.date || 'Recent'}</div>
                         </div>
-                        <div class="notice-body">${n.desc}</div>
+                        <div class="notice-body">${n.desc || n.content || ''}</div>
                         <div class="notice-footer">
-                            <span class="notice-sender"><i class="fa-solid fa-user-tie"></i> ${n.sender}</span>
-                            <span class="notice-target">${n.target}</span>
+                            <span class="notice-sender"><i class="fa-solid fa-user-tie"></i> ${n.sender || n.postedBy || 'Administrator'}</span>
+                            <span class="notice-target">${n.target || n.campus || 'All Students'}</span>
                         </div>
                     </div>
                 `).join("");

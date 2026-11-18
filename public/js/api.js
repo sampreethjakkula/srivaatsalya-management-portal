@@ -140,7 +140,17 @@ window.SchoolAPI = {
     if (type) params.append('type', type);
     if (campus) params.append('campus', campus);
     const res = await this.request(`/api/notices?${params.toString()}`);
-    return res.notices || [];
+    return (res.notices || []).map(n => ({
+      ...n,
+      id: n._id || n.id,
+      desc: n.desc || n.content || '',
+      content: n.content || n.desc || '',
+      sender: n.sender || n.postedBy || 'Administrator',
+      postedBy: n.postedBy || n.sender || 'Administrator',
+      target: n.target || n.campus || 'All Students',
+      campus: n.campus || n.target || 'All Campuses',
+      priority: n.priority || 'Normal'
+    }));
   },
 
   async postNotice(noticeData) {
@@ -153,6 +163,19 @@ window.SchoolAPI = {
   async deleteNotice(id) {
     return await this.request(`/api/notices/${id}`, {
       method: 'DELETE'
+    });
+  },
+
+  // ================= ACHIEVEMENTS =================
+  async getAchievements() {
+    const res = await this.request('/api/achievements').catch(() => ({ achievements: [] }));
+    return res.achievements || [];
+  },
+
+  async addAchievement(data) {
+    return await this.request('/api/achievements', {
+      method: 'POST',
+      body: JSON.stringify(data)
     });
   },
 
@@ -183,24 +206,28 @@ window.SchoolAPI = {
   async syncDashboard(role = 'admin') {
     await this.ensureAuth(role);
     try {
-      const [students, fees, notices] = await Promise.all([
+      const [students, fees, notices, achievements] = await Promise.all([
         this.getStudents().catch(() => []),
         this.getFees().catch(() => ({})),
-        this.getNotices().catch(() => [])
+        this.getNotices().catch(() => []),
+        this.getAchievements().catch(() => [])
       ]);
 
-      if (students.length > 0) {
+      if (students && students.length > 0) {
         localStorage.setItem('adminStudentsData', JSON.stringify(students));
       }
-      if (Object.keys(fees).length > 0) {
+      if (fees && Object.keys(fees).length > 0) {
         localStorage.setItem('adminFees', JSON.stringify(fees));
       }
-      if (notices.length > 0) {
+      if (notices) {
         localStorage.setItem('adminNotices', JSON.stringify(notices));
-        localStorage.setItem('globalNotices', JSON.stringify(notices.filter(n => n.type === 'global')));
+        localStorage.setItem('globalNotices', JSON.stringify(notices.filter(n => n.type === 'global' || !n.type)));
+      }
+      if (achievements) {
+        localStorage.setItem('adminAchievements', JSON.stringify(achievements));
       }
 
-      return { students, fees, notices };
+      return { students, fees, notices, achievements };
     } catch (err) {
       console.warn('Sync notice:', err.message);
     }
