@@ -447,42 +447,70 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 <!-- ==================== MERGED STUDENTS PAGE ==================== -->
 <section id="students" class="page">
-    <div class="card" style="border-left: 5px solid #0d4e78; margin-bottom: 22px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-            <div>
-                <h3 style="margin: 0; color: #0d4e78; display: flex; align-items: center; gap: 10px;">
-                    👨‍🎓 Student Management Directory
-                    <span id="superStudentTotalBadge" class="badge" style="background:#e8f0f6; color:#0d4e78; font-size:12px;">0 Students</span>
-                </h3>
-                <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Search, view, and permanently remove student records across all campuses.</p>
+    <!-- ==================== SEARCH & DELETE STUDENT BY ID ==================== -->
+    <div class="card" style="border-left: 5px solid #dc4b4b; background: white; margin-bottom: 25px;">
+        <h3 style="color: #0d4e78; display: flex; align-items: center; gap: 8px;">
+            🗑️ Delete Student by ID
+        </h3>
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 18px;">
+            Enter a student's ID to preview their full profile and permanently remove their records.
+        </p>
+
+        <!-- Search Input Bar -->
+        <div style="display: flex; gap: 10px; max-width: 650px; align-items: center; flex-wrap: wrap;">
+            <input type="text" id="deleteLookupId" placeholder="Enter Student ID (e.g. STUDENT, STU101)" 
+                   style="margin: 0; padding: 12px 14px; font-size: 14px; text-transform: uppercase; flex: 1; min-width: 220px;"
+                   onkeypress="if(event.key === 'Enter') lookupStudentForDeletion()">
+            <button class="primary" onclick="lookupStudentForDeletion()" style="padding: 12px 22px; font-size: 14px; flex-shrink: 0;">
+                🔍 Search Student
+            </button>
+            <button class="light" onclick="clearStudentDeletionCard()" style="padding: 12px 16px; font-size: 14px; flex-shrink: 0;">
+                Clear
+            </button>
+        </div>
+        
+        <!-- Status / Error Notification -->
+        <div id="deleteLookupMsg" style="display: none; margin-top: 14px; font-size: 14px; font-weight: 600; padding: 10px 14px; border-radius: 6px;"></div>
+
+        <!-- Student Details Card (Only shown when student is found) -->
+        <div id="deleteStudentDetailsBox" style="display: none; margin-top: 20px; border: 1px solid #fed7d7; border-radius: 10px; padding: 22px; background: #fffaf0;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid #fee2e2; padding-bottom: 15px; margin-bottom: 15px;">
+                <div>
+                    <h2 id="delPreviewName" style="color: #0d4e78; font-size: 20px; margin-bottom: 4px;">Student Name</h2>
+                    <span id="delPreviewId" class="badge" style="background: #0d4e78; color: white; font-size: 12px; padding: 4px 10px;">ID: STUDENT</span>
+                </div>
+                <button class="red" id="delConfirmBtn" onclick="executeDeleteSearchedStudent()" style="padding: 11px 22px; font-size: 14px; font-weight: bold; border-radius: 6px; box-shadow: 0 4px 12px rgba(220,75,75,0.25);">
+                    🗑️ Permanently Delete This Student
+                </button>
             </div>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <select id="superStudentCampusFilter" onchange="renderSuperStudentsDirectory()" style="width: 220px; margin: 0; padding: 10px; border-radius: 6px; border: 1px solid #dce3eb;">
-                    <option value="All Campuses">All Campuses</option>
-                    <option value="Day Scholar">Sri Vaibhav Campus (Day Scholar)</option>
-                    <option value="Girls Campus">Sri Vaarahi Bhavan (Girls)</option>
-                    <option value="Boys Campus">Sri Virinchi Bhavan (Boys)</option>
-                </select>
-                <input id="superStudentSearch" placeholder="🔍 Search ID, Name, Phone..." oninput="renderSuperStudentsDirectory()" style="width: 240px; margin: 0; padding: 10px; border-radius: 6px; border: 1px solid #dce3eb;">
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; font-size: 13px;">
+                <div>
+                    <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Campus</span>
+                    <strong id="delPreviewCampus" style="color: #243b53; font-size: 14px;">—</strong>
+                </div>
+                <div>
+                    <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Course</span>
+                    <strong id="delPreviewCourse" style="color: #243b53; font-size: 14px;">—</strong>
+                </div>
+                <div>
+                    <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Academic Year</span>
+                    <strong id="delPreviewYear" style="color: #243b53; font-size: 14px;">—</strong>
+                </div>
+                <div>
+                    <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Attendance</span>
+                    <strong id="delPreviewAttendance" style="color: #169b6b; font-size: 14px;">—</strong>
+                </div>
+                <div>
+                    <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Contact Phone</span>
+                    <strong id="delPreviewPhone" style="color: #243b53; font-size: 14px;">—</strong>
+                </div>
+                <div>
+                    <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Fee Status</span>
+                    <strong id="delPreviewFee" style="color: #243b53; font-size: 14px;">—</strong>
+                </div>
             </div>
         </div>
-        <div class="tablewrap">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Student ID</th>
-                        <th>Name</th>
-                        <th>Course</th>
-                        <th>Year</th>
-                        <th>Campus</th>
-                        <th>Attendance</th>
-                        <th style="text-align: center;">Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="superStudentDirectoryTable"></tbody>
-            </table>
-        </div>
-        <div id="superStudentEmptyMsg" style="display:none; text-align: center; padding: 30px; color: #64748b; font-weight: 600;">No students found matching your search.</div>
     </div>
 
     <div class="analytics-panel">
@@ -782,7 +810,7 @@ function showPage(id, button) {
     const titles = { dashboard: "Administrator Dashboard", notices: "Notice Board", manageAdmins: "Manage Admins", adminPerformance: "Admin Performance", targets: "Monthly Targets", students: "Student Management", fees: "Global Fees", results: "Global Results", achievements: "Achievements" };
     document.getElementById("pageTitle").textContent = titles[id] || "Administrator Dashboard";
     if (id !== "students" && id !== "fees") renderAll();
-    else if (id === "students") { initAnalyticsPage(); renderSuperStudentsDirectory(); }
+    else if (id === "students") { initAnalyticsPage(); clearStudentDeletionCard(); }
     else if (id === "fees") initFeesPage();
 }
 
@@ -1454,67 +1482,119 @@ window.onload = async function() {
     await loadAdminAccounts(); // Load admins from DB on every page load
 };
 
-/* ================= STUDENT DIRECTORY & DELETION ================= */
-function renderSuperStudentsDirectory() {
-    const table = document.getElementById("superStudentDirectoryTable");
-    if (!table) return;
+/* ================= SEARCH & DELETE STUDENT BY ID ================= */
+let currentLookupStudent = null;
+
+function lookupStudentForDeletion() {
+    const input = document.getElementById("deleteLookupId");
+    const msg = document.getElementById("deleteLookupMsg");
+    const box = document.getElementById("deleteStudentDetailsBox");
+    if (!input || !msg || !box) return;
     
-    const campusFilter = document.getElementById("superStudentCampusFilter") ? document.getElementById("superStudentCampusFilter").value : "All Campuses";
-    const q = (document.getElementById("superStudentSearch") ? document.getElementById("superStudentSearch").value : "").toLowerCase().trim();
-    const emptyMsg = document.getElementById("superStudentEmptyMsg");
-    
-    let list = (allStudents || []).slice();
-    
-    // Campus filter
-    if (campusFilter !== "All Campuses") {
-        list = list.filter(s => {
-            const c = (s.campus || "").toLowerCase();
-            const f = campusFilter.toLowerCase();
-            return c.includes(f) || 
-                   (f.includes("girls") && c.includes("vaarahi")) || 
-                   (f.includes("boys") && c.includes("virinchi")) || 
-                   (f.includes("day") && c.includes("vaibhav"));
-        });
-    }
-    
-    // Search filter
-    if (q) {
-        list = list.filter(s => 
-            (s.id && String(s.id).toLowerCase().includes(q)) || 
-            (s.name && String(s.name).toLowerCase().includes(q)) ||
-            (s.course && String(s.course).toLowerCase().includes(q)) ||
-            (s.phone && String(s.phone).toLowerCase().includes(q))
-        );
-    }
-    
-    // Sort by ID
-    list.sort((a, b) => String(a.id).localeCompare(String(b.id)));
-    
-    const totalCountEl = document.getElementById("superStudentTotalBadge");
-    if (totalCountEl) totalCountEl.textContent = `${list.length} Students`;
-    
-    if (list.length === 0) {
-        table.innerHTML = "";
-        if (emptyMsg) emptyMsg.style.display = "block";
+    const searchId = input.value.trim().toUpperCase();
+    if (!searchId) {
+        msg.textContent = "⚠️ Please enter a Student ID to search.";
+        msg.style.background = "#fef3c7";
+        msg.style.color = "#92400e";
+        msg.style.display = "block";
+        box.style.display = "none";
+        currentLookupStudent = null;
         return;
     }
     
-    if (emptyMsg) emptyMsg.style.display = "none";
-    table.innerHTML = list.map(s => {
-        const att = Number(s.att || 0);
-        const attClass = att >= 90 ? 'att-good' : (att < 75 ? 'att-bad' : 'att-mid');
-        return `<tr>
-            <td><strong>${s.id}</strong></td>
-            <td>${s.name}</td>
-            <td>${s.course || '—'}</td>
-            <td>${normalizeYear(s.year)}</td>
-            <td>${normalizeCampus(s.campus)}</td>
-            <td class="${attClass}"><strong>${att}%</strong></td>
-            <td style="text-align: center;">
-                <button class="red" style="padding: 5px 12px; font-size: 12px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button>
-            </td>
-        </tr>`;
-    }).join("");
+    // Find student in memory
+    const student = (allStudents || []).find(s => String(s.id).trim().toUpperCase() === searchId);
+    
+    if (!student) {
+        msg.textContent = `❌ No student found with ID "${searchId}". Please verify the ID and try again.`;
+        msg.style.background = "#fee2e2";
+        msg.style.color = "#991b1b";
+        msg.style.display = "block";
+        box.style.display = "none";
+        currentLookupStudent = null;
+        return;
+    }
+    
+    // Found student!
+    currentLookupStudent = student;
+    msg.style.display = "none";
+    
+    // Populate details preview
+    document.getElementById("delPreviewName").textContent = student.name || "Student";
+    document.getElementById("delPreviewId").textContent = `ID: ${student.id}`;
+    document.getElementById("delPreviewCampus").textContent = normalizeCampus(student.campus);
+    document.getElementById("delPreviewCourse").textContent = student.course || "—";
+    document.getElementById("delPreviewYear").textContent = normalizeYear(student.year);
+    document.getElementById("delPreviewAttendance").textContent = `${student.att || 0}%`;
+    document.getElementById("delPreviewPhone").textContent = student.phone || "Not Provided";
+    
+    // Fee status calculation
+    const f = (fees && fees[student.id]) ? fees[student.id] : null;
+    let feeText = "No Record";
+    if (f) {
+        const total = f.total || 0;
+        const paid = f.paid || 0;
+        const due = total - paid;
+        if (due <= 0 && total > 0) feeText = `Full Paid (₹${total.toLocaleString('en-IN')})`;
+        else if (paid > 0) feeText = `Paid ₹${paid.toLocaleString('en-IN')} / Due ₹${due.toLocaleString('en-IN')}`;
+        else feeText = `Unpaid (Due ₹${due.toLocaleString('en-IN')})`;
+    }
+    document.getElementById("delPreviewFee").textContent = feeText;
+    
+    // Reveal details card smoothly
+    box.style.display = "block";
+}
+
+function clearStudentDeletionCard() {
+    const input = document.getElementById("deleteLookupId");
+    if (input) input.value = "";
+    const msg = document.getElementById("deleteLookupMsg");
+    if (msg) msg.style.display = "none";
+    const box = document.getElementById("deleteStudentDetailsBox");
+    if (box) box.style.display = "none";
+    currentLookupStudent = null;
+}
+
+async function executeDeleteSearchedStudent() {
+    if (!currentLookupStudent) return;
+    const cleanId = String(currentLookupStudent.id).trim().toUpperCase();
+    const studentName = currentLookupStudent.name || cleanId;
+    
+    if (!confirm(`⚠️ FINAL CONFIRMATION\n\nAre you sure you want to permanently delete:\n\nStudent: ${studentName}\nID: ${cleanId}\nCampus: ${normalizeCampus(currentLookupStudent.campus)}\n\nThis will completely erase:\n• Student profile\n• Portal login credentials\n• Fee records\n• Attendance records\n\nThis action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        if (window.SchoolAPI) {
+            await window.SchoolAPI.deleteStudent(cleanId);
+        }
+        
+        // Remove from in-memory array and cache
+        allStudents = allStudents.filter(s => String(s.id).trim().toUpperCase() !== cleanId);
+        if (fees && fees[cleanId]) delete fees[cleanId];
+        
+        persist();
+        
+        // Refresh views
+        renderDashboard();
+        if (typeof calculateTargets === 'function') calculateTargets();
+        if (typeof renderAdminPerformance === 'function') renderAdminPerformance();
+        
+        // Reset and show success banner
+        clearStudentDeletionCard();
+        const msg = document.getElementById("deleteLookupMsg");
+        if (msg) {
+            msg.textContent = `✅ Student "${studentName}" (${cleanId}) has been permanently deleted from the system.`;
+            msg.style.background = "#dcfce7";
+            msg.style.color = "#166534";
+            msg.style.display = "block";
+        }
+        
+        alert(`✅ Student "${studentName}" (${cleanId}) has been permanently deleted.`);
+    } catch (err) {
+        console.error("Delete student error:", err);
+        alert("❌ Failed to delete student: " + (err.message || err));
+    }
 }
 
 async function deleteStudentPermanently(studentId) {
@@ -1531,16 +1611,12 @@ async function deleteStudentPermanently(studentId) {
             await window.SchoolAPI.deleteStudent(cleanId);
         }
         
-        // Remove from in-memory array and cache
         allStudents = allStudents.filter(s => String(s.id).trim().toUpperCase() !== cleanId);
         if (fees && fees[cleanId]) delete fees[cleanId];
         
         persist();
         
-        // Refresh all dashboard views
-        renderSuperStudentsDirectory();
         renderDashboard();
-        if (typeof anRenderStudentTable === 'function') anRenderStudentTable();
         if (typeof calculateTargets === 'function') calculateTargets();
         if (typeof renderAdminPerformance === 'function') renderAdminPerformance();
         
@@ -1554,7 +1630,6 @@ async function deleteStudentPermanently(studentId) {
 function renderAll() {
     renderNotices(); calculateTargets();
     renderResults(); renderAchievements(); renderDashboard();
-    renderSuperStudentsDirectory();
 }
 renderAll();
 </script>
