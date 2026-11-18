@@ -730,23 +730,32 @@ function showPage(id, button) {
 // --- NOTICE BOARD LOGIC ---
 function toggleForwardBox(id) {
     const box = document.getElementById(`forward-box-${id}`);
-    box.style.display = box.style.display === "flex" ? "none" : "flex";
+    if (!box) return;
+    box.style.display = (box.style.display === "flex") ? "none" : "flex";
 }
 
 async function sendDirective(id) {
-    let directive = globalNotices.find(n => n.id === id || n._id === id);
-    if(!directive) return;
-    let target = document.getElementById(`forwardTarget-${id}`).value;
+    let directive = (globalNotices || []).find(n => String(n.id) === String(id) || String(n._id) === String(id));
+    if (!directive) {
+        directive = (adminNotices || []).find(n => String(n.id) === String(id) || String(n._id) === String(id));
+    }
+    if (!directive) {
+        alert("Directive not found.");
+        return;
+    }
+    
+    const targetSelect = document.getElementById(`forwardTarget-${id}`);
+    let target = targetSelect ? targetSelect.value : "All Students";
 
     let newNotice = {
         title: directive.title,
-        desc: directive.desc || directive.content,
-        content: directive.desc || directive.content,
+        desc: directive.desc || directive.content || '',
+        content: directive.content || directive.desc || '',
         target: target,
         priority: directive.priority || 'Normal',
         sender: "Campus Admin",
         type: 'admin',
-        campus: currentAdminCampus,
+        campus: currentAdminCampus || 'All Campuses',
         date: new Date().toLocaleDateString()
     };
     
@@ -756,11 +765,15 @@ async function sendDirective(id) {
             if (res && res.notice) newNotice = res.notice;
         } catch (err) {
             console.error("Notice forward error:", err);
+            alert("❌ Failed to forward directive: " + err.message);
+            return;
         }
     }
     
     adminNotices.unshift(newNotice);
-    persist(); renderNotices();
+    persist();
+    toggleForwardBox(id);
+    renderNotices();
     alert(`✅ Notice successfully sent to: ${target}`);
 }
 
@@ -807,22 +820,24 @@ function renderNotices() {
     if(directives.length === 0) {
         directivesContainer.innerHTML = "<p style='color:#888;'>No directives from Administrator.</p>";
     } else {
-        directivesContainer.innerHTML = directives.map(n => `
+        directivesContainer.innerHTML = directives.map(n => {
+            const safeId = String(n.id || n._id || '');
+            return `
             <div class="notice-card directive">
                 <h4 style="color:#991b1b;">🚨 ${n.title}</h4>
-                <p>${n.desc}</p>
+                <p>${n.desc || n.content || ''}</p>
                 <div class="notice-meta" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                     <div>
-                        <span><i class="fa-solid fa-user-tie"></i> ${n.sender}</span>
-                        <span style="margin-left:15px;"><i class="fa-solid fa-calendar"></i> ${n.date}</span>
+                        <span><i class="fa-solid fa-user-tie"></i> ${n.sender || 'Administrator'}</span>
+                        <span style="margin-left:15px;"><i class="fa-solid fa-calendar"></i> ${n.date || 'Recent'}</span>
                     </div>
-                    <button class="gold" style="padding: 8px 15px; font-size: 13px; display:flex; align-items:center; gap:5px;" onclick="toggleForwardBox(${n.id})">
+                    <button class="gold" style="padding: 8px 15px; font-size: 13px; display:flex; align-items:center; gap:5px;" onclick="toggleForwardBox('${safeId}')">
                         <i class="fa-solid fa-share"></i> Forward to Students
                     </button>
                 </div>
-                <div id="forward-box-${n.id}" class="forward-box">
+                <div id="forward-box-${safeId}" class="forward-box">
                     <label>Send this notice to:</label>
-                    <select id="forwardTarget-${n.id}">
+                    <select id="forwardTarget-${safeId}">
                         <option value="All Students">All Students</option>
                         <option value="MPC Students">Only MPC Students</option>
                         <option value="BiPC Students">Only BiPC Students</option>
@@ -830,12 +845,13 @@ function renderNotices() {
                         <option value="2nd Year">Only 2nd Year Students</option>
                     </select>
                     <div class="btn-group">
-                        <button class="green" onclick="sendDirective(${n.id})"><i class="fa-solid fa-paper-plane"></i> Send Now</button>
-                        <button class="light" onclick="toggleForwardBox(${n.id})">Cancel</button>
+                        <button class="green" onclick="sendDirective('${safeId}')"><i class="fa-solid fa-paper-plane"></i> Send Now</button>
+                        <button class="light" onclick="toggleForwardBox('${safeId}')">Cancel</button>
                     </div>
                 </div>
             </div>
-        `).join("");
+            `;
+        }).join("");
     }
 
     let container = document.getElementById("adminNoticeList");
@@ -1801,7 +1817,7 @@ window.onload = async function() {
             if (data && data.students && data.students.length > 0) allStudents = data.students;
             if (data && data.fees && Object.keys(data.fees).length > 0) fees = data.fees;
             if (data && data.notices && data.notices.length > 0) {
-                adminNotices = data.notices;
+                adminNotices = data.notices.filter(n => n.type === 'admin');
                 globalNotices = data.notices.filter(n => n.type === 'global' || !n.type);
             }
             if (data && data.achievements && data.achievements.length > 0) {
