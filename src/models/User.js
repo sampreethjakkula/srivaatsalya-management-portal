@@ -37,13 +37,9 @@ const userSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
-});
+// Password hashing is handled manually in routes and seed logic
+// to maintain compatibility with both MongoDB and NeDB.
+// Do NOT add a pre('save') hook here — it would double-hash passwords.
 
 // Compare password method
 userSchema.methods.comparePassword = async function (enteredPassword) {

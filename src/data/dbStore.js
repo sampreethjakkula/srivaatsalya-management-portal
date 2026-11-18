@@ -78,6 +78,19 @@ const Admissions = createStore(AdmissionModel, localAdmissions);
 // Seed function for cloud & local
 const seedDB = async () => {
   try {
+    // Fix: Remove any corrupted (double-hashed) default accounts so they get re-seeded correctly
+    const testUser = await Users.findOne({ username: 'SUPERADMIN' });
+    if (testUser) {
+      const isValid = await bcrypt.compare('super123', testUser.password);
+      if (!isValid) {
+        console.log('[Database] Detected corrupted default accounts. Re-seeding...');
+        await Users.remove({ username: { $in: ['SUPERADMIN', 'ADMIN', 'STUDENT'] } }, { multi: true });
+        await Students.remove({ id: 'STUDENT' });
+        await Fees.remove({ studentId: 'STUDENT' });
+        await Notices.remove({});
+      }
+    }
+
     const userCount = await Users.count({});
     if (userCount === 0) {
       console.log('[Database] Seeding initial administrative and student accounts...');

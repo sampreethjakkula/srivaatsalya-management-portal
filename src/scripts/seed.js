@@ -1,5 +1,6 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Student = require('../models/Student');
 const Fee = require('../models/Fee');
@@ -13,9 +14,10 @@ const seedDB = async () => {
     // 1. Seed Administrator (Super Admin)
     let superAdmin = await User.findOne({ username: 'SUPERADMIN' });
     if (!superAdmin) {
+      const hashedPass = await bcrypt.hash('super123', 10);
       superAdmin = new User({
         username: 'SUPERADMIN',
-        password: 'super123',
+        password: hashedPass,
         role: 'superadmin',
         name: 'Chief Administrator',
         campus: 'All Campuses'
@@ -27,9 +29,10 @@ const seedDB = async () => {
     // 2. Seed Admin
     let admin = await User.findOne({ username: 'ADMIN' });
     if (!admin) {
+      const hashedPass = await bcrypt.hash('admin123', 10);
       admin = new User({
         username: 'ADMIN',
-        password: 'admin123',
+        password: hashedPass,
         role: 'admin',
         name: 'Campus Admin',
         campus: 'All Campuses'
@@ -41,9 +44,10 @@ const seedDB = async () => {
     // 3. Seed Default Student
     let studentUser = await User.findOne({ username: 'STUDENT' });
     if (!studentUser) {
+      const hashedPass = await bcrypt.hash('student123', 10);
       studentUser = new User({
         username: 'STUDENT',
-        password: 'student123',
+        password: hashedPass,
         role: 'student',
         name: 'Default Student',
         campus: 'Day Scholar',
