@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
-const { Users, Students, Fees } = require('../data/dbStore');
+const { Users, Students, Fees, Attendance } = require('../data/dbStore');
 const { protect, authorize } = require('../middleware/auth');
 
 // @route   GET /api/students
@@ -231,6 +231,7 @@ router.delete('/:id', protect, authorize('superadmin'), async (req, res) => {
     await Students.remove({ id: studentId });
     await Users.remove({ username: studentId });
     await Fees.remove({ studentId: studentId });
+    await Attendance.remove({ studentId: studentId });
     res.json({ success: true, message: `Student ${studentId} removed.` });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

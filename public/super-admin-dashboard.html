@@ -235,7 +235,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
     </div>
     <div class="card">
         <h3>Recent Students (All Campuses)</h3>
-        <div class="tablewrap"><table><thead><tr><th>Student ID</th><th>Name</th><th>Course</th><th>Year</th><th>Campus</th></tr></thead><tbody id="recentStudents"></tbody></table></div>
+        <div class="tablewrap"><table><thead><tr><th>Student ID</th><th>Name</th><th>Course</th><th>Year</th><th>Campus</th><th style="text-align:center;">Actions</th></tr></thead><tbody id="recentStudents"></tbody></table></div>
     </div>
 </section>
 
@@ -447,6 +447,44 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 <!-- ==================== MERGED STUDENTS PAGE ==================== -->
 <section id="students" class="page">
+    <div class="card" style="border-left: 5px solid #0d4e78; margin-bottom: 22px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+            <div>
+                <h3 style="margin: 0; color: #0d4e78; display: flex; align-items: center; gap: 10px;">
+                    👨‍🎓 Student Management Directory
+                    <span id="superStudentTotalBadge" class="badge" style="background:#e8f0f6; color:#0d4e78; font-size:12px;">0 Students</span>
+                </h3>
+                <p style="font-size: 13px; color: #64748b; margin-top: 4px;">Search, view, and permanently remove student records across all campuses.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <select id="superStudentCampusFilter" onchange="renderSuperStudentsDirectory()" style="width: 220px; margin: 0; padding: 10px; border-radius: 6px; border: 1px solid #dce3eb;">
+                    <option value="All Campuses">All Campuses</option>
+                    <option value="Day Scholar">Sri Vaibhav Campus (Day Scholar)</option>
+                    <option value="Girls Campus">Sri Vaarahi Bhavan (Girls)</option>
+                    <option value="Boys Campus">Sri Virinchi Bhavan (Boys)</option>
+                </select>
+                <input id="superStudentSearch" placeholder="🔍 Search ID, Name, Phone..." oninput="renderSuperStudentsDirectory()" style="width: 240px; margin: 0; padding: 10px; border-radius: 6px; border: 1px solid #dce3eb;">
+            </div>
+        </div>
+        <div class="tablewrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Course</th>
+                        <th>Year</th>
+                        <th>Campus</th>
+                        <th>Attendance</th>
+                        <th style="text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="superStudentDirectoryTable"></tbody>
+            </table>
+        </div>
+        <div id="superStudentEmptyMsg" style="display:none; text-align: center; padding: 30px; color: #64748b; font-weight: 600;">No students found matching your search.</div>
+    </div>
+
     <div class="analytics-panel">
         <h3>👨‍🎓 Attendance Overview</h3>
         <p class="sub">Filter students by Campus → Year → Group → Examination. All counts and lists are calculated live from the existing database.</p>
@@ -514,7 +552,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <input id="anSearch" placeholder="🔍 Search within results by ID or Name" oninput="anRenderStudentTable()">
             </div>
             <table>
-                <thead><tr><th>Student ID</th><th>Student Name</th><th>Course</th><th>Year</th><th>Campus</th><th>Attendance %</th></tr></thead>
+                <thead><tr><th>Student ID</th><th>Student Name</th><th>Course</th><th>Year</th><th>Campus</th><th>Attendance %</th><th style="text-align:center;">Actions</th></tr></thead>
                 <tbody id="anStudentTable"></tbody>
             </table>
         </div>
@@ -741,10 +779,10 @@ function showPage(id, button) {
     document.getElementById(id).classList.add("active");
     document.querySelectorAll(".sidebar button").forEach(b => b.classList.remove("active"));
     if (button) button.classList.add("active");
-    const titles = { dashboard: "Administrator Dashboard", notices: "Notice Board", manageAdmins: "Manage Admins", adminPerformance: "Admin Performance", targets: "Monthly Targets", students: "Attendance Overview", fees: "Global Fees", results: "Global Results", achievements: "Achievements" };
+    const titles = { dashboard: "Administrator Dashboard", notices: "Notice Board", manageAdmins: "Manage Admins", adminPerformance: "Admin Performance", targets: "Monthly Targets", students: "Student Management", fees: "Global Fees", results: "Global Results", achievements: "Achievements" };
     document.getElementById("pageTitle").textContent = titles[id] || "Administrator Dashboard";
     if (id !== "students" && id !== "fees") renderAll();
-    else if (id === "students") initAnalyticsPage();
+    else if (id === "students") { initAnalyticsPage(); renderSuperStudentsDirectory(); }
     else if (id === "fees") initFeesPage();
 }
 
@@ -1053,7 +1091,7 @@ function renderDashboard() {
     document.getElementById("totalCollection").textContent = money(collection);
     document.getElementById("pendingFees").textContent = money(pending);
     document.getElementById("averageAttendance").textContent = avgAtt + "%";
-    document.getElementById("recentStudents").innerHTML = allStudents.slice(-5).reverse().map(s => `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.course}</td><td>${normalizeYear(s.year)}</td><td>${normalizeCampus(s.campus)}</td></tr>`).join("");
+    document.getElementById("recentStudents").innerHTML = allStudents.slice(-5).reverse().map(s => `<tr><td><strong>${s.id}</strong></td><td>${s.name}</td><td>${s.course || '—'}</td><td>${normalizeYear(s.year)}</td><td>${normalizeCampus(s.campus)}</td><td style="text-align:center;"><button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button></td></tr>`).join("");
 }
 
 /* =====================================================================
@@ -1179,7 +1217,7 @@ function anRenderStudentTable() {
     emptyMsg.style.display = 'none'; tableWrapInner.style.display = 'block';
     tbody.innerHTML = displayList.map(s => {
         const att = Number(s.att || 0); const attClass = att >= 90 ? 'att-good' : (att < 75 ? 'att-bad' : 'att-mid');
-        return `<tr><td>${s.id}</td><td>${s.name}</td><td>${s.course || '—'}</td><td>${normalizeYear(s.year)}</td><td>${normalizeCampus(s.campus)}</td><td class="${attClass}">${att}%</td></tr>`;
+        return `<tr><td><strong>${s.id}</strong></td><td>${s.name}</td><td>${s.course || '—'}</td><td>${normalizeYear(s.year)}</td><td>${normalizeCampus(s.campus)}</td><td class="${attClass}">${att}%</td><td style="text-align:center;"><button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button></td></tr>`;
     }).join('');
 }
 
@@ -1416,9 +1454,107 @@ window.onload = async function() {
     await loadAdminAccounts(); // Load admins from DB on every page load
 };
 
+/* ================= STUDENT DIRECTORY & DELETION ================= */
+function renderSuperStudentsDirectory() {
+    const table = document.getElementById("superStudentDirectoryTable");
+    if (!table) return;
+    
+    const campusFilter = document.getElementById("superStudentCampusFilter") ? document.getElementById("superStudentCampusFilter").value : "All Campuses";
+    const q = (document.getElementById("superStudentSearch") ? document.getElementById("superStudentSearch").value : "").toLowerCase().trim();
+    const emptyMsg = document.getElementById("superStudentEmptyMsg");
+    
+    let list = (allStudents || []).slice();
+    
+    // Campus filter
+    if (campusFilter !== "All Campuses") {
+        list = list.filter(s => {
+            const c = (s.campus || "").toLowerCase();
+            const f = campusFilter.toLowerCase();
+            return c.includes(f) || 
+                   (f.includes("girls") && c.includes("vaarahi")) || 
+                   (f.includes("boys") && c.includes("virinchi")) || 
+                   (f.includes("day") && c.includes("vaibhav"));
+        });
+    }
+    
+    // Search filter
+    if (q) {
+        list = list.filter(s => 
+            (s.id && String(s.id).toLowerCase().includes(q)) || 
+            (s.name && String(s.name).toLowerCase().includes(q)) ||
+            (s.course && String(s.course).toLowerCase().includes(q)) ||
+            (s.phone && String(s.phone).toLowerCase().includes(q))
+        );
+    }
+    
+    // Sort by ID
+    list.sort((a, b) => String(a.id).localeCompare(String(b.id)));
+    
+    const totalCountEl = document.getElementById("superStudentTotalBadge");
+    if (totalCountEl) totalCountEl.textContent = `${list.length} Students`;
+    
+    if (list.length === 0) {
+        table.innerHTML = "";
+        if (emptyMsg) emptyMsg.style.display = "block";
+        return;
+    }
+    
+    if (emptyMsg) emptyMsg.style.display = "none";
+    table.innerHTML = list.map(s => {
+        const att = Number(s.att || 0);
+        const attClass = att >= 90 ? 'att-good' : (att < 75 ? 'att-bad' : 'att-mid');
+        return `<tr>
+            <td><strong>${s.id}</strong></td>
+            <td>${s.name}</td>
+            <td>${s.course || '—'}</td>
+            <td>${normalizeYear(s.year)}</td>
+            <td>${normalizeCampus(s.campus)}</td>
+            <td class="${attClass}"><strong>${att}%</strong></td>
+            <td style="text-align: center;">
+                <button class="red" style="padding: 5px 12px; font-size: 12px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button>
+            </td>
+        </tr>`;
+    }).join("");
+}
+
+async function deleteStudentPermanently(studentId) {
+    const cleanId = String(studentId).trim().toUpperCase();
+    const student = allStudents.find(s => String(s.id).trim().toUpperCase() === cleanId);
+    const studentName = student ? student.name : cleanId;
+    
+    if (!confirm(`⚠️ Confirm Student Deletion\n\nAre you sure you want to permanently delete student:\nName: ${studentName}\nID: ${cleanId}\n\nThis will permanently erase their:\n• Student profile\n• Portal login credentials\n• Fee records\n• Attendance records\n\nThis action cannot be undone.`)) {
+        return;
+    }
+    
+    try {
+        if (window.SchoolAPI) {
+            await window.SchoolAPI.deleteStudent(cleanId);
+        }
+        
+        // Remove from in-memory array and cache
+        allStudents = allStudents.filter(s => String(s.id).trim().toUpperCase() !== cleanId);
+        if (fees && fees[cleanId]) delete fees[cleanId];
+        
+        persist();
+        
+        // Refresh all dashboard views
+        renderSuperStudentsDirectory();
+        renderDashboard();
+        if (typeof anRenderStudentTable === 'function') anRenderStudentTable();
+        if (typeof calculateTargets === 'function') calculateTargets();
+        if (typeof renderAdminPerformance === 'function') renderAdminPerformance();
+        
+        alert(`✅ Student "${studentName}" (${cleanId}) has been permanently deleted.`);
+    } catch (err) {
+        console.error("Delete student error:", err);
+        alert("❌ Failed to delete student: " + (err.message || err));
+    }
+}
+
 function renderAll() {
     renderNotices(); calculateTargets();
     renderResults(); renderAchievements(); renderDashboard();
+    renderSuperStudentsDirectory();
 }
 renderAll();
 </script>
