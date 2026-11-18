@@ -14,17 +14,34 @@ router.get('/', async (req, res) => {
     }
 
     const rawNotices = await Notices.find(query);
-    const notices = (rawNotices || []).map(n => ({
-      ...n,
-      desc: n.desc || n.content || '',
-      content: n.content || n.desc || '',
-      sender: n.sender || n.postedBy || 'Administrator',
-      postedBy: n.postedBy || n.sender || 'Administrator',
-      target: n.target || n.campus || 'All Students',
-      campus: n.campus || n.target || 'All Campuses',
-      priority: n.priority || 'Normal',
-      date: n.date || (n.createdAt ? new Date(n.createdAt).toLocaleDateString() : new Date().toLocaleDateString())
-    }));
+
+    // Track all directive titles originally issued by the Administrator
+    const adminDirectiveTitles = new Set(
+      rawNotices
+        .filter(n => (n.postedBy === 'SUPERADMIN' || n.sender === 'Administrator') && n.target === 'Campus Admins')
+        .map(n => (n.title || '').trim().toLowerCase())
+    );
+
+    const notices = (rawNotices || []).map(n => {
+      let finalSender = n.sender || n.postedBy || 'Administrator';
+      if (n.postedBy === 'SUPERADMIN' || n.sender === 'SUPERADMIN') {
+        finalSender = 'Administrator';
+      } else if (n.title && adminDirectiveTitles.has(n.title.trim().toLowerCase())) {
+        finalSender = 'Administrator';
+      }
+
+      return {
+        ...n,
+        desc: n.desc || n.content || '',
+        content: n.content || n.desc || '',
+        sender: finalSender,
+        postedBy: n.postedBy || finalSender,
+        target: n.target || n.campus || 'All Students',
+        campus: n.campus || n.target || 'All Campuses',
+        priority: n.priority || 'Normal',
+        date: n.date || (n.createdAt ? new Date(n.createdAt).toLocaleDateString() : new Date().toLocaleDateString())
+      };
+    });
     res.json({ success: true, count: notices.length, notices });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
