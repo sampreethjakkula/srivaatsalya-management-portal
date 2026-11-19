@@ -159,6 +159,33 @@ router.get('/users', protect, authorize('superadmin'), async (req, res) => {
   }
 });
 
+// @route   PUT /api/auth/users/:username/password (Super Admin only - change admin password)
+router.put('/users/:username/password', protect, authorize('superadmin'), async (req, res) => {
+  try {
+    const username = req.params.username.trim().toUpperCase();
+    const { password } = req.body;
+
+    if (!password || password.trim().length === 0) {
+      return res.status(400).json({ success: false, message: 'New password is required.' });
+    }
+
+    const targetUser = await Users.findOne({ username });
+    if (!targetUser) {
+      return res.status(404).json({ success: false, message: `User "${username}" not found.` });
+    }
+
+    const hashedPassword = await bcrypt.hash(password.trim(), 10);
+    await Users.update({ username }, { $set: { password: hashedPassword } });
+
+    res.json({
+      success: true,
+      message: `Password for admin "${username}" updated successfully.`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 // @route   DELETE /api/users/:username  (Super Admin only)
 router.delete('/users/:username', protect, authorize('superadmin'), async (req, res) => {
   try {

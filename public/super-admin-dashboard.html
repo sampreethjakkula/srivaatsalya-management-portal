@@ -830,11 +830,40 @@ async function loadAdminAccounts() {
             row.innerHTML = `
                 <td>${admin.username}</td><td>${admin.campus || 'All Campuses'}</td>
                 <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Admin</span></td>
-                <td><button class="red" style="padding:5px 10px;font-size:12px;" onclick="deleteAdmin('${admin.username}', this)">Delete</button></td>
+                <td>
+                    <button class="primary" style="padding:5px 10px;font-size:12px;margin-right:6px;" onclick="changeAdminPassword('${admin.username}')">🔑 Change Password</button>
+                    <button class="red" style="padding:5px 10px;font-size:12px;" onclick="deleteAdmin('${admin.username}', this)">Delete</button>
+                </td>
             `;
             table.appendChild(row);
         });
     } catch(e) { console.warn('Could not load admins:', e.message); }
+}
+
+async function changeAdminPassword(username) {
+    const newPass = prompt(`Enter new password for Admin "${username}":`);
+    if (newPass === null) return; // User cancelled
+    const trimmed = newPass.trim();
+    if (!trimmed) {
+        alert("Password cannot be empty.");
+        return;
+    }
+    const confirmPass = prompt(`Confirm new password for Admin "${username}":`);
+    if (confirmPass === null) return;
+    if (trimmed !== confirmPass.trim()) {
+        alert("Passwords do not match. Password was not changed.");
+        return;
+    }
+
+    try {
+        await window.SchoolAPI.request('/api/auth/users/' + encodeURIComponent(username) + '/password', {
+            method: 'PUT',
+            body: JSON.stringify({ password: trimmed })
+        });
+        alert(`✅ Password for Admin "${username}" updated successfully!`);
+    } catch(err) {
+        alert('Error updating password: ' + err.message);
+    }
 }
 
 async function deleteAdmin(username, btn) {
