@@ -100,6 +100,13 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 .target-filters, .filter-grid { grid-template-columns: 1fr; }
 }
 </style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const adminName = localStorage.getItem('loggedInAdmin') || localStorage.getItem('userName') || '';
+  const adminLabelEl = document.getElementById('adminLabel');
+  if (adminLabelEl) adminLabelEl.textContent = adminName;
+});
+</script>
 </head>
 <body>
 
@@ -625,7 +632,14 @@ let results = JSON.parse(localStorage.getItem("adminResults") || "[]");
 let achievements = JSON.parse(localStorage.getItem("adminAchievements") || "[]");
 
 let globalNotices = JSON.parse(localStorage.getItem("globalNotices") || "[]");
-let adminNotices = JSON.parse(localStorage.getItem("adminNotices") || "[]");
+let allNotices = [];
+function loadNotices(){
+  SchoolAPI.getNotices().then(res => {
+    allNotices = res;
+    renderNotices();
+  }).catch(err=> console.error(err));
+}
+window.addEventListener('load', loadNotices);
 
 function persist() {
     localStorage.setItem("adminStudentsData", JSON.stringify(allStudents));
@@ -720,7 +734,7 @@ function renderNotices() {
                 <p>${n.desc}</p>
                 <div class="notice-meta" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                     <div>
-                        <span><i class="fa-solid fa-user-tie"></i> ${n.sender}</span>
+                        <span><i class="fa-solid fa-user-tie"></i> ${n.senderName || n.sender} (${n.senderRole || (n.sender === 'Administrator' ? 'superadmin' : 'admin')})</span>
                         <span style="margin-left:15px;"><i class="fa-solid fa-calendar"></i> ${n.date}</span>
                     </div>
                     <button class="gold" style="padding: 8px 15px; font-size: 13px; display:flex; align-items:center; gap:5px;" onclick="toggleForwardBox(${n.id})">
@@ -759,8 +773,9 @@ function renderNotices() {
             </div>
             <p>${n.desc}</p>
             <div class="notice-meta">
-                <span><i class="fa-solid fa-user-tie"></i> ${n.sender}</span>
+                <span><i class="fa-solid fa-user-tie"></i> ${n.senderName || n.sender} (${n.senderRole || (n.sender === 'Administrator' ? 'superadmin' : 'admin')})</span>
                 <span><i class="fa-solid fa-calendar"></i> ${n.date}</span>
+                ${n.originalSenderName ? '<span><i class="fa-solid fa-share"></i> Forwarded from ' + n.originalSenderName + ' (' + n.originalSenderRole + ')</span>' : ''}
                 <span class="notice-target">To: ${n.target}</span>
             </div>
         </div>

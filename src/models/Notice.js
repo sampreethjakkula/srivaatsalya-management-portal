@@ -42,7 +42,14 @@ const noticeSchema = new mongoose.Schema({
   date: {
     type: String,
     default: () => new Date().toISOString().split('T')[0]
-  }
+  },
+  // New fields for role‑based tracking
+  senderName: { type: String, required: true },
+  senderRole: { type: String, enum: ['admin', 'superadmin', 'student'], required: true },
+  originalSenderName: { type: String }, // for forwarded notices
+  originalSenderRole: { type: String, enum: ['admin', 'superadmin', 'student'] },
+  forwardedBy: { type: String } // admin who forwarded
+
 }, { timestamps: true });
 
 module.exports = mongoose.model('Notice', noticeSchema);
