@@ -191,7 +191,12 @@ window.SchoolAPI = {
   async ensureAuth(defaultRole = 'student') {
     const token = this.getToken();
     const currentRole = localStorage.getItem('userRole');
-    if (!token || currentRole !== defaultRole) {
+    // If a valid session with the correct role already exists, preserve it!
+    if (token && currentRole === defaultRole) {
+      return;
+    }
+    // Only auto-login with default test credentials if NO session token exists
+    if (!token) {
       try {
         if (defaultRole === 'student') await this.login('STUDENT', 'student123', 'student');
         else if (defaultRole === 'admin') await this.login('ADMIN', 'admin123', 'admin');

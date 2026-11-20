@@ -147,13 +147,21 @@ router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => 
 
     const studentPassword = pass || 'pass123';
 
+    const rawDob = (dob || '').trim();
+    let cleanDob = rawDob;
+    // Normalize DD/MM/YYYY or DD-MM-YYYY to YYYY-MM-DD
+    const dmyMatch = rawDob.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+    if (dmyMatch) {
+      cleanDob = `${dmyMatch[3]}-${String(dmyMatch[2]).padStart(2, '0')}-${String(dmyMatch[1]).padStart(2, '0')}`;
+    }
+
     const newStudent = await Students.insert({
       id: cleanId,
       name: name.trim(),
       course: course || 'BiPC - NEET',
       year: year || '1st Year',
       campus: campus || req.user.campus || 'Day Scholar',
-      dob: dob || 'Not Provided',
+      dob: cleanDob || 'Not Provided',
       gender: gender || 'Not Provided',
       father: father || 'Not Provided',
       mother: mother || 'Not Provided',
@@ -206,6 +214,14 @@ router.put('/:id', protect, authorize('admin', 'superadmin'), async (req, res) =
     const updateData = { ...req.body };
     delete updateData._id;
     delete updateData.id;
+
+    if (updateData.dob) {
+      const rawDob = String(updateData.dob).trim();
+      const dmyMatch = rawDob.match(/^(\d{1,2})[\/\-\.](\d{1,2})[\/\-\.](\d{4})$/);
+      if (dmyMatch) {
+        updateData.dob = `${dmyMatch[3]}-${String(dmyMatch[2]).padStart(2, '0')}-${String(dmyMatch[1]).padStart(2, '0')}`;
+      }
+    }
 
     const student = await Students.findOne({ id: studentId });
     if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });

@@ -745,7 +745,16 @@
             if (window.SchoolAPI) {
                 await window.SchoolAPI.ensureAuth('student');
             }
-            let loggedInId = localStorage.getItem('loggedInStudent') || 'STUDENT';
+            let loggedInId = localStorage.getItem('loggedInStudent');
+            if (!loggedInId) {
+                // Check if user object has studentId or username
+                try {
+                    const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+                    if (savedUser.studentId) loggedInId = savedUser.studentId;
+                    else if (savedUser.username && savedUser.role === 'student') loggedInId = savedUser.username;
+                } catch(e) {}
+            }
+            if (!loggedInId) loggedInId = 'STUDENT';
             localStorage.setItem('loggedInStudent', loggedInId);
 
             if (window.SchoolAPI) {
@@ -807,23 +816,37 @@
             document.getElementById('dashYear').textContent = student.year; 
             document.getElementById('dashRoll').textContent = student.id; 
             document.getElementById('dashCampus').textContent = student.campus; 
-            document.getElementById('dashDob').textContent = student.dob || "Not Provided";
+            // Helper to format DOB nicely
+            function formatDisplayDob(rawDob) {
+                if (!rawDob || rawDob === "Not Provided" || rawDob === "undefined" || rawDob === "null") return "Not Provided";
+                const str = String(rawDob).trim();
+                // If YYYY-MM-DD
+                const ymd = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+                if (ymd) {
+                    return `${String(ymd[3]).padStart(2, '0')}/${String(ymd[2]).padStart(2, '0')}/${ymd[1]}`;
+                }
+                return str;
+            }
+
+            document.getElementById('dashDob').textContent = formatDisplayDob(student.dob);
             document.getElementById('dashGender').textContent = student.gender || "Not Provided";
             document.getElementById('dashFather').textContent = student.father || "Not Provided";
             document.getElementById('dashMother').textContent = student.mother || "Not Provided";
             document.getElementById('dashPhone').textContent = student.phone || "Not Provided";
             document.getElementById('dashSchool').textContent = student.school || "Not Provided";
 
-            // Student Results Section
+            // Student Results Section (Dashboard Tab)
             if (student.results && student.results.length > 0) {
                 document.getElementById('previousYearSection').style.display = 'block';
                 const prevContainer = document.getElementById('prevResultContainer');
                 prevContainer.innerHTML = ''; 
                 student.results.forEach(res => {
+                    const examTitle = res.test || res.exam || res.examName || res.name || res.title || 'Exam / Test';
+                    const scoreVal = res.score !== undefined ? res.score : (res.marks !== undefined ? res.marks : (res.mark !== undefined ? res.mark : 'N/A'));
                     prevContainer.innerHTML += `
                         <div class="prev-result-row">
-                            <span>${res.test || res.exam || 'Exam / Test'}</span>
-                            <span><strong>${res.score || res.marks || 'N/A'}</strong></span>
+                            <span>${examTitle}</span>
+                            <span><strong>${scoreVal}</strong></span>
                         </div>
                     `;
                 });
@@ -834,12 +857,39 @@
             // --- NOTICE BOARD TAB ---
             let allNotices = [...globalNotices, ...adminNotices];
             let relevantNotices = allNotices.filter(n => {
-                if(n.target === "Campus Admins") return false;
-                if(!n.target || n.target === "All Students" || n.target === "All Campuses") return true;
-                if(n.target === "MPC Students" && student.course.includes("MPC")) return true;
-                if(n.target === "BiPC Students" && student.course.includes("BiPC")) return true;
-                if(n.target === "1st Year" && student.year === "1st Year") return true;
-                if(n.target === "2nd Year" && student.year === "2nd Year") return true;
+                const target = (n.target || '').trim();
+                // Directives meant strictly for campus admins
+                if (target === "Campus Admins" || target === "All Campus Admins") return false;
+
+                // Match campus if specified on the notice
+                if (n.campus && n.campus !== "All Campuses" && n.campus !== "All") {
+                    const noticeCamp = String(n.campus).toLowerCase();
+                    const stuCamp = String(student.campus || '').toLowerCase();
+                    // If campuses don't intersect, skip
+                    const matchesCamp = (
+                        (noticeCamp.includes('girl') || noticeCamp.includes('vaarahi')) && (stuCamp.includes('girl') || stuCamp.includes('vaarahi')) ||
+                        (noticeCamp.includes('boy') || noticeCamp.includes('virinchi')) && (stuCamp.includes('boy') || stuCamp.includes('virinchi')) ||
+                        (noticeCamp.includes('day') || noticeCamp.includes('vaibhav')) && (stuCamp.includes('day') || stuCamp.includes('vaibhav'))
+                    );
+                    if (!matchesCamp && stuCamp && !stuCamp.toLowerCase().includes('all')) return false;
+                }
+
+                // General broadcast targets
+                if (!target || target === "All Students" || target === "All Campuses" || target === "All") return true;
+
+                // Course / Stream target
+                const stuCourse = String(student.course || '').toUpperCase();
+                if (target.toUpperCase().includes("MPC") && stuCourse.includes("MPC")) return true;
+                if (target.toUpperCase().includes("BIPC") && stuCourse.includes("BIPC")) return true;
+
+                // Academic Year target
+                const stuYear = String(student.year || '').toUpperCase();
+                if (target.toUpperCase().includes("1ST") && stuYear.includes("1ST")) return true;
+                if (target.toUpperCase().includes("2ND") && stuYear.includes("2ND")) return true;
+
+                // Direct student ID target
+                if (target.toUpperCase() === String(student.id || '').toUpperCase()) return true;
+
                 return false;
             });
 
@@ -1017,13 +1067,15 @@
             resultsContainer.innerHTML = ""; 
             if(student.results && student.results.length > 0) {
                 student.results.forEach(res => {
+                    const examTitle = res.test || res.exam || res.examName || res.name || res.title || 'Examination';
+                    const scoreVal = res.score !== undefined ? res.score : (res.marks !== undefined ? res.marks : (res.mark !== undefined ? res.mark : 'N/A'));
                     resultsContainer.innerHTML += `
                         <div class="result-card">
                             <div>
-                                <h4>${res.test}</h4>
+                                <h4>${examTitle}</h4>
                                 <p>Academic Year 2024-2026</p>
                             </div>
-                            <div class="score-badge">${res.score}</div>
+                            <div class="score-badge">${scoreVal}</div>
                         </div>
                     `;
                 });

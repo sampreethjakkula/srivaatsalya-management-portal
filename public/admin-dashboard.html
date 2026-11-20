@@ -209,7 +209,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <div class="formgrid">
             <div><label>Student ID</label><input id="sid" placeholder="e.g. STU111"></div>
             <div><label>Student Name</label><input id="sname" placeholder="Enter name"></div>
-            <div><label>Date of Birth</label><input type="date" id="sdob"></div>
+            <div><label>Date of Birth</label><input type="text" id="sdob" placeholder="YYYY-MM-DD or DD/MM/YYYY" onfocus="if(!this.value)this.type='date'" onblur="if(!this.value)this.type='text'"></div>
             
             <div>
                 <label>Gender</label>
@@ -1260,8 +1260,11 @@ async function saveStudent() {
 
     let transportVal = document.getElementById("transport").value === "true";
 
+    let rawInputDob = (document.getElementById("sdob").value || '').trim();
+    let normalizedDob = parseExcelDob(rawInputDob) || rawInputDob;
+
     let student = {
-        id, name, dob: document.getElementById("sdob").value, gender: genderVal,
+        id, name, dob: normalizedDob, gender: genderVal,
         father: document.getElementById("sfather").value, mother: document.getElementById("smother").value,
         phone: document.getElementById("sphone").value, school: document.getElementById("sschool").value,
         course: courseVal, year: document.getElementById("year").value,
