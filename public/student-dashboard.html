@@ -784,7 +784,7 @@
                         localStorage.setItem('globalNotices', JSON.stringify(nots.filter(n => n.type === 'global' || !n.type)));
                         localStorage.setItem('adminNotices', JSON.stringify(nots.filter(n => n.type === 'admin')));
                     }
-                    if (achs && achs.length > 0) {
+                    if (achs && Array.isArray(achs)) {
                         localStorage.setItem('adminAchievements', JSON.stringify(achs));
                     }
                 } catch (e) {

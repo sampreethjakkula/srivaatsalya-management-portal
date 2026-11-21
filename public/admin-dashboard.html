@@ -1907,7 +1907,7 @@ window.onload = async function() {
                 adminNotices = data.notices.filter(n => n.type === 'admin');
                 globalNotices = data.notices.filter(n => n.type === 'global' || !n.type);
             }
-            if (data && data.achievements && data.achievements.length > 0) {
+            if (data && Array.isArray(data.achievements)) {
                 achievements = data.achievements;
             }
         } catch (e) {

@@ -1578,7 +1578,7 @@ window.onload = async function() {
                 allNotices = data.notices;
                 globalNotices = data.notices;
             }
-            if (data && data.achievements && data.achievements.length > 0) {
+            if (data && Array.isArray(data.achievements)) {
                 achievements = data.achievements;
             }
         } catch (e) {
