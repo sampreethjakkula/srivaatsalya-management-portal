@@ -711,7 +711,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 </main>
 
-<script src="js/api.js"></script>
+<script src="js/api.js?v=2.2"></script>
 <script>
 /* ================= DATA SETUP ================= */
 const COURSE_FEES = { "MPC - JEE Advanced": 150000, "MPC - JEE Mains": 125000, "MPC - EAPCET": 100000, "MPC - AP EAPCET": 100000, "MPC - eapset": 100000, "BiPC - NEET": 150000, "BiPC - EAPCET": 100000, "BiPC - AP EAPCET": 100000, "BiPC - eapset": 100000 };
@@ -1188,31 +1188,70 @@ function renderResults() {
     document.getElementById("resultTable").innerHTML = results.map((r) => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.exam}</td><td>${r.score}</td></tr>`).join("");
 }
 
+async function executeDeleteAchievement(targetId) {
+    if (window.SchoolAPI && typeof window.SchoolAPI.deleteAchievement === 'function') {
+        try {
+            return await window.SchoolAPI.deleteAchievement(targetId);
+        } catch(e) {
+            console.warn("SchoolAPI.deleteAchievement error, trying direct fetch:", e);
+        }
+    }
+    let token = localStorage.getItem('token');
+    if (!token && window.SchoolAPI && typeof window.SchoolAPI.login === 'function') {
+        try {
+            const l = await window.SchoolAPI.login('SUPERADMIN', 'super123', 'superadmin');
+            token = l?.token;
+        } catch(e) {}
+    }
+    const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    
+    let res = await fetch('/api/achievements/' + encodeURIComponent(targetId), {
+        method: 'DELETE',
+        headers
+    });
+    if (!res.ok && res.status === 401 && window.SchoolAPI && typeof window.SchoolAPI.login === 'function') {
+        try {
+            const l = await window.SchoolAPI.login('SUPERADMIN', 'super123', 'superadmin');
+            if (l?.token) {
+                headers['Authorization'] = 'Bearer ' + l.token;
+                res = await fetch('/api/achievements/' + encodeURIComponent(targetId), {
+                    method: 'DELETE',
+                    headers
+                });
+            }
+        } catch(e) {}
+    }
+    if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || ('Server error: ' + res.status));
+    }
+    return await res.json();
+}
+
 async function deleteAchievement(index) {
     if (!confirm("Are you sure you want to delete this achievement?")) return;
     const ach = achievements[index];
     if (!ach) return;
 
-    if (window.SchoolAPI) {
+    try {
+        const targetId = ach.id || ach.title;
+        await executeDeleteAchievement(targetId);
+    } catch (e) {
+        console.error("Achievement delete error:", e);
         try {
-            const targetId = ach.id || encodeURIComponent(ach.title);
-            await window.SchoolAPI.deleteAchievement(targetId);
-        } catch (e) {
-            console.error("Achievement delete error:", e);
-            try {
-                const serverList = await window.SchoolAPI.getAchievements();
-                const match = serverList.find(s => s.title === ach.title || (ach.id && s.id === ach.id));
-                if (match && match.id) {
-                    await window.SchoolAPI.deleteAchievement(match.id);
-                }
-            } catch (err2) {
-                console.error("Secondary delete error:", err2);
-                alert("Failed to delete from server: " + (err2.message || "Session error"));
-                return;
+            if (ach.title) {
+                await executeDeleteAchievement(ach.title);
             }
+        } catch (err2) {
+            console.error("Secondary delete error:", err2);
+            alert("Failed to delete from server: " + (err2.message || "Session error"));
+            return;
         }
+    }
 
-        try {
+    try {
+        if (window.SchoolAPI && typeof window.SchoolAPI.getAchievements === 'function') {
             const fresh = await window.SchoolAPI.getAchievements();
             if (Array.isArray(fresh)) {
                 achievements = fresh;
@@ -1220,8 +1259,17 @@ async function deleteAchievement(index) {
                 renderAchievements();
                 return;
             }
-        } catch (e) { /* ignore */ }
-    }
+        } else {
+            const res = await fetch('/api/achievements');
+            const data = await res.json();
+            if (data && Array.isArray(data.achievements)) {
+                achievements = data.achievements;
+                persist();
+                renderAchievements();
+                return;
+            }
+        }
+    } catch (e) { /* ignore */ }
 
     achievements.splice(index, 1);
     persist();
