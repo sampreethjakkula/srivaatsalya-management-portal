@@ -223,8 +223,8 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
             <div><label>Previous School</label><input id="sschool" placeholder="Enter previous school"></div>
             <div><label>Course</label>
                 <select id="course">
-                    <option>MPC - JEE Advanced</option><option>MPC - JEE Mains</option><option>MPC - AP EAPCET</option>
-                    <option>BiPC - NEET</option><option>BiPC - AP EAPCET</option>
+                    <option>MPC - JEE Advanced</option><option>MPC - JEE Mains</option><option>MPC - EAPCET</option>
+                    <option>BiPC - NEET</option><option>BiPC - EAPCET</option>
                 </select>
             </div>
             <div><label>Year</label><select id="year"><option>1st Year</option><option>2nd Year</option></select></div>
@@ -297,7 +297,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                     <option value="All Exams">All Exams</option>
                     <option value="JEE Mains">JEE Mains</option>
                     <option value="JEE Advanced">JEE Advanced</option>
-                    <option value="AP EAPCET">AP EAPCET</option>
+                    <option value="EAPCET">EAPCET</option>
                     <option value="NEET">NEET</option>
                 </select>
             </div>
@@ -540,7 +540,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                     <option value="All Exams">All Exams</option>
                     <option value="JEE Mains">JEE Mains</option>
                     <option value="JEE Advanced">JEE Advanced</option>
-                    <option value="AP EAPCET">AP EAPCET</option>
+                    <option value="EAPCET">EAPCET</option>
                     <option value="NEET">NEET</option>
                 </select>
             </div>
@@ -613,8 +613,8 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <script src="js/api.js"></script>
 <script>
 const COURSE_FEES = { 
-    "MPC - JEE Advanced": 150000, "MPC - JEE Mains": 125000, "MPC - AP EAPCET": 100000, 
-    "BiPC - NEET": 150000, "BiPC - AP EAPCET": 100000 
+    "MPC - JEE Advanced": 150000, "MPC - JEE Mains": 125000, "MPC - EAPCET": 100000, "MPC - AP EAPCET": 100000, "MPC - eapset": 100000,
+    "BiPC - NEET": 150000, "BiPC - EAPCET": 100000, "BiPC - AP EAPCET": 100000, "BiPC - eapset": 100000 
 };
 const HOSTEL_FEE = 60000;
 const TRANSPORT_FEE = 15000;
@@ -642,8 +642,11 @@ function money(n) { return "₹" + Number(n || 0).toLocaleString("en-IN"); }
 function getGroupAndCoaching(courseString) {
     if (!courseString) return { group: "Unknown", coaching: "Unknown" };
     let parts = courseString.split(" - ");
-    let group = parts[0] || "Unknown";
-    let coaching = parts[1] || "General";
+    let group = (parts[0] || "Unknown").trim();
+    let coaching = (parts[1] || "General").trim();
+    if (/^(AP\s+)?(EAPCET|EAPSET|EAMCET)$/i.test(coaching)) {
+        coaching = "EAPCET";
+    }
     return { group, coaching };
 }
 
@@ -706,7 +709,7 @@ function matchExam(courseOrExam, filterExam) {
 
     if (fe.includes("JEE ADV") && ce.includes("ADV")) return true;
     if (fe.includes("JEE MAIN") && ce.includes("MAIN")) return true;
-    if ((fe.includes("EAPCET") || fe.includes("EAMCET")) && (ce.includes("EAPCET") || ce.includes("EAMCET"))) return true;
+    if ((fe.includes("EAPCET") || fe.includes("EAMCET") || fe.includes("EAPSET")) && (ce.includes("EAPCET") || ce.includes("EAMCET") || ce.includes("EAPSET"))) return true;
     if (fe.includes("NEET") && ce.includes("NEET")) return true;
 
     return ce.includes(fe);
@@ -1486,14 +1489,14 @@ function updateCoachingDropdown() {
 
     if (selectedGroup === "MPC") {
         coachingSelect.innerHTML += `
-            <option value="AP EAPCET">AP EAPCET</option>
+            <option value="EAPCET">EAPCET</option>
             <option value="JEE Mains">JEE Mains</option>
             <option value="JEE Advanced">JEE Advanced</option>
         `;
     } else if (selectedGroup === "BiPC") {
         coachingSelect.innerHTML += `
             <option value="NEET">NEET</option>
-            <option value="AP EAPCET">AP EAPCET</option>
+            <option value="EAPCET">EAPCET</option>
         `;
     }
 }
@@ -1611,11 +1614,11 @@ function generateCampusBreakdown() {
 
 function generateGroupBreakdown() {
     let groups = [
-        { name: "MPC", coaching: "AP EAPCET" },
+        { name: "MPC", coaching: "EAPCET" },
         { name: "MPC", coaching: "JEE Mains" },
         { name: "MPC", coaching: "JEE Advanced" },
         { name: "BiPC", coaching: "NEET" },
-        { name: "BiPC", coaching: "AP EAPCET" }
+        { name: "BiPC", coaching: "EAPCET" }
     ];
     
     let termFilter = parseInt(document.getElementById("tfTerm").value);

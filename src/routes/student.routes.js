@@ -61,10 +61,11 @@ router.post('/bulk', protect, authorize('admin', 'superadmin'), async (req, res)
       const cleanId = String(s.id).trim().toUpperCase();
       const studentPassword = s.pass || 'pass123';
 
+      const cleanCourse = s.course ? String(s.course).trim().replace(/\bAP\s+EAPCET\b/gi, 'EAPCET').replace(/\beapset\b/gi, 'EAPCET') : 'BiPC - NEET';
       const studentDoc = {
         id: cleanId,
         name: String(s.name).trim(),
-        course: s.course || 'BiPC - NEET',
+        course: cleanCourse,
         year: s.year || '1st Year',
         campus: s.campus || req.user.campus || 'Day Scholar',
         dob: s.dob || 'Not Provided',
@@ -155,10 +156,12 @@ router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => 
       cleanDob = `${dmyMatch[3]}-${String(dmyMatch[2]).padStart(2, '0')}-${String(dmyMatch[1]).padStart(2, '0')}`;
     }
 
+    const cleanCourse = course ? String(course).trim().replace(/\bAP\s+EAPCET\b/gi, 'EAPCET').replace(/\beapset\b/gi, 'EAPCET') : 'BiPC - NEET';
+
     const newStudent = await Students.insert({
       id: cleanId,
       name: name.trim(),
-      course: course || 'BiPC - NEET',
+      course: cleanCourse,
       year: year || '1st Year',
       campus: campus || req.user.campus || 'Day Scholar',
       dob: cleanDob || 'Not Provided',
@@ -221,6 +224,10 @@ router.put('/:id', protect, authorize('admin', 'superadmin'), async (req, res) =
       if (dmyMatch) {
         updateData.dob = `${dmyMatch[3]}-${String(dmyMatch[2]).padStart(2, '0')}-${String(dmyMatch[1]).padStart(2, '0')}`;
       }
+    }
+
+    if (updateData.course) {
+      updateData.course = String(updateData.course).trim().replace(/\bAP\s+EAPCET\b/gi, 'EAPCET').replace(/\beapset\b/gi, 'EAPCET');
     }
 
     const student = await Students.findOne({ id: studentId });

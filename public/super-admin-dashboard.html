@@ -714,7 +714,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <script src="js/api.js"></script>
 <script>
 /* ================= DATA SETUP ================= */
-const COURSE_FEES = { "MPC - JEE Advanced": 150000, "MPC - JEE Mains": 125000, "MPC - AP EAPCET": 100000, "BiPC - NEET": 150000, "BiPC - AP EAPCET": 100000 };
+const COURSE_FEES = { "MPC - JEE Advanced": 150000, "MPC - JEE Mains": 125000, "MPC - EAPCET": 100000, "MPC - AP EAPCET": 100000, "MPC - eapset": 100000, "BiPC - NEET": 150000, "BiPC - EAPCET": 100000, "BiPC - AP EAPCET": 100000, "BiPC - eapset": 100000 };
 const HOSTEL_FEE = 60000; const TRANSPORT_FEE = 15000;
 
 let allStudents = JSON.parse(localStorage.getItem("adminStudentsData") || "[]");
@@ -782,12 +782,12 @@ function deriveExamFromCourse(courseString) {
     if (v.includes("jee advanced")) return "JEE Advanced";
     if (v.includes("jee mains") || v.includes("jee main")) return "JEE Mains";
     if (v.includes("neet")) return "NEET";
-    if (v.includes("eapcet") || v.includes("eamcet")) return "AP EAPCET";
+    if (v.includes("eapcet") || v.includes("eamcet") || v.includes("eapset")) return "EAPCET";
     return "";
 }
 
 function validExamsForGroup(group) {
-    return group === "MPC" ? ["JEE Mains", "JEE Advanced", "AP EAPCET"] : ["NEET", "AP EAPCET"];
+    return group === "MPC" ? ["JEE Mains", "JEE Advanced", "EAPCET"] : ["NEET", "EAPCET"];
 }
 
 function enrichStudent(s) {
