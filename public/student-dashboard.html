@@ -303,8 +303,9 @@
         .fee-header-banner h3 { color: var(--primary-blue); font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
         .fee-header-banner p { color: var(--text-muted); font-size: 14px; margin-top: 5px; }
 
-        .fee-breakdown-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .fee-breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .fee-type-card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-top: 4px solid var(--primary-blue); text-align: center; }
+        .fee-type-card.paid { border-top-color: #10b981; }
         .fee-type-card.hostel { border-top-color: #8b5cf6; }
         .fee-type-card.transport { border-top-color: var(--warning-orange); }
         .fee-type-icon { font-size: 24px; color: var(--text-muted); margin-bottom: 10px; }
@@ -314,18 +315,25 @@
         .fee-cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .fee-term-card { background: var(--white); border-radius: 16px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid var(--border-color); transition: transform 0.3s; }
         .fee-term-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+        .fee-term-card.paid-card { border-color: #86efac; }
+        .fee-term-card.partial-card { border-color: #fcd34d; background: #fffdf5; }
         .fee-term-card.pending-card { border-color: #fca5a5; background: #fffafb; }
-        .term-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .term-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .term-title { font-size: 16px; font-weight: 700; color: var(--text-dark); }
         .status-pill { padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .status-pill.paid { background: #dcfce7; color: #166534; }
+        .status-pill.partial { background: #fef3c7; color: #b45309; }
         .status-pill.pending { background: #fee2e2; color: #991b1b; }
-        .term-amount { font-size: 28px; font-weight: 800; color: var(--primary-blue); margin-bottom: 5px; }
+        .term-amount { font-size: 26px; font-weight: 800; color: var(--primary-blue); margin-bottom: 5px; }
+        .fee-term-card.paid-card .term-amount { color: #166534; }
+        .fee-term-card.partial-card .term-amount { color: #b45309; }
         .fee-term-card.pending-card .term-amount { color: var(--danger-red); }
         .term-due-date { font-size: 13px; color: var(--text-muted); font-weight: 500; display: flex; align-items: center; gap: 5px; }
-        .action-btn { display: block; width: 100%; text-align: center; padding: 12px; margin-top: 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: 0.3s; }
+        .action-btn { display: block; width: 100%; text-align: center; padding: 12px; margin-top: 15px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none; transition: 0.3s; }
         .action-btn.pay-now { background: var(--primary-blue); color: white; }
         .action-btn.pay-now:hover { background: #072a44; }
+        .action-btn.pay-partial { background: #d97706; color: white; }
+        .action-btn.pay-partial:hover { background: #b45309; }
         .action-btn.receipt { background: #f1f5f9; color: var(--primary-blue); border: 1px solid #cbd5e1; }
         .action-btn.receipt:hover { background: #e2e8f0; }
 
@@ -632,6 +640,11 @@
                     <div class="fee-type-icon"><i class="fa-solid fa-book-open"></i></div>
                     <h4>Tuition / Coaching Fee</h4>
                     <div class="amount" id="tuitionAmountDisplay">₹0</div>
+                </div>
+                <div class="fee-type-card paid" id="paidFeeCard">
+                    <div class="fee-type-icon" style="color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
+                    <h4>Total Paid Amount</h4>
+                    <div class="amount" style="color: #10b981;" id="paidAmountDisplay">₹0</div>
                 </div>
                 <div class="fee-type-card hostel" id="hostelFeeCard">
                     <div class="fee-type-icon"><i class="fa-solid fa-bed"></i></div>
@@ -1010,7 +1023,19 @@
             let currentTransport = hasTransport ? TRANSPORT_FEE : 0;
             let totalAnnualFee = currentTuition + currentHostel + currentTransport;
 
+            const studentFeeData = allFees[student.id];
+            let totalPaid = 0;
+            if (studentFeeData) {
+                totalPaid = Number(studentFeeData.paid || 0);
+                if (studentFeeData.total && Number(studentFeeData.total) > 0) {
+                    totalAnnualFee = Number(studentFeeData.total);
+                }
+            }
+
             document.getElementById('tuitionAmountDisplay').textContent = formatCurrency(currentTuition);
+            if (document.getElementById('paidAmountDisplay')) {
+                document.getElementById('paidAmountDisplay').textContent = formatCurrency(totalPaid);
+            }
             
             if (isHostel) {
                 document.getElementById('hostelAmountDisplay').textContent = formatCurrency(currentHostel);
@@ -1026,43 +1051,70 @@
                 document.getElementById('transportFeeCard').style.display = "none"; 
             }
 
-            const termFeeAmount = totalAnnualFee / 10;
+            const termFeeAmount = Math.round(totalAnnualFee / 10);
             currentStudentFees.termFee = termFeeAmount;
             currentStudentFees.totalFee = totalAnnualFee;
-
-            const studentFeeData = allFees[student.id];
-            let totalPaid = 0;
-            if (studentFeeData) { totalPaid = Number(studentFeeData.paid); }
             
             let remainingPaid = totalPaid;
             const feeTermsContainer = document.getElementById('feeTermsContainer');
             feeTermsContainer.innerHTML = '';
 
             for (let term = 1; term <= 10; term++) {
-                const isPaid = remainingPaid >= termFeeAmount;
-                if(isPaid) remainingPaid -= termFeeAmount;
+                let termPaid = 0;
+                if (remainingPaid >= termFeeAmount) {
+                    termPaid = termFeeAmount;
+                    remainingPaid -= termFeeAmount;
+                } else if (remainingPaid > 0) {
+                    termPaid = remainingPaid;
+                    remainingPaid = 0;
+                } else {
+                    termPaid = 0;
+                }
+
+                let termDue = Math.max(0, termFeeAmount - termPaid);
                 const termName = `Term ${term}`;
 
+                let isPaid = termPaid >= termFeeAmount;
+                let isPartial = termPaid > 0 && termPaid < termFeeAmount;
+
+                let statusClass = isPaid ? 'paid' : (isPartial ? 'partial' : 'pending');
+                let statusText = isPaid ? 'Paid' : (isPartial ? 'Partially Paid' : 'Pending');
+                let cardClass = isPaid ? 'paid-card' : (isPartial ? 'partial-card' : 'pending-card');
+
                 feeTermsContainer.innerHTML += `
-                    <div class="fee-term-card ${isPaid ? '' : 'pending-card'}">
+                    <div class="fee-term-card ${cardClass}">
                         <div class="term-header">
                             <span class="term-title">${termName} Fee</span>
-                            <span class="status-pill ${isPaid ? 'paid' : 'pending'}">${isPaid ? 'Paid' : 'Pending'}</span>
+                            <span class="status-pill ${statusClass}">${statusText}</span>
                         </div>
                         <div class="term-amount">${formatCurrency(termFeeAmount)}</div>
+
+                        <!-- Due and Paid inside each term column -->
+                        <div style="display: flex; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; margin: 14px 0 10px 0; border: 1px solid var(--border-color);">
+                            <div>
+                                <span style="color: var(--text-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Paid</span>
+                                <strong style="color: ${termPaid > 0 ? '#166534' : 'var(--text-muted)'}; font-size: 15px;">${formatCurrency(termPaid)}</strong>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="color: var(--text-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Due</span>
+                                <strong style="color: ${termDue > 0 ? 'var(--danger-red)' : '#166534'}; font-size: 15px;">${formatCurrency(termDue)}</strong>
+                            </div>
+                        </div>
+
                         <div class="term-due-date">
-                            <i class="fa-regular ${isPaid ? 'fa-calendar-check' : 'fa-clock'}"></i>
-                            ${isPaid ? `Paid` : 'Payment due as per schedule'}
+                            <i class="fa-regular ${isPaid ? 'fa-calendar-check' : (isPartial ? 'fa-hourglass-half' : 'fa-clock')}"></i>
+                            ${isPaid ? 'Term Paid' : (isPartial ? `Partially Paid (${formatCurrency(termPaid)})` : 'Payment due as per schedule')}
                         </div>
                         ${isPaid
                             ? `<button class="action-btn receipt" onclick="downloadReceipt('${termName}')">Download Receipt</button>`
-                            : `<button class="action-btn pay-now" type="button" onclick="alert('Please contact the accounts office to complete this payment.')">Pay Now</button>`}
+                            : (isPartial
+                            ? `<button class="action-btn pay-partial" type="button" onclick="alert('Please contact the accounts office to clear the pending balance of ${formatCurrency(termDue)} for ${termName}.')">Pay Balance Due (${formatCurrency(termDue)})</button>`
+                            : `<button class="action-btn pay-now" type="button" onclick="alert('Please contact the accounts office to complete this payment of ${formatCurrency(termFeeAmount)}.')">Pay Now</button>`)}
                     </div>
                 `;
             }
 
-            let totalPendingFee = totalAnnualFee - totalPaid;
-            if(totalPendingFee < 0) totalPendingFee = 0;
+            let totalPendingFee = Math.max(0, totalAnnualFee - totalPaid);
             currentStudentFees.pending = totalPendingFee;
             document.getElementById('fullPendingFee').textContent = formatCurrency(totalPendingFee);
 
