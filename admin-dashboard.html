@@ -119,7 +119,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <main>
 <header class="topbar">
     <div><h2 id="pageTitle">Admin Dashboard</h2><small id="adminCampusLabel">Sri Vaatsalya Junior College</small></div>
-    <div><strong>👤 Administrator</strong></div>
+    <div><strong style="color: #164e70; font-size: 15px;">👤 <span id="adminNameDisplay">Administrator</span></strong></div>
 </header>
 
 <section id="dashboard" class="page active">
@@ -622,6 +622,28 @@ const HOSTEL_FEE = 60000;
 const TRANSPORT_FEE = 15000;
 
 let currentAdminCampus = localStorage.getItem('loggedInAdminCampus') || "All Campuses";
+
+function updateAdminHeader() {
+    let adminName = '';
+    try {
+        const uStr = localStorage.getItem('user');
+        if (uStr) {
+            const u = JSON.parse(uStr);
+            if (u && (u.name || u.username)) adminName = u.name || u.username;
+        }
+    } catch(e) {}
+
+    if (!adminName) {
+        adminName = localStorage.getItem('userName') || 
+                    localStorage.getItem('loggedInAdminName') || 
+                    localStorage.getItem('loggedInAdmin') || 
+                    'Administrator';
+    }
+
+    const el = document.getElementById('adminNameDisplay');
+    if (el) el.textContent = adminName;
+}
+updateAdminHeader();
 
 let allStudents = JSON.parse(localStorage.getItem("adminStudentsData") || "[]");
 let fees = JSON.parse(localStorage.getItem("adminFees") || "{}");
@@ -2000,6 +2022,7 @@ window.onload = async function() {
     });
 
     document.getElementById('adminCampusLabel').textContent = currentAdminCampus === "All Campuses" ? "Sri Vaatsalya Junior College" : `${currentAdminCampus} Administrator`;
+    updateAdminHeader();
 
     if(currentAdminCampus !== "All Campuses") {
         document.getElementById("campus").value = currentAdminCampus;

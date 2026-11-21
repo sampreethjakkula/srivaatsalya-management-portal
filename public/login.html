@@ -598,6 +598,8 @@ async function validateLogin(event, role) {
             } else if (role === 'admin') {
                 localStorage.setItem('loggedInAdminCampus', res.user.campus || 'All Campuses');
                 localStorage.setItem('loggedInAdmin', res.user.username);
+                localStorage.setItem('loggedInAdminName', res.user.name || res.user.username);
+                localStorage.setItem('userName', res.user.name || res.user.username);
                 window.location.href = './admin-dashboard.html';
             } else if (role === 'superadmin') {
                 localStorage.setItem('loggedInSuperAdmin', 'true');
