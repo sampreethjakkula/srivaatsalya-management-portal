@@ -93,7 +93,19 @@ app.post('/api/achievements', authProtect, authAuthorize('admin', 'superadmin'),
 app.delete('/api/achievements/:id', authProtect, authAuthorize('admin', 'superadmin'), async (req, res) => {
   try {
     const id = req.params.id;
-    await Notices.remove({ _id: id, type: 'achievement' });
+    const mongoose = require('mongoose');
+    const NoticeModel = require('./models/Notice');
+    // Try Mongoose first (production), fall back to NeDB-style remove
+    if (mongoose.connection.readyState === 1) {
+      // Use findByIdAndDelete for reliable ObjectId matching
+      const deleted = await NoticeModel.findByIdAndDelete(id);
+      if (!deleted) {
+        // Try as string match in case _id is stored differently
+        await NoticeModel.deleteOne({ _id: id, type: 'achievement' });
+      }
+    } else {
+      await Notices.remove({ _id: id });
+    }
     res.json({ success: true, message: 'Achievement deleted.' });
   } catch(e) { res.status(500).json({ success: false, message: e.message }); }
 });
