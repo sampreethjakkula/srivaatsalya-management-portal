@@ -173,16 +173,43 @@ window.SchoolAPI = {
   },
 
   async addAchievement(data) {
-    return await this.request('/api/achievements', {
-      method: 'POST',
-      body: JSON.stringify(data)
-    });
+    const role = localStorage.getItem('userRole') || 'admin';
+    await this.ensureAuth(role);
+    try {
+      return await this.request('/api/achievements', {
+        method: 'POST',
+        body: JSON.stringify(data)
+      });
+    } catch (err) {
+      if (err.message && (err.message.includes('401') || err.message.includes('token') || err.message.includes('expired'))) {
+        localStorage.removeItem('token');
+        await this.ensureAuth(role);
+        return await this.request('/api/achievements', {
+          method: 'POST',
+          body: JSON.stringify(data)
+        });
+      }
+      throw err;
+    }
   },
 
   async deleteAchievement(id) {
-    return await this.request(`/api/achievements/${encodeURIComponent(id)}`, {
-      method: 'DELETE'
-    });
+    const role = localStorage.getItem('userRole') || 'admin';
+    await this.ensureAuth(role);
+    try {
+      return await this.request(`/api/achievements/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (err) {
+      if (err.message && (err.message.includes('401') || err.message.includes('token') || err.message.includes('expired'))) {
+        localStorage.removeItem('token');
+        await this.ensureAuth(role);
+        return await this.request(`/api/achievements/${encodeURIComponent(id)}`, {
+          method: 'DELETE'
+        });
+      }
+      throw err;
+    }
   },
 
   // ================= ADMISSION =================

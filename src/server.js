@@ -92,22 +92,46 @@ app.post('/api/achievements', authProtect, authAuthorize('admin', 'superadmin'),
 // DELETE achievement — admin and superadmin only
 app.delete('/api/achievements/:id', authProtect, authAuthorize('admin', 'superadmin'), async (req, res) => {
   try {
-    const id = req.params.id;
+    const rawId = req.params.id;
+    const decodedId = decodeURIComponent(rawId).trim();
     const mongoose = require('mongoose');
     const NoticeModel = require('./models/Notice');
-    // Try Mongoose first (production), fall back to NeDB-style remove
+
+    let deleted = false;
     if (mongoose.connection.readyState === 1) {
-      // Use findByIdAndDelete for reliable ObjectId matching
-      const deleted = await NoticeModel.findByIdAndDelete(id);
+      if (mongoose.Types.ObjectId.isValid(decodedId)) {
+        deleted = await NoticeModel.findByIdAndDelete(decodedId);
+      }
       if (!deleted) {
-        // Try as string match in case _id is stored differently
-        await NoticeModel.deleteOne({ _id: id, type: 'achievement' });
+        // Fallback: match by title or content
+        deleted = await NoticeModel.findOneAndDelete({
+          $and: [
+            { type: 'achievement' },
+            {
+              $or: [
+                { title: decodedId },
+                { title: rawId }
+              ]
+            }
+          ]
+        });
       }
     } else {
-      await Notices.remove({ _id: id });
+      await Notices.remove({
+        $or: [
+          { _id: decodedId },
+          { _id: rawId },
+          { title: decodedId }
+        ]
+      });
+      deleted = true;
     }
-    res.json({ success: true, message: 'Achievement deleted.' });
-  } catch(e) { res.status(500).json({ success: false, message: e.message }); }
+
+    res.json({ success: true, message: 'Achievement deleted.', deleted: !!deleted });
+  } catch(e) {
+    console.error('Delete achievement error:', e);
+    res.status(500).json({ success: false, message: e.message });
+  }
 });
 
 // Health check endpoint for load balancers
