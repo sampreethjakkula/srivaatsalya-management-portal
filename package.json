@@ -4,9 +4,9 @@
   "description": "High-performance School Management System with Node.js and MongoDB",
   "main": "src/server.js",
   "scripts": {
-    "start": "node backend/server.js",
+    "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "seed": "node backend/scripts/seed.js"
+    "seed": "node src/scripts/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

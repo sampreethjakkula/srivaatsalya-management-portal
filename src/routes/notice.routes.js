@@ -23,23 +23,6 @@ router.get('/', async (req, res) => {
     );
 
     const notices = (rawNotices || []).map(n => {
-  return {
-    ...n,
-    desc: n.desc || n.content || '',
-    content: n.content || n.desc || '',
-    sender: n.sender,
-    senderName: n.senderName,
-    senderRole: n.senderRole,
-    originalSenderName: n.originalSenderName,
-    originalSenderRole: n.originalSenderRole,
-    forwardedBy: n.forwardedBy,
-    postedBy: n.postedBy,
-    target: n.target || n.campus || 'All Students',
-    campus: n.campus || n.target || 'All Campuses',
-    priority: n.priority || 'Normal',
-    date: n.date || (n.createdAt ? new Date(n.createdAt).toLocaleDateString() : new Date().toLocaleDateString())
-  };
-});
       let finalSender = n.sender;
 
       // 1. If originated from Administrator, posted by SUPERADMIN, or forwarded from an Administrator directive
@@ -57,6 +40,11 @@ router.get('/', async (req, res) => {
         desc: n.desc || n.content || '',
         content: n.content || n.desc || '',
         sender: finalSender,
+        senderName: n.senderName || finalSender,
+        senderRole: n.senderRole || (finalSender === 'Administrator' ? 'superadmin' : 'admin'),
+        originalSenderName: n.originalSenderName,
+        originalSenderRole: n.originalSenderRole,
+        forwardedBy: n.forwardedBy,
         postedBy: n.postedBy || finalSender,
         target: n.target || n.campus || 'All Students',
         campus: n.campus || n.target || 'All Campuses',
@@ -95,38 +83,9 @@ router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => 
       sender: senderRole === 'superadmin' ? 'Administrator' : 'Campus Admin',
       senderName,
       senderRole,
-      date: new Date().toISOString().split('T')[0]
-    });
-    res.status(201).json({ success: true, message: 'Notice posted successfully.', notice });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-});
-  try {
-    const { title, content, desc, type, campus, target, priority, sender } = req.body;
-    const bodyText = (content || desc || '').trim();
-    if (!title || !bodyText) {
-      return res.status(400).json({ success: false, message: 'Title and content/description are required.' });
-    }
-
-    const noticeSender = sender || (req.user.role === 'superadmin' ? 'Administrator' : 'Campus Admin');
-    const noticeCampus = campus || req.user.campus || 'All Campuses';
-    const noticeTarget = target || noticeCampus || 'All Students';
-
-    const notice = await Notices.insert({
-      title: title.trim(),
-      content: bodyText,
-      desc: bodyText,
-      type: type || 'global',
-      campus: noticeCampus,
-      target: noticeTarget,
-      priority: priority || 'Normal',
-      postedBy: req.user.username,
-      sender: noticeSender,
       date: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString()
     });
-
     res.status(201).json({ success: true, message: 'Notice posted successfully.', notice });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
