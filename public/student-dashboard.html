@@ -306,6 +306,7 @@
         .fee-breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 30px; }
         .fee-type-card { background: var(--white); border-radius: 12px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); border-top: 4px solid var(--primary-blue); text-align: center; }
         .fee-type-card.paid { border-top-color: #10b981; }
+        .fee-type-card.due { border-top-color: var(--danger-red); }
         .fee-type-card.hostel { border-top-color: #8b5cf6; }
         .fee-type-card.transport { border-top-color: var(--warning-orange); }
         .fee-type-icon { font-size: 24px; color: var(--text-muted); margin-bottom: 10px; }
@@ -637,14 +638,22 @@
 
             <div class="fee-breakdown-grid">
                 <div class="fee-type-card">
-                    <div class="fee-type-icon"><i class="fa-solid fa-book-open"></i></div>
-                    <h4>Tuition / Coaching Fee</h4>
+                    <div class="fee-type-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+                    <h4>Total Annual Fee</h4>
                     <div class="amount" id="tuitionAmountDisplay">₹0</div>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">(Divided into 10 Equal Terms)</p>
                 </div>
                 <div class="fee-type-card paid" id="paidFeeCard">
                     <div class="fee-type-icon" style="color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
                     <h4>Total Paid Amount</h4>
                     <div class="amount" style="color: #10b981;" id="paidAmountDisplay">₹0</div>
+                    <p style="font-size: 11px; color: #166534; margin-top: 4px; font-weight: 600;" id="paidCountHint">Payment Recorded</p>
+                </div>
+                <div class="fee-type-card due" id="dueFeeCard">
+                    <div class="fee-type-icon" style="color: var(--danger-red);"><i class="fa-solid fa-circle-exclamation"></i></div>
+                    <h4>Total Due Balance</h4>
+                    <div class="amount" style="color: var(--danger-red);" id="dueAmountCardDisplay">₹0</div>
+                    <p style="font-size: 11px; color: var(--danger-red); margin-top: 4px; font-weight: 600;" id="dueCountHint">Pending Clearance</p>
                 </div>
                 <div class="fee-type-card hostel" id="hostelFeeCard">
                     <div class="fee-type-icon"><i class="fa-solid fa-bed"></i></div>
@@ -656,6 +665,16 @@
                     <h4>Transport Fee</h4>
                     <div class="amount" id="transportAmountDisplay">₹0</div>
                 </div>
+            </div>
+
+            <!-- Schedule Header showing term division -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 15px 0; flex-wrap: wrap; gap: 10px;">
+                <h3 style="font-size: 18px; color: var(--primary-blue); font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-calendar-days"></i> 10-Term Fee Breakdown
+                </h3>
+                <span style="font-size: 13px; color: var(--text-muted); font-weight: 600; background: #f1f5f9; padding: 6px 14px; border-radius: 20px;">
+                    Each Term = Total Fee ÷ 10: <strong id="termBaseRate" style="color: var(--primary-blue);">₹0</strong>
+                </span>
             </div>
 
             <!-- 10 Terms Grid -->
@@ -1032,9 +1051,17 @@
                 }
             }
 
-            document.getElementById('tuitionAmountDisplay').textContent = formatCurrency(currentTuition);
+            let totalPendingFee = Math.max(0, totalAnnualFee - totalPaid);
+
+            document.getElementById('tuitionAmountDisplay').textContent = formatCurrency(totalAnnualFee);
             if (document.getElementById('paidAmountDisplay')) {
                 document.getElementById('paidAmountDisplay').textContent = formatCurrency(totalPaid);
+            }
+            if (document.getElementById('dueAmountCardDisplay')) {
+                document.getElementById('dueAmountCardDisplay').textContent = formatCurrency(totalPendingFee);
+            }
+            if (document.getElementById('termBaseRate')) {
+                document.getElementById('termBaseRate').textContent = formatCurrency(Math.round(totalAnnualFee / 10));
             }
             
             if (isHostel) {
@@ -1054,16 +1081,25 @@
             const termFeeAmount = Math.round(totalAnnualFee / 10);
             currentStudentFees.termFee = termFeeAmount;
             currentStudentFees.totalFee = totalAnnualFee;
+            currentStudentFees.pending = totalPendingFee;
             
             let remainingPaid = totalPaid;
             const feeTermsContainer = document.getElementById('feeTermsContainer');
             feeTermsContainer.innerHTML = '';
 
+            let clearedTermsCount = 0;
+            let pendingTermsCount = 0;
+
             for (let term = 1; term <= 10; term++) {
+                // Ensure all 10 terms divide the total amount exactly
+                let thisTermTarget = (term === 10) 
+                    ? (totalAnnualFee - (termFeeAmount * 9)) 
+                    : termFeeAmount;
+
                 let termPaid = 0;
-                if (remainingPaid >= termFeeAmount) {
-                    termPaid = termFeeAmount;
-                    remainingPaid -= termFeeAmount;
+                if (remainingPaid >= thisTermTarget) {
+                    termPaid = thisTermTarget;
+                    remainingPaid -= thisTermTarget;
                 } else if (remainingPaid > 0) {
                     termPaid = remainingPaid;
                     remainingPaid = 0;
@@ -1071,11 +1107,14 @@
                     termPaid = 0;
                 }
 
-                let termDue = Math.max(0, termFeeAmount - termPaid);
+                let termDue = Math.max(0, thisTermTarget - termPaid);
                 const termName = `Term ${term}`;
 
-                let isPaid = termPaid >= termFeeAmount;
-                let isPartial = termPaid > 0 && termPaid < termFeeAmount;
+                let isPaid = termPaid >= thisTermTarget;
+                let isPartial = termPaid > 0 && termPaid < thisTermTarget;
+
+                if (isPaid) clearedTermsCount++;
+                else pendingTermsCount++;
 
                 let statusClass = isPaid ? 'paid' : (isPartial ? 'partial' : 'pending');
                 let statusText = isPaid ? 'Paid' : (isPartial ? 'Partially Paid' : 'Pending');
@@ -1087,7 +1126,7 @@
                             <span class="term-title">${termName} Fee</span>
                             <span class="status-pill ${statusClass}">${statusText}</span>
                         </div>
-                        <div class="term-amount">${formatCurrency(termFeeAmount)}</div>
+                        <div class="term-amount">${formatCurrency(thisTermTarget)}</div>
 
                         <!-- Due and Paid inside each term column -->
                         <div style="display: flex; justify-content: space-between; background: #f8fafc; padding: 10px 14px; border-radius: 8px; margin: 14px 0 10px 0; border: 1px solid var(--border-color);">
@@ -1109,13 +1148,18 @@
                             ? `<button class="action-btn receipt" onclick="downloadReceipt('${termName}')">Download Receipt</button>`
                             : (isPartial
                             ? `<button class="action-btn pay-partial" type="button" onclick="alert('Please contact the accounts office to clear the pending balance of ${formatCurrency(termDue)} for ${termName}.')">Pay Balance Due (${formatCurrency(termDue)})</button>`
-                            : `<button class="action-btn pay-now" type="button" onclick="alert('Please contact the accounts office to complete this payment of ${formatCurrency(termFeeAmount)}.')">Pay Now</button>`)}
+                            : `<button class="action-btn pay-now" type="button" onclick="alert('Please contact the accounts office to complete this payment of ${formatCurrency(thisTermTarget)}.')">Pay Now</button>`)}
                     </div>
                 `;
             }
 
-            let totalPendingFee = Math.max(0, totalAnnualFee - totalPaid);
-            currentStudentFees.pending = totalPendingFee;
+            if (document.getElementById('paidCountHint')) {
+                document.getElementById('paidCountHint').textContent = clearedTermsCount + " of 10 Terms Cleared";
+            }
+            if (document.getElementById('dueCountHint')) {
+                document.getElementById('dueCountHint').textContent = pendingTermsCount + " of 10 Terms Due";
+            }
+
             document.getElementById('fullPendingFee').textContent = formatCurrency(totalPendingFee);
 
             // --- RESULTS TAB ---
