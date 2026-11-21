@@ -179,6 +179,12 @@ window.SchoolAPI = {
     });
   },
 
+  async deleteAchievement(id) {
+    return await this.request(`/api/achievements/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    });
+  },
+
   // ================= ADMISSION =================
   async submitAdmission(data) {
     return await this.request('/api/admissions', {

@@ -1188,8 +1188,22 @@ function renderResults() {
     document.getElementById("resultTable").innerHTML = results.map((r) => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.exam}</td><td>${r.score}</td></tr>`).join("");
 }
 
+async function deleteAchievement(index) {
+    if (!confirm("Are you sure you want to delete this achievement?")) return;
+    const ach = achievements[index];
+    if (ach && ach.id && window.SchoolAPI) {
+        try {
+            await window.SchoolAPI.deleteAchievement(ach.id);
+        } catch (e) {
+            console.error("Achievement delete error:", e);
+        }
+    }
+    achievements.splice(index, 1);
+    persist(); renderAchievements();
+}
+
 function renderAchievements() {
-    document.getElementById("achievementList").innerHTML = achievements.map((a) => `<div class="card" style="border-left: 4px solid #e9bd45; margin-bottom: 10px;"><h3>🏆 ${a.title}</h3><p>${a.description}</p></div>`).join("");
+    document.getElementById("achievementList").innerHTML = achievements.map((a, i) => `<div class="card" style="border-left: 4px solid #e9bd45; margin-bottom: 10px;"><h3>🏆 ${a.title}</h3><p>${a.description}</p><button class="light" style="color:#c0392b;border-color:#c0392b;" onclick="deleteAchievement(${i})">🗑 Delete</button></div>`).join("");
 }
 
 function renderDashboard() {

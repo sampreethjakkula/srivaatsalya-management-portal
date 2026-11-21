@@ -82,9 +82,19 @@ app.post('/api/achievements', authProtect, authAuthorize('admin', 'superadmin'),
     const ach = await Notices.insert({
       title, content: description, desc: description, type: 'achievement',
       postedBy: req.user.username, sender: req.user.name || req.user.username,
+      senderName: req.user.name || req.user.username,
+      senderRole: req.user.role || 'admin',
       date: new Date().toISOString().split('T')[0], createdAt: new Date().toISOString()
     });
     res.status(201).json({ success: true, achievement: { id: ach._id, title: ach.title, description: ach.desc } });
+  } catch(e) { res.status(500).json({ success: false, message: e.message }); }
+});
+// DELETE achievement — admin and superadmin only
+app.delete('/api/achievements/:id', authProtect, authAuthorize('admin', 'superadmin'), async (req, res) => {
+  try {
+    const id = req.params.id;
+    await Notices.remove({ _id: id, type: 'achievement' });
+    res.json({ success: true, message: 'Achievement deleted.' });
   } catch(e) { res.status(500).json({ success: false, message: e.message }); }
 });
 
