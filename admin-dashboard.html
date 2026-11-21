@@ -118,8 +118,11 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 <main>
 <header class="topbar">
-    <div><h2 id="pageTitle">Admin Dashboard</h2><small id="adminCampusLabel">Sri Vaatsalya Junior College</small></div>
-    <div><strong style="color: #164e70; font-size: 15px;">👤 <span id="adminNameDisplay">Administrator</span></strong></div>
+    <div><h2 id="pageTitle">Admin Dashboard</h2><small id="adminCampusLabel" style="font-size: 13px;">Sri Vaatsalya Junior College</small></div>
+    <div style="display: flex; align-items: center; gap: 10px; background: #f0f7fc; padding: 10px 18px; border-radius: 30px; border: 1px solid #d4e7f5;">
+        <span style="font-size: 22px;">👤</span>
+        <strong style="color: #164e70; font-size: 19px; font-weight: 800; letter-spacing: 0.3px;" id="adminNameDisplay">Administrator</strong>
+    </div>
 </header>
 
 <section id="dashboard" class="page active">
@@ -1366,7 +1369,7 @@ function deleteStudent(id) {
 function renderStudents() {
     let q = (document.getElementById("search").value || "").toLowerCase();
     let myStudents = getMyStudents();
-    document.getElementById("studentTable").innerHTML = myStudents.filter(s => (s.id + " " + s.name).toLowerCase().includes(q)).map(s => `<tr><td>${s.id}</td><td>${s.name}</td><td>${(s.course||"").replace(/\bAP\s+EAPCET\b/gi,"EAPCET").replace(/\beapset\b/gi,"EAPCET")}</td><td>${s.year}</td><td>${s.campus}</td><td><strong>${s.att}%</strong></td>
+    document.getElementById("studentTable").innerHTML = myStudents.filter(s => (s.id + " " + s.name).toLowerCase().includes(q)).map(s => `<tr><td>${s.id}</td><td><strong style="font-size: 15px; color: #164e70;">${s.name}</strong></td><td>${(s.course||"").replace(/\bAP\s+EAPCET\b/gi,"EAPCET").replace(/\beapset\b/gi,"EAPCET")}</td><td>${s.year}</td><td>${s.campus}</td><td><strong>${s.att}%</strong></td>
     <td><button class="light" onclick="editStudent('${s.id}')">Edit</button></td></tr>`).join("");
 }
 
@@ -1985,7 +1988,7 @@ function renderDashboard() {
     document.getElementById("totalCollection").textContent = money(collection);
     document.getElementById("pendingFees").textContent = money(pending);
     document.getElementById("averageAttendance").textContent = avgAtt + "%";
-    document.getElementById("recentStudents").innerHTML = myStudents.slice(-5).reverse().map(s => `<tr><td>${s.id}</td><td>${s.name}</td><td>${(s.course||"").replace(/\bAP\s+EAPCET\b/gi,"EAPCET").replace(/\beapset\b/gi,"EAPCET")}</td><td>${s.year}</td></tr>`).join("");
+    document.getElementById("recentStudents").innerHTML = myStudents.slice(-5).reverse().map(s => `<tr><td>${s.id}</td><td><strong style="font-size: 15px; color: #164e70;">${s.name}</strong></td><td>${(s.course||"").replace(/\bAP\s+EAPCET\b/gi,"EAPCET").replace(/\beapset\b/gi,"EAPCET")}</td><td>${s.year}</td></tr>`).join("");
 }
 
 window.onload = async function() {
