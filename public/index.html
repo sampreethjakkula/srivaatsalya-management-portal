@@ -288,6 +288,7 @@ header {
     overflow: hidden;
     display: flex;
     flex-direction: row;
+    align-items: stretch;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     padding: 30px;
     gap: 30px;
@@ -297,16 +298,16 @@ header {
     flex: 1.2;
     min-width: 300px;
     display: flex;
-    align-items: center;
+    align-items: stretch;
     justify-content: center;
-    padding: 10px 0;
+    padding: 0;
 }
 
 .about-image-wrapper img {
     width: 100%;
-    height: auto;
-    max-height: 450px;
-    object-fit: contain;
+    height: 100%;
+    min-height: 100%;
+    object-fit: cover;
     border-radius: 5px;
     display: block;
     border: 2px solid rgba(255,255,255,0.2);
@@ -318,8 +319,8 @@ header {
     color: white;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    padding: 10px 0;
+    justify-content: space-between;
+    padding: 0;
 }
 
 .about-content p {
@@ -908,7 +909,9 @@ footer {
     }
 
     .about-image-wrapper {
-        padding: 20px 0;
+        padding: 0;
+        min-height: 280px;
+        height: 280px;
     }
 }
 
@@ -1004,7 +1007,7 @@ footer {
 
         <li><a href="results.html">Results</a></li>
         <li><a href="programs.html">Programs</a></li>
-        <li><a href="campus.html">Hostel & Campus</a></li>
+        <li><a href="campus.html#hostels">Hostel & Classrooms</a></li>
 
         <li>
             <a href="login.html" style="color:var(--accent-gold);font-weight:800;">

@@ -126,10 +126,12 @@ router.post('/payment', protect, authorize('admin', 'superadmin'), async (req, r
     if (addPayment && Number(addPayment) > 0) {
       newPaid = current.paid + Number(addPayment);
       newHistory.push({
-        amount:    Number(addPayment),
-        date:      new Date().toISOString().split('T')[0],
-        receiptNo: receiptNo || `REC-${Date.now().toString().slice(-6)}`,
-        notes:     notes || 'Fee Installment'
+        amount:      Number(addPayment),
+        date:        new Date().toISOString().split('T')[0],
+        receiptNo:   receiptNo || `REC-${Date.now().toString().slice(-6)}`,
+        notes:       notes || 'Fee Installment',
+        collectedBy: req.user.username || req.user.name || 'Admin',
+        adminCampus: req.user.campus || ''
       });
     } else if (paid !== undefined) {
       newPaid = Number(paid);
@@ -156,6 +158,63 @@ router.post('/payment', protect, authorize('admin', 'superadmin'), async (req, r
       message: 'Fee updated successfully.',
       fee: normalizeFee(updatedFee)
     });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
+// @route   GET /api/fees/admin-collections
+// Returns fee collection breakdown by admin, scoped by campus
+router.get('/admin-collections', protect, authorize('admin', 'superadmin'), async (req, res) => {
+  try {
+    const { campus } = req.query;
+
+    // Build allowed student set based on campus access
+    let allowedStudentIds = null;
+    if (req.user.role === 'admin') {
+      const campusCondition = buildCampusCondition(req.user);
+      const campusStudents = await Students.find(campusCondition);
+      allowedStudentIds = new Set(campusStudents.map(s => s.id));
+    } else if (campus && campus !== 'All Campuses' && campus !== 'All') {
+      const campusCondition = buildCampusCondition(req.user, campus);
+      const campusStudents = await Students.find(campusCondition);
+      allowedStudentIds = new Set(campusStudents.map(s => s.id));
+    }
+
+    const allFees = await Fees.find({});
+    const adminMap = {};
+
+    for (const fee of allFees) {
+      if (allowedStudentIds && !allowedStudentIds.has(fee.studentId)) continue;
+      const history = fee.paymentHistory || fee.history || [];
+      for (const payment of history) {
+        const collector = payment.collectedBy || 'Unknown Admin';
+        const adminCampus = payment.adminCampus || '';
+        if (!adminMap[collector]) {
+          adminMap[collector] = {
+            adminName:    collector,
+            adminCampus:  adminCampus,
+            transactions: 0,
+            totalAmount:  0,
+            payments:     []
+          };
+        }
+        const payDate = payment.date ? new Date(payment.date).toLocaleDateString('en-IN') : 'N/A';
+        // Find student name
+        const student = await Students.findOne({ id: fee.studentId });
+        adminMap[collector].transactions++;
+        adminMap[collector].totalAmount += Number(payment.amount) || 0;
+        adminMap[collector].payments.push({
+          date:        payDate,
+          studentId:   fee.studentId,
+          studentName: student ? student.name : fee.studentId,
+          amount:      Number(payment.amount) || 0
+        });
+      }
+    }
+
+    const list = Object.values(adminMap).sort((a, b) => b.totalAmount - a.totalAmount);
+    res.json({ success: true, admins: list });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }

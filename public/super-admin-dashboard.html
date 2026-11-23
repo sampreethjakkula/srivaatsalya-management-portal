@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -187,16 +187,16 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <aside class="sidebar">
     <div class="logo"><span>SRI VAATSALYA</span> ADMINISTRATOR</div>
     <p>MAIN MENU</p>
-    <button class="active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
-    <button onclick="showPage('notices',this)">📢 Notice Board</button>
-    <button onclick="showPage('manageAdmins',this)">🛡️ Manage Admins</button>
-    <button onclick="showPage('adminPerformance',this); renderAdminPerformance();">👑 Admin Performance</button>
-    <button onclick="showPage('targets',this)">🎯 Monthly Targets</button>
-    <button onclick="showPage('students',this)">👨‍🎓 Students</button>
-    <button onclick="showPage('fees',this)">💰 Fees</button>
-    <button onclick="showPage('results',this)">📚 Exam Results</button>
-    <button onclick="showPage('achievements',this)">🏆 Achievements</button>
-    <button class="logout" onclick="window.location.href='login.html'">↪ Logout</button>
+    <button class="active" onclick="showPage('dashboard',this)">ðŸ“Š Dashboard</button>
+    <button onclick="showPage('notices',this)">ðŸ“¢ Notice Board</button>
+    <button onclick="showPage('manageAdmins',this)">ðŸ›¡ï¸ Manage Admins</button>
+    <button onclick="showPage('adminPerformance',this); renderAdminPerformance();">ðŸ‘‘ Admin Performance</button>
+    <button onclick="showPage('targets',this)">ðŸŽ¯ Monthly Targets</button>
+    <button onclick="showPage('students',this)">ðŸ‘¨â€ðŸŽ“ Students</button>
+    <button onclick="showPage('fees',this)">ðŸ’° Fees</button>
+    <button onclick="showPage('results',this)">ðŸ“š Exam Results</button>
+    <button onclick="showPage('achievements',this)">ðŸ† Achievements</button>
+    <button class="logout" onclick="window.location.href='login.html'">â†ª Logout</button>
 </aside>
 
 <main>
@@ -207,7 +207,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
     </div>
     <div class="profile" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
         <div style="display:flex; align-items:center; gap:8px; background:#f0f7fc; padding:5px 12px; border-radius:8px; border:1.5px solid #bae0f7;">
-            <span style="font-size:18px;">🏫</span>
+            <span style="font-size:18px;">ðŸ«</span>
             <label for="globalCampusFilter" style="margin:0; font-size:12px; font-weight:700; color:#0d4e78; text-transform:uppercase; letter-spacing:0.5px;">Campus:</label>
             <select id="globalCampusFilter" onchange="onGlobalCampusFilterChange(this.value)" style="margin:0; padding: 7px 12px; min-width: 260px; font-weight: 700; font-size: 13px; border-radius: 6px; border: 1.5px solid #0d4e78; color: #0d4e78; background: #fff; cursor: pointer;">
                 <option value="All Campuses">All Campuses</option>
@@ -216,17 +216,17 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <option value="Sri Virinchi Boys Hostel">Sri Virinchi Boys Hostel</option>
             </select>
         </div>
-        <span style="display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:#164e70;"><span style="font-size:22px;">👤</span> Administrator</span>
+        <span style="display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:#164e70;"><span style="font-size:22px;">ðŸ‘¤</span> Administrator</span>
     </div>
 </header>
 
 <!-- ==================== DASHBOARD ==================== -->
 <section id="dashboard" class="page active">
     <div class="cards">
-        <div class="stat"><div class="icon">👨‍🎓</div><p>Total Students</p><h2 id="totalStudents">0</h2></div>
-        <div class="stat"><div class="icon">💰</div><p>Total Fee Collection</p><h2 id="totalCollection">₹0</h2></div>
-        <div class="stat"><div class="icon">⏳</div><p>Pending Fees</p><h2 id="pendingFees">₹0</h2></div>
-        <div class="stat"><div class="icon">📅</div><p>Average Attendance</p><h2 id="averageAttendance">0%</h2></div>
+        <div class="stat"><div class="icon">ðŸ‘¨â€ðŸŽ“</div><p>Total Students</p><h2 id="totalStudents">0</h2></div>
+        <div class="stat"><div class="icon">ðŸ’°</div><p>Total Fee Collection</p><h2 id="totalCollection">â‚¹0</h2></div>
+        <div class="stat"><div class="icon">â³</div><p>Pending Fees</p><h2 id="pendingFees">â‚¹0</h2></div>
+        <div class="stat"><div class="icon">ðŸ“…</div><p>Average Attendance</p><h2 id="averageAttendance">0%</h2></div>
     </div>
     <div class="card">
         <h3>Welcome, Administrator</h3>
@@ -246,7 +246,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <!-- ==================== MANAGE ADMINS ==================== -->
 <section id="manageAdmins" class="page">
     <div class="card" style="border-left: 5px solid #0d4e78;">
-        <h3 style="color: #0d4e78;">🛡️ Create New Admin Account</h3>
+        <h3 style="color: #0d4e78;">ðŸ›¡ï¸ Create New Admin Account</h3>
         <p style="font-size: 13px; color: #555; margin-bottom: 12px;">Regular administrators must always be assigned to exactly one specific campus. "All Campuses" access is reserved exclusively for the Super Administrator.</p>
         <div class="formgrid">
             <div><label>Admin Username <span style="color:#dc2626;">*</span></label><input type="text" id="newAdminUser" placeholder="e.g. virinchi_admin"></div>
@@ -270,7 +270,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
             <table>
                 <thead><tr><th>Username</th><th>Campus</th><th>Role</th><th>Actions</th></tr></thead>
                 <tbody id="adminAccountsTable">
-                    <tr><td>administrator</td><td>All Campuses</td><td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Administrator</span></td><td>🔒 Protected</td></tr>
+                    <tr><td>administrator</td><td>All Campuses</td><td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Administrator</span></td><td>ðŸ”’ Protected</td></tr>
                     <tr><td>admin</td><td>All Campuses</td><td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Admin</span></td><td><button class="red" style="padding: 5px 10px; font-size: 12px;">Delete</button></td></tr>
                 </tbody>
             </table>
@@ -281,7 +281,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <!-- ==================== NOTICE BOARD ==================== -->
 <section id="notices" class="page">
     <div class="card" style="border-left: 5px solid #0d4e78;">
-        <h3>📢 Post Global Notice / Directive</h3>
+        <h3>ðŸ“¢ Post Global Notice / Directive</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#31536b;">Send announcements to Campus Admins or directly to Students globally.</p>
         <label>Notice Title</label>
         <input id="superNoticeTitle" placeholder="e.g. System Maintenance Tonight">
@@ -319,9 +319,9 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <label>Campus</label>
                 <select id="tfCampus" onchange="updateCoachingDropdown(); calculateTargets();">
                     <option value="All Campuses">All Campuses</option>
-                    <option value="Sri Vaibhav Campus – Day Scholar">Sri Vaibhav Campus – Day Scholar</option>
-                    <option value="Sri Vaarahi Bhavan – Girls Campus & Hostel">Sri Vaarahi Bhavan – Girls Campus & Hostel</option>
-                    <option value="Sri Virinchi Bhavan – Boys Campus & Hostel">Sri Virinchi Bhavan – Boys Campus & Hostel</option>
+                    <option value="Sri Vaibhav Campus â€“ Day Scholar">Sri Vaibhav Campus â€“ Day Scholar</option>
+                    <option value="Sri Vaarahi Bhavan â€“ Girls Campus & Hostel">Sri Vaarahi Bhavan â€“ Girls Campus & Hostel</option>
+                    <option value="Sri Virinchi Bhavan â€“ Boys Campus & Hostel">Sri Virinchi Bhavan â€“ Boys Campus & Hostel</option>
                 </select>
             </div>
             <div>
@@ -342,19 +342,19 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
         <div class="target-grid">
             <div class="target-card"><h4>Total Students</h4><h2 id="tgtTotalStudents">0</h2></div>
-            <div class="target-card gold"><h4>Expected Collection</h4><h2 id="tgtExpected">₹0</h2></div>
-            <div class="target-card green"><h4>Collected Amount</h4><h2 id="tgtCollected">₹0</h2></div>
-            <div class="target-card red"><h4>Pending Collection</h4><h2 id="tgtPending">₹0</h2></div>
+            <div class="target-card gold"><h4>Expected Collection</h4><h2 id="tgtExpected">â‚¹0</h2></div>
+            <div class="target-card green"><h4>Collected Amount</h4><h2 id="tgtCollected">â‚¹0</h2></div>
+            <div class="target-card red"><h4>Pending Collection</h4><h2 id="tgtPending">â‚¹0</h2></div>
         </div>
-        <div class="card" style="box-shadow: none; border: 1px solid #e2e8f0; margin-top: 20px;">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                <h3 style="margin:0;">Collection Progress for <span id="tgtMonthLabel">Month</span></h3>
+        <div class="card" style="box-shadow: none; border: 1px solid #e2e8f0; margin-top: 20px; cursor:pointer;" onclick="openAdminCollectionsModal()" title="Click to view collection breakdown by admin">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items:center;">
+                <h3 style="margin:0;">Collection Progress <span style="font-size:12px;color:#0369a1;font-weight:500;">(Click for details by admin)</span></h3>
                 <h3 style="margin:0; color: #169b6b;" id="tgtPercentage">0%</h3>
             </div>
             <div class="progress-container"><div class="progress-fill" id="tgtProgressBar"></div></div>
             <div class="progress-labels">
-                <span>Target: <strong id="tgtGoalLabel">₹0</strong></span>
-                <span>Remaining: <strong id="tgtRemainingLabel">₹0</strong></span>
+                <span>Target: <strong id="tgtGoalLabel">â‚¹0</strong></span>
+                <span>Remaining: <strong id="tgtRemainingLabel">â‚¹0</strong></span>
             </div>
         </div>
     </div>
@@ -366,26 +366,26 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h3 style="margin:0;">Campus Performance Overview</h3>
-                <button class="light" onclick="renderAdminPerformance()">🔄 Refresh Data</button>
+                <button class="light" onclick="renderAdminPerformance()">ðŸ”„ Refresh Data</button>
             </div>
             <div class="cards" style="margin-bottom: 30px;">
-                <div class="stat"><div class="icon">🏫</div><p>Total Campuses</p><h2>3</h2></div>
-                <div class="stat"><div class="icon">👤</div><p>Total Administrators</p><h2 id="perfTotalAdmins">0</h2></div>
-                <div class="stat"><div class="icon">💰</div><p>Total Collection</p><h2 id="perfTotalCollection">₹0</h2></div>
-                <div class="stat"><div class="icon">👨‍🎓</div><p>Total Students</p><h2 id="perfTotalStudents">0</h2></div>
+                <div class="stat"><div class="icon">ðŸ«</div><p>Total Campuses</p><h2>3</h2></div>
+                <div class="stat"><div class="icon">ðŸ‘¤</div><p>Total Administrators</p><h2 id="perfTotalAdmins">0</h2></div>
+                <div class="stat"><div class="icon">ðŸ’°</div><p>Total Collection</p><h2 id="perfTotalCollection">â‚¹0</h2></div>
+                <div class="stat"><div class="icon">ðŸ‘¨â€ðŸŽ“</div><p>Total Students</p><h2 id="perfTotalStudents">0</h2></div>
             </div>
             <div class="perf-campus-grid">
-                <div class="perf-campus-card" onclick="openCampusAdmins('Sri Vaibhav Campus – Day Scholar')">
-                    <div style="font-size: 40px; margin-bottom: 15px;">🏫</div><h3>Sri Vaibhav Campus</h3><p>Day Scholar</p>
-                    <div style="margin-top: 15px; font-size: 13px; color: #0d4e78; font-weight: bold;">Click to view Administrators →</div>
+                <div class="perf-campus-card" onclick="openCampusAdmins('Sri Vaibhav Campus â€“ Day Scholar')">
+                    <div style="font-size: 40px; margin-bottom: 15px;">ðŸ«</div><h3>Sri Vaibhav Campus</h3><p>Day Scholar</p>
+                    <div style="margin-top: 15px; font-size: 13px; color: #0d4e78; font-weight: bold;">Click to view Administrators â†’</div>
                 </div>
-                <div class="perf-campus-card" onclick="openCampusAdmins('Sri Vaarahi Bhavan – Girls Campus & Hostel')">
-                    <div style="font-size: 40px; margin-bottom: 15px;">🏫</div><h3>Sri Vaarahi Bhavan</h3><p>Girls Campus & Hostel</p>
-                    <div style="margin-top: 15px; font-size: 13px; color: #0d4e78; font-weight: bold;">Click to view Administrators →</div>
+                <div class="perf-campus-card" onclick="openCampusAdmins('Sri Vaarahi Bhavan â€“ Girls Campus & Hostel')">
+                    <div style="font-size: 40px; margin-bottom: 15px;">ðŸ«</div><h3>Sri Vaarahi Bhavan</h3><p>Girls Campus & Hostel</p>
+                    <div style="margin-top: 15px; font-size: 13px; color: #0d4e78; font-weight: bold;">Click to view Administrators â†’</div>
                 </div>
-                <div class="perf-campus-card" onclick="openCampusAdmins('Sri Virinchi Bhavan – Boys Campus & Hostel')">
-                    <div style="font-size: 40px; margin-bottom: 15px;">🏫</div><h3>Sri Virinchi Bhavan</h3><p>Boys Campus & Hostel</p>
-                    <div style="margin-top: 15px; font-size: 13px; color: #0d4e78; font-weight: bold;">Click to view Administrators →</div>
+                <div class="perf-campus-card" onclick="openCampusAdmins('Sri Virinchi Bhavan â€“ Boys Campus & Hostel')">
+                    <div style="font-size: 40px; margin-bottom: 15px;">ðŸ«</div><h3>Sri Virinchi Bhavan</h3><p>Boys Campus & Hostel</p>
+                    <div style="margin-top: 15px; font-size: 13px; color: #0d4e78; font-weight: bold;">Click to view Administrators â†’</div>
                 </div>
             </div>
         </div>
@@ -394,7 +394,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <button class="light" onclick="showPerfLevel(1)" style="margin-bottom: 10px;">← Back to Campuses</button>
+                    <button class="light" onclick="showPerfLevel(1)" style="margin-bottom: 10px;">â† Back to Campuses</button>
                     <h3 style="margin:0;" id="perfSelectedCampusTitle">Campus Name</h3>
                 </div>
                 <div class="target-filters" style="margin:0; padding: 15px; flex-wrap: wrap; background: #f8fafc; border-radius: 8px;">
@@ -408,7 +408,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
     </div>
     <div id="perfLevel3" style="display: none;">
-        <div style="margin-bottom: 20px;"><button class="light" onclick="showPerfLevel(2)">← Back to Administrators</button></div>
+        <div style="margin-bottom: 20px;"><button class="light" onclick="showPerfLevel(2)">â† Back to Administrators</button></div>
         <div class="perf-detail-header">
             <div class="perf-detail-avatar" id="detailAvatar">A</div>
             <div class="perf-detail-info">
@@ -425,8 +425,8 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
         <div class="target-grid">
             <div class="target-card"><h4>Assigned Students</h4><h2 id="detailTotalStudents">0</h2></div>
-            <div class="target-card gold"><h4>Total Amount Collected</h4><h2 id="detailCollected">₹0</h2></div>
-            <div class="target-card red"><h4>Pending Amount</h4><h2 id="detailPending">₹0</h2></div>
+            <div class="target-card gold"><h4>Total Amount Collected</h4><h2 id="detailCollected">â‚¹0</h2></div>
+            <div class="target-card red"><h4>Pending Amount</h4><h2 id="detailPending">â‚¹0</h2></div>
             <div class="target-card green"><h4>Collection %</h4><h2 id="detailPercentage">0%</h2></div>
         </div>
         <div class="card">
@@ -436,7 +436,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <button class="primary" onclick="updateMonthlyPerformance()">Update</button>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div><p style="font-size: 13px; color: #64748b;">Amount Collected This Month</p><h3 id="detailMonthlyCollected" style="color: #169b6b;">₹0</h3></div>
+                <div><p style="font-size: 13px; color: #64748b;">Amount Collected This Month</p><h3 id="detailMonthlyCollected" style="color: #169b6b;">â‚¹0</h3></div>
                 <div><p style="font-size: 13px; color: #64748b;">Number of Students Paid</p><h3 id="detailMonthlyStudents" style="color: #0d4e78;">0</h3></div>
             </div>
             <div style="margin-top: 20px;"><canvas id="monthlyChart" width="400" height="150"></canvas></div>
@@ -455,7 +455,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
     <!-- ==================== SEARCH & DELETE STUDENT BY ID ==================== -->
     <div class="card" style="border-left: 5px solid #dc4b4b; background: white; margin-bottom: 25px;">
         <h3 style="color: #0d4e78; display: flex; align-items: center; gap: 8px;">
-            🗑️ Delete Student by ID
+            ðŸ—‘ï¸ Delete Student by ID
         </h3>
         <p style="font-size: 13px; color: #64748b; margin-bottom: 18px;">
             Enter a student's ID to preview their full profile and permanently remove their records.
@@ -467,7 +467,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                    style="margin: 0; padding: 12px 14px; font-size: 14px; text-transform: uppercase; flex: 1; min-width: 220px;"
                    onkeypress="if(event.key === 'Enter') lookupStudentForDeletion()">
             <button class="primary" onclick="lookupStudentForDeletion()" style="padding: 12px 22px; font-size: 14px; flex-shrink: 0;">
-                🔍 Search Student
+                ðŸ” Search Student
             </button>
             <button class="light" onclick="clearStudentDeletionCard()" style="padding: 12px 16px; font-size: 14px; flex-shrink: 0;">
                 Clear
@@ -485,50 +485,50 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                     <span id="delPreviewId" class="badge" style="background: #0d4e78; color: white; font-size: 12px; padding: 4px 10px;">ID: STUDENT</span>
                 </div>
                 <button class="red" id="delConfirmBtn" onclick="executeDeleteSearchedStudent()" style="padding: 11px 22px; font-size: 14px; font-weight: bold; border-radius: 6px; box-shadow: 0 4px 12px rgba(220,75,75,0.25);">
-                    🗑️ Permanently Delete This Student
+                    ðŸ—‘ï¸ Permanently Delete This Student
                 </button>
             </div>
 
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; font-size: 13px;">
                 <div>
                     <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Campus</span>
-                    <strong id="delPreviewCampus" style="color: #243b53; font-size: 14px;">—</strong>
+                    <strong id="delPreviewCampus" style="color: #243b53; font-size: 14px;">â€”</strong>
                 </div>
                 <div>
                     <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Course</span>
-                    <strong id="delPreviewCourse" style="color: #243b53; font-size: 14px;">—</strong>
+                    <strong id="delPreviewCourse" style="color: #243b53; font-size: 14px;">â€”</strong>
                 </div>
                 <div>
                     <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Academic Year</span>
-                    <strong id="delPreviewYear" style="color: #243b53; font-size: 14px;">—</strong>
+                    <strong id="delPreviewYear" style="color: #243b53; font-size: 14px;">â€”</strong>
                 </div>
                 <div>
                     <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Attendance</span>
-                    <strong id="delPreviewAttendance" style="color: #169b6b; font-size: 14px;">—</strong>
+                    <strong id="delPreviewAttendance" style="color: #169b6b; font-size: 14px;">â€”</strong>
                 </div>
                 <div>
                     <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Contact Phone</span>
-                    <strong id="delPreviewPhone" style="color: #243b53; font-size: 14px;">—</strong>
+                    <strong id="delPreviewPhone" style="color: #243b53; font-size: 14px;">â€”</strong>
                 </div>
                 <div>
                     <span style="color: #8293a4; font-size: 11px; text-transform: uppercase; display: block; font-weight: 600;">Fee Status</span>
-                    <strong id="delPreviewFee" style="color: #243b53; font-size: 14px;">—</strong>
+                    <strong id="delPreviewFee" style="color: #243b53; font-size: 14px;">â€”</strong>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="analytics-panel">
-        <h3>👨‍🎓 Attendance Overview</h3>
-        <p class="sub">Filter students by Campus → Year → Group → Examination. All counts and lists are calculated live from the existing database.</p>
+        <h3>ðŸ‘¨â€ðŸŽ“ Attendance Overview</h3>
+        <p class="sub">Filter students by Campus â†’ Year â†’ Group â†’ Examination. All counts and lists are calculated live from the existing database.</p>
 
         <div class="an-step">
             <span class="an-step-label">1. Select Campus</span>
             <div class="pill-row" id="anCampusRow">
                 <button class="pill-btn active" data-campus="All Campuses" onclick="anSelectCampus('All Campuses')">All Campuses</button>
-                <button class="pill-btn" data-campus="Sri Vaibhav Campus – Day Scholar" onclick="anSelectCampus('Sri Vaibhav Campus – Day Scholar')">Sri Vaibhav Campus (Day Scholar)</button>
-                <button class="pill-btn" data-campus="Sri Vaarahi Bhavan – Girls Campus & Hostel" onclick="anSelectCampus('Sri Vaarahi Bhavan – Girls Campus & Hostel')">Sri Vaarahi Bhavan (Girls Campus &amp; Hostel)</button>
-                <button class="pill-btn" data-campus="Sri Virinchi Bhavan – Boys Campus & Hostel" onclick="anSelectCampus('Sri Virinchi Bhavan – Boys Campus & Hostel')">Sri Virinchi Bhavan (Boys Campus &amp; Hostel)</button>
+                <button class="pill-btn" data-campus="Sri Vaibhav Campus â€“ Day Scholar" onclick="anSelectCampus('Sri Vaibhav Campus â€“ Day Scholar')">Sri Vaibhav Campus (Day Scholar)</button>
+                <button class="pill-btn" data-campus="Sri Vaarahi Bhavan â€“ Girls Campus & Hostel" onclick="anSelectCampus('Sri Vaarahi Bhavan â€“ Girls Campus & Hostel')">Sri Vaarahi Bhavan (Girls Campus &amp; Hostel)</button>
+                <button class="pill-btn" data-campus="Sri Virinchi Bhavan â€“ Boys Campus & Hostel" onclick="anSelectCampus('Sri Virinchi Bhavan â€“ Boys Campus & Hostel')">Sri Virinchi Bhavan (Boys Campus &amp; Hostel)</button>
             </div>
         </div>
 
@@ -554,7 +554,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
 
         <div class="missing-exam-box" id="anMissingExamBox" style="display:none;">
-            ⚠️ <strong id="anMissingCount">0</strong> student(s) matching the current filters have no examination assigned yet.
+            âš ï¸ <strong id="anMissingCount">0</strong> student(s) matching the current filters have no examination assigned yet.
             <div class="assign-row">
                 <select id="anMissingExamSelect"></select>
                 <button class="primary" onclick="anAssignMissingExam()">Assign Exam to These Students</button>
@@ -562,7 +562,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
 
         <div style="text-align: right;">
-            <button class="red" onclick="resetAnalytics()">↺ Reset Filters</button>
+            <button class="red" onclick="resetAnalytics()">â†º Reset Filters</button>
         </div>
     </div>
 
@@ -582,7 +582,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         
         <div class="tablewrap" id="anTableWrapInner">
             <div class="search-bar">
-                <input id="anSearch" placeholder="🔍 Search within results by ID or Name" oninput="anRenderStudentTable()">
+                <input id="anSearch" placeholder="ðŸ” Search within results by ID or Name" oninput="anRenderStudentTable()">
             </div>
             <table>
                 <thead><tr><th>Student ID</th><th>Student Name</th><th>Course</th><th>Year</th><th>Campus</th><th>Attendance %</th><th style="text-align:center;">Actions</th></tr></thead>
@@ -596,17 +596,17 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <!-- ==================== FEES ==================== -->
 <section id="fees" class="page">
     <div class="analytics-panel">
-        <h3>💰 Global Fee Management &amp; Filtering</h3>
-        <p class="sub">Filter by Campus → Year → Group → Examination → Term → Payment Status to view dynamic fee collections.</p>
+        <h3>ðŸ’° Global Fee Management &amp; Filtering</h3>
+        <p class="sub">Filter by Campus â†’ Year â†’ Group â†’ Examination â†’ Term â†’ Payment Status to view dynamic fee collections.</p>
 
         <!-- Step 1: Campus -->
         <div class="an-step">
             <span class="an-step-label">1. Select Campus</span>
             <div class="pill-row" id="feeCampusRow">
                 <button class="pill-btn active" data-campus="All Campuses" onclick="feeSelectCampus('All Campuses')">All Campuses</button>
-                <button class="pill-btn" data-campus="Sri Vaibhav Campus – Day Scholar" onclick="feeSelectCampus('Sri Vaibhav Campus – Day Scholar')">Sri Vaibhav Campus (Day Scholar)</button>
-                <button class="pill-btn" data-campus="Sri Vaarahi Bhavan – Girls Campus & Hostel" onclick="feeSelectCampus('Sri Vaarahi Bhavan – Girls Campus & Hostel')">Sri Vaarahi Bhavan (Girls Campus &amp; Hostel)</button>
-                <button class="pill-btn" data-campus="Sri Virinchi Bhavan – Boys Campus & Hostel" onclick="feeSelectCampus('Sri Virinchi Bhavan – Boys Campus & Hostel')">Sri Virinchi Bhavan (Boys Campus &amp; Hostel)</button>
+                <button class="pill-btn" data-campus="Sri Vaibhav Campus â€“ Day Scholar" onclick="feeSelectCampus('Sri Vaibhav Campus â€“ Day Scholar')">Sri Vaibhav Campus (Day Scholar)</button>
+                <button class="pill-btn" data-campus="Sri Vaarahi Bhavan â€“ Girls Campus & Hostel" onclick="feeSelectCampus('Sri Vaarahi Bhavan â€“ Girls Campus & Hostel')">Sri Vaarahi Bhavan (Girls Campus &amp; Hostel)</button>
+                <button class="pill-btn" data-campus="Sri Virinchi Bhavan â€“ Boys Campus & Hostel" onclick="feeSelectCampus('Sri Virinchi Bhavan â€“ Boys Campus & Hostel')">Sri Virinchi Bhavan (Boys Campus &amp; Hostel)</button>
             </div>
         </div>
 
@@ -663,7 +663,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
         <!-- Reset Filters -->
         <div style="text-align: right; margin-top: 10px;">
-            <button class="red" onclick="initFeesPage()">↺ Clear Filters</button>
+            <button class="red" onclick="initFeesPage()">â†º Clear Filters</button>
         </div>
     </div>
 
@@ -674,7 +674,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         
         <div class="tablewrap" id="feeTableWrapInner">
             <div class="search-bar">
-                <input id="feeSearch" placeholder="🔍 Search within results by ID or Name" oninput="renderFeeStudentTable()">
+                <input id="feeSearch" placeholder="ðŸ” Search within results by ID or Name" oninput="renderFeeStudentTable()">
             </div>
             <table>
                 <thead>
@@ -707,11 +707,30 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
             <table><thead><tr><th>Student ID</th><th>Name</th><th>Exam</th><th>Score</th></tr></thead><tbody id="resultTable"></tbody></table>
         </div>
     </div>
+
+    <!-- BULK RESULTS UPLOAD -->
+    <div class="card" style="margin-top:20px;">
+        <h3>ðŸ“¤ Bulk Examination Results Upload</h3>
+        <p style="color:#64748b;font-size:13px;margin-bottom:14px;">Upload an Excel or CSV file to add exam results for multiple students at once. Columns required: <strong>Student ID, Student Name, Exam Name, Marks, Date</strong>.</p>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+            <button class="primary" onclick="downloadResultsTemplate()">â¬‡ Download Template</button>
+            <label class="primary" style="cursor:pointer;background:#0d4e78;color:#fff;padding:8px 18px;border-radius:6px;font-weight:600;font-size:14px;">
+                ðŸ“‚ Choose File
+                <input type="file" id="resultsFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewResultsFile(event)">
+            </label>
+        </div>
+        <div id="resultsPreviewArea" style="display:none;">
+            <div id="resultsPreviewTable" class="tablewrap" style="margin-bottom:12px;"></div>
+            <div id="resultsValidationMsg" style="margin-bottom:10px;font-size:13px;"></div>
+            <button class="green" onclick="submitBulkResults()">âœ… Save All Valid Results</button>
+            <button onclick="cancelResultsUpload()" style="margin-left:8px;background:#e2e8f0;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;">Cancel</button>
+        </div>
+    </div>
 </section>
 
 <!-- ==================== ACHIEVEMENTS ==================== -->
 <section id="achievements" class="page">
-    <div class="card"><h3 style="display:flex;align-items:center;gap:8px;">🏆 College Achievements <span id="achievementCount" style="background:#e9bd45;color:#fff;font-size:12px;padding:2px 10px;border-radius:20px;font-weight:700;"></span></h3><div id="achievementList"></div></div>
+    <div class="card"><h3 style="display:flex;align-items:center;gap:8px;">ðŸ† College Achievements <span id="achievementCount" style="background:#e9bd45;color:#fff;font-size:12px;padding:2px 10px;border-radius:20px;font-weight:700;"></span></h3><div id="achievementList"></div></div>
 </section>
 
 </main>
@@ -738,10 +757,10 @@ function persist() {
     localStorage.setItem("globalNotices", JSON.stringify(globalNotices));
 }
 
-function money(n) { return "₹" + Number(n || 0).toLocaleString("en-IN"); }
+function money(n) { return "â‚¹" + Number(n || 0).toLocaleString("en-IN"); }
 function getGroupAndCoaching(courseString) {
     if (!courseString) return { group: "Unknown", coaching: "Unknown" };
-    let parts = courseString.split(/[-–]/);
+    let parts = courseString.split(/[-â€“]/);
     return { group: parts[0].trim() || "Unknown", coaching: parts[1] ? parts[1].trim() : "General" };
 }
 
@@ -872,7 +891,7 @@ async function loadAdminAccounts() {
             <td><strong>SUPERADMIN</strong></td>
             <td><span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">All Campuses (Global)</span></td>
             <td><span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700;">Super Admin</span></td>
-            <td>🔒 Protected</td>
+            <td>ðŸ”’ Protected</td>
         `;
         table.appendChild(superRow);
 
@@ -883,7 +902,7 @@ async function loadAdminAccounts() {
 
             const isUnassigned = !admin.campus || admin.campus === 'All Campuses' || admin.campus === 'Unassigned';
             const campusBadge = isUnassigned
-                ? `<span class="badge" style="background:#fee2e2; color:#dc2626; font-weight:700;">⚠️ Unassigned / Legacy</span>`
+                ? `<span class="badge" style="background:#fee2e2; color:#dc2626; font-weight:700;">âš ï¸ Unassigned / Legacy</span>`
                 : `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">${admin.campus}</span>`;
 
             row.innerHTML = `
@@ -891,8 +910,8 @@ async function loadAdminAccounts() {
                 <td>${campusBadge}</td>
                 <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Admin</span></td>
                 <td>
-                    <button class="primary" style="padding:5px 10px;font-size:12px;margin-right:6px;" onclick="changeAdminPassword('${admin.username}')">🔑 Change Password</button>
-                    <button class="gold" style="padding:5px 10px;font-size:12px;margin-right:6px;" onclick="editAdminCampus('${admin.username}', '${admin.campus || ''}')">🏫 Edit Campus</button>
+                    <button class="primary" style="padding:5px 10px;font-size:12px;margin-right:6px;" onclick="changeAdminPassword('${admin.username}')">ðŸ”‘ Change Password</button>
+                    <button class="gold" style="padding:5px 10px;font-size:12px;margin-right:6px;" onclick="editAdminCampus('${admin.username}', '${admin.campus || ''}')">ðŸ« Edit Campus</button>
                     <button class="red" style="padding:5px 10px;font-size:12px;" onclick="deleteAdmin('${admin.username}', this)">Delete</button>
                 </td>
             `;
@@ -923,7 +942,7 @@ async function editAdminCampus(username, currentCampus) {
             method: 'PUT',
             body: JSON.stringify({ campus: selectedCampus })
         });
-        alert(`✅ Admin "${username}" has been successfully assigned to: ${selectedCampus}`);
+        alert(`âœ… Admin "${username}" has been successfully assigned to: ${selectedCampus}`);
         await loadAdminAccounts();
     } catch(err) {
         alert("Error updating admin campus: " + (err.message || err));
@@ -950,7 +969,7 @@ async function changeAdminPassword(username) {
             method: 'PUT',
             body: JSON.stringify({ password: trimmed })
         });
-        alert(`✅ Password for Admin "${username}" updated successfully!`);
+        alert(`âœ… Password for Admin "${username}" updated successfully!`);
     } catch(err) {
         alert('Error updating password: ' + err.message);
     }
@@ -986,7 +1005,7 @@ async function createAdminAccount() {
         document.getElementById("newAdminCampus").selectedIndex = 0;
         document.getElementById("newAdminPass").value = "";
         document.getElementById("newAdminConfirmPass").value = "";
-        alert(`✅ Admin account for "${user.toUpperCase()}" created successfully!`);
+        alert(`âœ… Admin account for "${user.toUpperCase()}" created successfully!`);
         await loadAdminAccounts(); // Reload from DB to show real data
     } catch(err) {
         alert('Error creating admin: ' + err.message);
@@ -1027,7 +1046,7 @@ async function postSuperNotice() {
     persist(); renderNotices();
     document.getElementById("superNoticeTitle").value = "";
     document.getElementById("superNoticeDesc").value = "";
-    alert("✅ Global notice published successfully!");
+    alert("âœ… Global notice published successfully!");
 }
 
 function renderNotices() {
@@ -1068,13 +1087,13 @@ function renderNotices() {
 
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 6px;">
                 <h4 style="margin: 0; color: #0d4e78; font-size: 16px;">
-                    ${n.priority === 'Important' ? '🚨 ' : ''}${n.title}
+                    ${n.priority === 'Important' ? 'ðŸš¨ ' : ''}${n.title}
                 </h4>
             </div>
             <p style="margin: 8px 0; color: #555; line-height: 1.5;">${n.desc || n.content || ''}</p>
             <div class="notice-meta" style="display: flex; gap: 15px; align-items: center; margin-top: 10px; font-size: 12px; color: #888; flex-wrap: wrap;">
-                <span>👤 <strong>${n.sender || 'Administrator'}</strong></span>
-                <span>📅 ${n.date || 'Recent'}</span>
+                <span>ðŸ‘¤ <strong>${n.sender || 'Administrator'}</strong></span>
+                <span>ðŸ“… ${n.date || 'Recent'}</span>
                 <span class="notice-target">To: ${n.target || 'All Students'}</span>
                 <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-size: 11px; padding: 3px 8px;">${badgeText}</span>
             </div>
@@ -1084,7 +1103,7 @@ function renderNotices() {
 }
 
 async function deleteSuperNotice(id, title) {
-    if (!confirm("⚠️ Are you sure you want to delete this notice? This will permanently remove it for all students and admins.")) {
+    if (!confirm("âš ï¸ Are you sure you want to delete this notice? This will permanently remove it for all students and admins.")) {
         return;
     }
     try {
@@ -1125,7 +1144,7 @@ async function deleteSuperNotice(id, title) {
     });
     persist();
     renderNotices();
-    alert("✅ Notice deleted successfully.");
+    alert("âœ… Notice deleted successfully.");
 }
 
 /* ================= TARGETS ================= */
@@ -1173,14 +1192,14 @@ function calculateTargets() {
 
 /* ================= ADMIN PERFORMANCE ================= */
 const adminsData = {
-    "Sri Vaibhav Campus – Day Scholar": [
+    "Sri Vaibhav Campus â€“ Day Scholar": [
         { id: "ADM-DS-01", name: "Ramesh Kumar", email: "ramesh@vaatsalya.com", phone: "9876543210", joinDate: "15 Jan 2023" },
         { id: "ADM-DS-02", name: "Suresh Reddy", email: "suresh@vaatsalya.com", phone: "9876543211", joinDate: "10 Feb 2023" }
     ],
-    "Sri Vaarahi Bhavan – Girls Campus & Hostel": [
+    "Sri Vaarahi Bhavan â€“ Girls Campus & Hostel": [
         { id: "ADM-GC-01", name: "Lakshmi Devi", email: "lakshmi@vaatsalya.com", phone: "9876543212", joinDate: "01 Mar 2023" }
     ],
-    "Sri Virinchi Bhavan – Boys Campus & Hostel": [
+    "Sri Virinchi Bhavan â€“ Boys Campus & Hostel": [
         { id: "ADM-BC-01", name: "Venkat Rao", email: "venkat@vaatsalya.com", phone: "9876543213", joinDate: "20 Apr 2023" },
         { id: "ADM-BC-02", name: "Prasad Naidu", email: "prasad@vaatsalya.com", phone: "9876543214", joinDate: "05 May 2023" }
     ]
@@ -1317,7 +1336,7 @@ function updateMonthlyPerformance() {
         type: 'bar',
         data: {
             labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            datasets: [{ label: 'Collection (₹)', data: [collectedThisMonth * 0.8, collectedThisMonth * 0.9, collectedThisMonth * 1.1, collectedThisMonth * 0.7, collectedThisMonth * 1.2, collectedThisMonth], backgroundColor: '#0d4e78', borderRadius: 5 }]
+            datasets: [{ label: 'Collection (â‚¹)', data: [collectedThisMonth * 0.8, collectedThisMonth * 0.9, collectedThisMonth * 1.1, collectedThisMonth * 0.7, collectedThisMonth * 1.2, collectedThisMonth], backgroundColor: '#0d4e78', borderRadius: 5 }]
         },
         options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
@@ -1437,13 +1456,13 @@ function renderAchievements() {
     document.getElementById("achievementList").innerHTML = achievements.map((a, i) => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;margin-bottom:10px;background:#fafcfe;border:1px solid #e8eff5;border-left:4px solid #e9bd45;border-radius:10px;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.07)'" onmouseout="this.style.boxShadow='none'">
         <div style="display:flex;align-items:center;gap:14px;flex:1;">
-            <div style="width:42px;height:42px;background:linear-gradient(135deg,#e9bd45,#f0d78c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏆</div>
+            <div style="width:42px;height:42px;background:linear-gradient(135deg,#e9bd45,#f0d78c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">ðŸ†</div>
             <div>
                 <div style="font-weight:700;color:#164e70;font-size:15px;margin-bottom:3px;">${a.title}</div>
                 <div style="color:#666;font-size:13px;">${a.description}</div>
             </div>
         </div>
-        <button onclick="deleteAchievement(${i})" title="Delete achievement" style="width:36px;height:36px;border-radius:50%;border:1px solid #eee;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:16px;transition:all 0.2s;flex-shrink:0;padding:0;" onmouseover="this.style.color='#e74c3c';this.style.borderColor='#e74c3c';this.style.background='#fef2f2'" onmouseout="this.style.color='#ccc';this.style.borderColor='#eee';this.style.background='#fff'">✕</button>
+        <button onclick="deleteAchievement(${i})" title="Delete achievement" style="width:36px;height:36px;border-radius:50%;border:1px solid #eee;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:16px;transition:all 0.2s;flex-shrink:0;padding:0;" onmouseover="this.style.color='#e74c3c';this.style.borderColor='#e74c3c';this.style.background='#fef2f2'" onmouseout="this.style.color='#ccc';this.style.borderColor='#eee';this.style.background='#fff'">âœ•</button>
     </div>`).join("");
 }
 
@@ -1475,11 +1494,11 @@ function renderDashboard() {
         <tr>
             <td><strong>${s.id}</strong></td>
             <td>${s.name}</td>
-            <td>${s.course || '—'}</td>
+            <td>${s.course || 'â€”'}</td>
             <td>${normalizeYear(s.year)}</td>
             <td>${normalizeCampus(s.campus)}</td>
             <td style="text-align:center;">
-                <button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button>
+                <button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">ðŸ—‘ï¸ Delete</button>
             </td>
         </tr>
     `).join("");
@@ -1573,7 +1592,7 @@ function anAssignMissingExam() {
     const exam = document.getElementById('anMissingExamSelect').value; if (!exam) return;
     const list = anStudentsByGroup(); const missing = list.filter(s => !s.exam);
     missing.forEach(s => { s.exam = exam; }); persist(); anRenderAll();
-    alert(`✅ Assigned "${exam}" to ${missing.length} student(s).`);
+    alert(`âœ… Assigned "${exam}" to ${missing.length} student(s).`);
 }
 
 function anClickCustomCount() {
@@ -1608,7 +1627,7 @@ function anRenderStudentTable() {
     emptyMsg.style.display = 'none'; tableWrapInner.style.display = 'block';
     tbody.innerHTML = displayList.map(s => {
         const att = Number(s.att || 0); const attClass = att >= 90 ? 'att-good' : (att < 75 ? 'att-bad' : 'att-mid');
-        return `<tr><td><strong>${s.id}</strong></td><td>${s.name}</td><td>${s.course || '—'}</td><td>${normalizeYear(s.year)}</td><td>${normalizeCampus(s.campus)}</td><td class="${attClass}">${att}%</td><td style="text-align:center;"><button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button></td></tr>`;
+        return `<tr><td><strong>${s.id}</strong></td><td>${s.name}</td><td>${s.course || 'â€”'}</td><td>${normalizeYear(s.year)}</td><td>${normalizeCampus(s.campus)}</td><td class="${attClass}">${att}%</td><td style="text-align:center;"><button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">ðŸ—‘ï¸ Delete</button></td></tr>`;
     }).join('');
 }
 
@@ -1791,7 +1810,7 @@ function renderFeeStudentTable() {
             <td>${normalizeCampus(s.campus)}</td>
             <td>${normalizeYear(s.year)}</td>
             <td>${normalizeGroup(s.course, s.group)}</td>
-            <td>${s.exam || '—'}</td>
+            <td>${s.exam || 'â€”'}</td>
             <td>Term ${feeState.term}</td>
             <td>${money(expectedTermFee)}</td>
             <td>${money(paidForSelectedTerm)}</td>
@@ -1870,7 +1889,7 @@ function lookupStudentForDeletion() {
     
     const searchId = input.value.trim().toUpperCase();
     if (!searchId) {
-        msg.textContent = "⚠️ Please enter a Student ID to search.";
+        msg.textContent = "âš ï¸ Please enter a Student ID to search.";
         msg.style.background = "#fef3c7";
         msg.style.color = "#92400e";
         msg.style.display = "block";
@@ -1883,7 +1902,7 @@ function lookupStudentForDeletion() {
     const student = (allStudents || []).find(s => String(s.id).trim().toUpperCase() === searchId);
     
     if (!student) {
-        msg.textContent = `❌ No student found with ID "${searchId}". Please verify the ID and try again.`;
+        msg.textContent = `âŒ No student found with ID "${searchId}". Please verify the ID and try again.`;
         msg.style.background = "#fee2e2";
         msg.style.color = "#991b1b";
         msg.style.display = "block";
@@ -1900,7 +1919,7 @@ function lookupStudentForDeletion() {
     document.getElementById("delPreviewName").textContent = student.name || "Student";
     document.getElementById("delPreviewId").textContent = `ID: ${student.id}`;
     document.getElementById("delPreviewCampus").textContent = normalizeCampus(student.campus);
-    document.getElementById("delPreviewCourse").textContent = student.course || "—";
+    document.getElementById("delPreviewCourse").textContent = student.course || "â€”";
     document.getElementById("delPreviewYear").textContent = normalizeYear(student.year);
     document.getElementById("delPreviewAttendance").textContent = `${student.att || 0}%`;
     document.getElementById("delPreviewPhone").textContent = student.phone || "Not Provided";
@@ -1912,9 +1931,9 @@ function lookupStudentForDeletion() {
         const total = f.total || 0;
         const paid = f.paid || 0;
         const due = total - paid;
-        if (due <= 0 && total > 0) feeText = `Full Paid (₹${total.toLocaleString('en-IN')})`;
-        else if (paid > 0) feeText = `Paid ₹${paid.toLocaleString('en-IN')} / Due ₹${due.toLocaleString('en-IN')}`;
-        else feeText = `Unpaid (Due ₹${due.toLocaleString('en-IN')})`;
+        if (due <= 0 && total > 0) feeText = `Full Paid (â‚¹${total.toLocaleString('en-IN')})`;
+        else if (paid > 0) feeText = `Paid â‚¹${paid.toLocaleString('en-IN')} / Due â‚¹${due.toLocaleString('en-IN')}`;
+        else feeText = `Unpaid (Due â‚¹${due.toLocaleString('en-IN')})`;
     }
     document.getElementById("delPreviewFee").textContent = feeText;
     
@@ -1937,7 +1956,7 @@ async function executeDeleteSearchedStudent() {
     const cleanId = String(currentLookupStudent.id).trim().toUpperCase();
     const studentName = currentLookupStudent.name || cleanId;
     
-    if (!confirm(`⚠️ FINAL CONFIRMATION\n\nAre you sure you want to permanently delete:\n\nStudent: ${studentName}\nID: ${cleanId}\nCampus: ${normalizeCampus(currentLookupStudent.campus)}\n\nThis will completely erase:\n• Student profile\n• Portal login credentials\n• Fee records\n• Attendance records\n\nThis action cannot be undone.`)) {
+    if (!confirm(`âš ï¸ FINAL CONFIRMATION\n\nAre you sure you want to permanently delete:\n\nStudent: ${studentName}\nID: ${cleanId}\nCampus: ${normalizeCampus(currentLookupStudent.campus)}\n\nThis will completely erase:\nâ€¢ Student profile\nâ€¢ Portal login credentials\nâ€¢ Fee records\nâ€¢ Attendance records\n\nThis action cannot be undone.`)) {
         return;
     }
     
@@ -1961,16 +1980,16 @@ async function executeDeleteSearchedStudent() {
         clearStudentDeletionCard();
         const msg = document.getElementById("deleteLookupMsg");
         if (msg) {
-            msg.textContent = `✅ Student "${studentName}" (${cleanId}) has been permanently deleted from the system.`;
+            msg.textContent = `âœ… Student "${studentName}" (${cleanId}) has been permanently deleted from the system.`;
             msg.style.background = "#dcfce7";
             msg.style.color = "#166534";
             msg.style.display = "block";
         }
         
-        alert(`✅ Student "${studentName}" (${cleanId}) has been permanently deleted.`);
+        alert(`âœ… Student "${studentName}" (${cleanId}) has been permanently deleted.`);
     } catch (err) {
         console.error("Delete student error:", err);
-        alert("❌ Failed to delete student: " + (err.message || err));
+        alert("âŒ Failed to delete student: " + (err.message || err));
     }
 }
 
@@ -1979,7 +1998,7 @@ async function deleteStudentPermanently(studentId) {
     const student = allStudents.find(s => String(s.id).trim().toUpperCase() === cleanId);
     const studentName = student ? student.name : cleanId;
     
-    if (!confirm(`⚠️ Confirm Student Deletion\n\nAre you sure you want to permanently delete student:\nName: ${studentName}\nID: ${cleanId}\n\nThis will permanently erase their:\n• Student profile\n• Portal login credentials\n• Fee records\n• Attendance records\n\nThis action cannot be undone.`)) {
+    if (!confirm(`âš ï¸ Confirm Student Deletion\n\nAre you sure you want to permanently delete student:\nName: ${studentName}\nID: ${cleanId}\n\nThis will permanently erase their:\nâ€¢ Student profile\nâ€¢ Portal login credentials\nâ€¢ Fee records\nâ€¢ Attendance records\n\nThis action cannot be undone.`)) {
         return;
     }
     
@@ -1997,10 +2016,10 @@ async function deleteStudentPermanently(studentId) {
         if (typeof calculateTargets === 'function') calculateTargets();
         if (typeof renderAdminPerformance === 'function') renderAdminPerformance();
         
-        alert(`✅ Student "${studentName}" (${cleanId}) has been permanently deleted.`);
+        alert(`âœ… Student "${studentName}" (${cleanId}) has been permanently deleted.`);
     } catch (err) {
         console.error("Delete student error:", err);
-        alert("❌ Failed to delete student: " + (err.message || err));
+        alert("âŒ Failed to delete student: " + (err.message || err));
     }
 }
 
@@ -2009,6 +2028,171 @@ function renderAll() {
     renderResults(); renderAchievements(); renderDashboard();
 }
 renderAll();
+
+/* =============== BULK RESULTS UPLOAD =============== */
+let parsedResultsData = [];
+
+function downloadResultsTemplate() {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([
+        ['Student ID', 'Student Name', 'Exam Name', 'Marks', 'Date'],
+        ['SV001', 'Example Student', 'Unit Test 1', 85, new Date().toISOString().split('T')[0]],
+    ]);
+    XLSX.utils.book_append_sheet(wb, ws, 'Results_Template');
+    XLSX.writeFile(wb, 'Exam_Results_Template.xlsx');
+}
+
+function previewResultsFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const ws = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: false });
+        if (rows.length < 2) { alert('File is empty or has no data rows.'); return; }
+        const header = rows[0].map(h => String(h).trim().toLowerCase());
+        const idCol = header.findIndex(h => h.includes('student id') || h === 'id');
+        const nameCol = header.findIndex(h => h.includes('student name') || h.includes('name'));
+        const examCol = header.findIndex(h => h.includes('exam'));
+        const marksCol = header.findIndex(h => h.includes('mark') || h.includes('score'));
+        const dateCol = header.findIndex(h => h.includes('date'));
+        if (idCol < 0 || examCol < 0 || marksCol < 0) {
+            alert('Missing required columns. Ensure "Student ID", "Exam Name", "Marks" columns exist.');
+            return;
+        }
+        parsedResultsData = [];
+        let tableHtml = '<table><thead><tr><th>#</th><th>Student ID</th><th>Student Name</th><th>Exam Name</th><th>Marks</th><th>Date</th><th>Status</th></tr></thead><tbody>';
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            const studentId = idCol >= 0 ? String(row[idCol] || '').trim() : '';
+            const studentName = nameCol >= 0 ? String(row[nameCol] || '').trim() : '';
+            const examName = examCol >= 0 ? String(row[examCol] || '').trim() : '';
+            const marks = marksCol >= 0 ? row[marksCol] : '';
+            const date = dateCol >= 0 ? String(row[dateCol] || '').trim() : '';
+            if (!studentId && !examName) continue;
+            let errors = [];
+            if (!studentId) errors.push('Missing Student ID');
+            if (!examName) errors.push('Missing Exam Name');
+            if (marks === '' || isNaN(Number(marks))) errors.push('Invalid Marks');
+            const student = allStudents.find(s => s.id === studentId.toUpperCase());
+            if (studentId && !student) errors.push('Student not found');
+            if (student && studentName && student.name.toLowerCase() !== studentName.toLowerCase()) errors.push('Name mismatch');
+            const isValid = errors.length === 0;
+            parsedResultsData.push({ studentId, studentName: student ? student.name : studentName, examName, marks, date, valid: isValid, error: errors.join('; ') });
+            tableHtml += `<tr style="background:${isValid ? '#f0fdf4' : '#fff1f2'}">
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${i}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;font-weight:600;">${studentId}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${studentName}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${examName}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;text-align:right;">${marks}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${date}</td>
+                <td style="padding:6px 10px;border:1px solid #e2e8f0;">${isValid ? '✅ Valid' : '❌ ' + errors.join(', ')}</td>
+            </tr>`;
+        }
+        tableHtml += '</tbody></table>';
+        const validCount = parsedResultsData.filter(r => r.valid).length;
+        document.getElementById('resultsPreviewArea').style.display = 'block';
+        document.getElementById('resultsPreviewTable').innerHTML = tableHtml;
+        document.getElementById('resultsValidationMsg').innerHTML = `<strong style="color:#166534;">✅ ${validCount} valid</strong> &nbsp; <strong style="color:#dc2626;">❌ ${parsedResultsData.length - validCount} invalid</strong> (will be skipped)`;
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+async function submitBulkResults() {
+    const validRows = parsedResultsData.filter(r => r.valid);
+    if (validRows.length === 0) { alert('No valid rows to submit.'); return; }
+    if (!confirm(`Submit ${validRows.length} exam result(s)?`)) return;
+    try {
+        const token = localStorage.getItem('adminToken');
+        const resp = await fetch('/api/students/bulk-results', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify({ results: validRows.map(r => ({ studentId: r.studentId, studentName: r.studentName, examName: r.examName, marks: r.marks, date: r.date })) })
+        });
+        const data = await resp.json();
+        if (data.success) {
+            alert(`✅ Saved ${data.saved} result(s). ${data.errors && data.errors.length ? data.errors.length + ' skipped.' : ''}`);
+            cancelResultsUpload();
+            if (window.SchoolAPI && window.SchoolAPI.syncDashboard) {
+                const syncData = await window.SchoolAPI.syncDashboard('superadmin');
+                if (syncData && syncData.students) { allStudents = syncData.students; persist(); renderAll(); }
+            }
+        } else {
+            alert('Error: ' + (data.message || 'Upload failed.'));
+        }
+    } catch (err) {
+        alert('Network error: ' + err.message);
+    }
+}
+
+function cancelResultsUpload() {
+    parsedResultsData = [];
+    document.getElementById('resultsPreviewArea').style.display = 'none';
+    document.getElementById('resultsPreviewTable').innerHTML = '';
+    document.getElementById('resultsFileInput').value = '';
+}
+
+/* =============== ADMIN COLLECTIONS MODAL =============== */
+async function openAdminCollectionsModal() {
+    const token = localStorage.getItem('adminToken');
+    const campusFilter = currentGlobalCampus !== 'All Campuses' ? `?campus=${encodeURIComponent(currentGlobalCampus)}` : '';
+    let modalHtml = `<div id="adminCollModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center;">
+        <div style="background:#fff;border-radius:12px;width:min(820px,95vw);max-height:85vh;overflow-y:auto;padding:28px 24px;position:relative;">
+        <button onclick="document.getElementById('adminCollModal').remove()" style="position:absolute;top:14px;right:18px;background:none;border:none;font-size:22px;cursor:pointer;color:#64748b;">✕</button>
+        <h3 style="margin:0 0 16px;font-size:18px;color:#0d4e78;">💰 Fee Collection by Administrator</h3>
+        <div id="adminCollBody"><p style="color:#64748b;">Loading...</p></div>
+        </div></div>`;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    try {
+        const resp = await fetch(`/api/fees/admin-collections${campusFilter}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await resp.json();
+        const modalBody = document.getElementById('adminCollBody');
+        if (!data.success || !data.admins.length) {
+            modalBody.innerHTML = '<p style="color:#64748b;text-align:center;padding:20px;">No collection records found. Payment history will appear here once fees are recorded.</p>';
+            return;
+        }
+        let html = `<table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead style="background:#0d4e78;color:#fff;"><tr>
+                <th style="padding:10px 12px;text-align:left;">Administrator</th>
+                <th style="padding:10px 12px;text-align:left;">Campus</th>
+                <th style="padding:10px 12px;text-align:center;">Transactions</th>
+                <th style="padding:10px 12px;text-align:right;">Total Collected</th>
+                <th style="padding:10px 12px;text-align:center;">Details</th>
+            </tr></thead><tbody>`;
+        data.admins.forEach((admin, idx) => {
+            html += `<tr style="border-bottom:1px solid #e2e8f0;background:${idx%2===0?'#f8fafc':'#fff'};">
+                <td style="padding:10px 12px;font-weight:600;">${admin.adminName}</td>
+                <td style="padding:10px 12px;color:#64748b;font-size:12px;">${admin.adminCampus || '—'}</td>
+                <td style="padding:10px 12px;text-align:center;">${admin.transactions}</td>
+                <td style="padding:10px 12px;text-align:right;font-weight:700;color:#166534;">₹${Number(admin.totalAmount).toLocaleString('en-IN')}</td>
+                <td style="padding:10px 12px;text-align:center;">
+                    <button onclick="toggleAdminPayments('ap-${idx}')" style="background:#e0f2fe;color:#0369a1;border:none;padding:4px 12px;border-radius:16px;cursor:pointer;font-size:12px;">View</button>
+                </td>
+            </tr>
+            <tr id="ap-${idx}" style="display:none;">
+                <td colspan="5" style="padding:10px 20px;background:#f0f9ff;">
+                    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+                        <thead><tr style="background:#e0f2fe;"><th style="padding:6px 10px;text-align:left;">Date</th><th style="padding:6px 10px;">Student ID</th><th style="padding:6px 10px;">Student Name</th><th style="padding:6px 10px;text-align:right;">Amount</th></tr></thead>
+                        <tbody>${(admin.payments || []).map(p => `<tr><td style="padding:5px 10px;">${p.date}</td><td style="padding:5px 10px;">${p.studentId}</td><td style="padding:5px 10px;">${p.studentName}</td><td style="padding:5px 10px;text-align:right;">₹${Number(p.amount).toLocaleString('en-IN')}</td></tr>`).join('')}</tbody>
+                    </table>
+                </td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        modalBody.innerHTML = html;
+    } catch (err) {
+        document.getElementById('adminCollBody').innerHTML = `<p style="color:#dc2626;">Error: ${err.message}</p>`;
+    }
+}
+
+function toggleAdminPayments(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
+}
 </script>
 </body>
 </html>

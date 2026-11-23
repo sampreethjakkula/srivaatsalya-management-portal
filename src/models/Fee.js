@@ -43,7 +43,9 @@ const feeSchema = new mongoose.Schema({
       date: { type: Date, default: Date.now },
       receiptNo: String,
       method: { type: String, default: 'Online / Cash' },
-      notes: String
+      notes: String,
+      collectedBy: { type: String, trim: true },
+      adminCampus: { type: String, trim: true }
     }
   ]
 }, { timestamps: true });

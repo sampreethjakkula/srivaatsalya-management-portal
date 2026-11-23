@@ -285,6 +285,73 @@ router.put('/:id', protect, authorize('admin', 'superadmin'), async (req, res) =
   }
 });
 
+// @route   POST /api/students/bulk-results (Bulk Exam Results Upload)
+router.post('/bulk-results', protect, authorize('admin', 'superadmin'), async (req, res) => {
+  try {
+    const { results: rawResults } = req.body;
+    if (!Array.isArray(rawResults) || rawResults.length === 0) {
+      return res.status(400).json({ success: false, message: 'Array of results is required.' });
+    }
+
+    let savedCount = 0;
+    const errors = [];
+
+    for (const r of rawResults) {
+      const { studentId, studentName, date, examName, marks } = r;
+      if (!studentId || !examName || marks === undefined || marks === null) {
+        errors.push({ studentId, reason: 'Missing required fields (studentId, examName, marks).' });
+        continue;
+      }
+      const cleanId = String(studentId).trim().toUpperCase();
+      const student = await Students.findOne({ id: cleanId });
+      if (!student) {
+        errors.push({ studentId: cleanId, reason: 'Student not found.' });
+        continue;
+      }
+      // Validate student name if provided
+      if (studentName && student.name && student.name.trim().toLowerCase() !== String(studentName).trim().toLowerCase()) {
+        errors.push({ studentId: cleanId, reason: `Name mismatch: expected "${student.name}", got "${studentName}".` });
+        continue;
+      }
+      // Campus enforcement for regular admin
+      if (req.user.role === 'admin' && !isSameCampus(student.campus, req.user.campus)) {
+        errors.push({ studentId: cleanId, reason: 'Access Denied: Student belongs to another campus.' });
+        continue;
+      }
+      // Validate marks
+      const numericMarks = Number(marks);
+      if (isNaN(numericMarks)) {
+        errors.push({ studentId: cleanId, reason: `Marks "${marks}" is not a valid number.` });
+        continue;
+      }
+
+      const resultEntry = {
+        exam:     String(examName).trim(),
+        test:     String(examName).trim(),
+        examName: String(examName).trim(),
+        marks:    numericMarks,
+        score:    numericMarks,
+        date:     date || new Date().toISOString().split('T')[0],
+        addedAt:  new Date().toISOString()
+      };
+
+      const existing = student.results || [];
+      const updatedResults = [...existing, resultEntry];
+      await Students.update({ id: cleanId }, { $set: { results: updatedResults } });
+      savedCount++;
+    }
+
+    res.json({
+      success: true,
+      saved:   savedCount,
+      errors:  errors,
+      message: `Saved ${savedCount} result(s). ${errors.length} skipped.`
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 // @route   DELETE /api/students/:id
 router.delete('/:id', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {

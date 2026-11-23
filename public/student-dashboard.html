@@ -1090,12 +1090,41 @@
             let clearedTermsCount = 0;
             let pendingTermsCount = 0;
 
+            // Build per-term payment history from global payment history
+            const globalHistory = (studentFeeData && studentFeeData.history) ? studentFeeData.history : [];
+            // Sort history chronologically
+            const sortedHistory = [...globalHistory].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Calculate term-level payment breakdown with dates
+            let termBreakdowns = [];
+            let runningBalance = 0;
+            let histIdx = 0;
+
             for (let term = 1; term <= 10; term++) {
-                // Ensure all 10 terms divide the total amount exactly
-                let thisTermTarget = (term === 10) 
-                    ? (totalAnnualFee - (termFeeAmount * 9)) 
+                let thisTermTarget = (term === 10)
+                    ? (totalAnnualFee - (termFeeAmount * 9))
                     : termFeeAmount;
 
+                let termStart = (term - 1) * termFeeAmount;
+                let termEnd = termStart + thisTermTarget;
+
+                // Collect installments that contribute to this term
+                let termPayments = []; // { amount: X, date: Y }
+                let termCumulativePaid = 0;
+
+                for (const installment of sortedHistory) {
+                    const instAmt = Number(installment.amount) || 0;
+                    const instDate = installment.date || '';
+                    // Portion of this installment that falls into this term
+                    let carriedIn = Math.min(runningBalance + instAmt, termEnd) - Math.max(runningBalance, termStart);
+                    if (carriedIn > 0) {
+                        termPayments.push({ amount: carriedIn, date: instDate });
+                        termCumulativePaid += carriedIn;
+                    }
+                    runningBalance += instAmt;
+                }
+
+                // Simpler approach: calculate termPaid from running remainingPaid
                 let termPaid = 0;
                 if (remainingPaid >= thisTermTarget) {
                     termPaid = thisTermTarget;
@@ -1107,6 +1136,30 @@
                     termPaid = 0;
                 }
 
+                termBreakdowns.push({ term, thisTermTarget, termPaid, termPayments });
+            }
+
+            // Re-process term payments using cumulative approach
+            let cumulativePaid = 0;
+            for (let i = 0; i < termBreakdowns.length; i++) {
+                let bd = termBreakdowns[i];
+                let termStart = (bd.term - 1) * termFeeAmount;
+                let termEnd = termStart + bd.thisTermTarget;
+                bd.termPayments = [];
+                for (const inst of sortedHistory) {
+                    const instAmt = Number(inst.amount) || 0;
+                    // find portion allocated to this term
+                    let globalBefore = sortedHistory.slice(0, sortedHistory.indexOf(inst)).reduce((s, x) => s + (Number(x.amount) || 0), 0);
+                    let globalAfter = globalBefore + instAmt;
+                    let overlap = Math.min(globalAfter, termEnd) - Math.max(globalBefore, termStart);
+                    if (overlap > 0) {
+                        bd.termPayments.push({ amount: overlap, date: inst.date || '' });
+                    }
+                }
+            }
+
+            for (const bd of termBreakdowns) {
+                const { term, thisTermTarget, termPaid, termPayments } = bd;
                 let termDue = Math.max(0, thisTermTarget - termPaid);
                 const termName = `Term ${term}`;
 
@@ -1117,8 +1170,31 @@
                 else pendingTermsCount++;
 
                 let statusClass = isPaid ? 'paid' : (isPartial ? 'partial' : 'pending');
-                let statusText = isPaid ? 'Paid' : (isPartial ? 'Partially Paid' : 'Pending');
+                let statusText = isPaid ? 'Fully Paid' : (isPartial ? 'Partially Paid' : 'Pending');
                 let cardClass = isPaid ? 'paid-card' : (isPartial ? 'partial-card' : 'pending-card');
+
+                // Compute last paid date and final paid date from termPayments
+                let lastPaymentDate = '';
+                let finalPaymentDate = '';
+                if (termPayments && termPayments.length > 0) {
+                    const validDates = termPayments.map(p => p.date).filter(d => d);
+                    if (validDates.length > 0) {
+                        const sortedDates = validDates.map(d => new Date(d)).filter(d => !isNaN(d)).sort((a,b) => a-b);
+                        if (sortedDates.length > 0) {
+                            lastPaymentDate = sortedDates[sortedDates.length - 1].toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+                            if (isPaid) finalPaymentDate = lastPaymentDate;
+                        }
+                    }
+                }
+
+                let dateDisplay = '';
+                if (isPaid && finalPaymentDate) {
+                    dateDisplay = `<span style="color:#166534;font-size:12px;font-weight:600;"><i class="fa-regular fa-calendar-check"></i> Fully Paid on ${finalPaymentDate}</span>`;
+                } else if (isPartial && lastPaymentDate) {
+                    dateDisplay = `<span style="color:#92400e;font-size:12px;font-weight:600;"><i class="fa-regular fa-clock"></i> Last Paid: ${lastPaymentDate}</span>`;
+                } else if (!isPaid && !isPartial) {
+                    dateDisplay = `<span style="color:var(--text-muted);font-size:12px;"><i class="fa-regular fa-clock"></i> Payment due as per schedule</span>`;
+                }
 
                 feeTermsContainer.innerHTML += `
                     <div class="fee-term-card ${cardClass}">
@@ -1140,10 +1216,7 @@
                             </div>
                         </div>
 
-                        <div class="term-due-date">
-                            <i class="fa-regular ${isPaid ? 'fa-calendar-check' : (isPartial ? 'fa-hourglass-half' : 'fa-clock')}"></i>
-                            ${isPaid ? 'Term Paid' : (isPartial ? `Partially Paid (${formatCurrency(termPaid)})` : 'Payment due as per schedule')}
-                        </div>
+                        <div class="term-due-date">${dateDisplay}</div>
                         ${isPaid
                             ? `<button class="action-btn receipt" onclick="downloadReceipt('${termName}')">Download Receipt</button>`
                             : (isPartial
@@ -1438,36 +1511,139 @@
         function downloadReceipt(termName) {
             if (!currentStudentData) return;
 
-            let receiptContent = "========================================\n";
-            receiptContent += "       SRI VAATSALYA ACADEMY\n";
-            receiptContent += "       FEE PAYMENT RECEIPT\n";
-            receiptContent += "========================================\n\n";
-            receiptContent += `Receipt No : RCPT-${Math.floor(Math.random() * 100000)}\n`;
-            receiptContent += `Date       : ${new Date().toLocaleDateString()}\n`;
-            receiptContent += `Term       : ${termName}\n\n`;
-            
-            receiptContent += "--- STUDENT DETAILS ---\n";
-            receiptContent += `Name       : ${currentStudentData.name}\n`;
-            receiptContent += `Roll No    : ${currentStudentData.id}\n`;
-            receiptContent += `Course     : ${currentStudentData.course}\n`;
-            receiptContent += `Campus     : ${currentStudentData.campus}\n\n`;
+            const student = currentStudentData;
+            const allFees = JSON.parse(localStorage.getItem('adminFees') || '{}');
+            const feeData = allFees[student.id];
+            const totalAnnualFee = (feeData && feeData.total && Number(feeData.total) > 0) ? Number(feeData.total) : (currentStudentFees.totalFee || 100000);
+            const termFeeAmount = Math.round(totalAnnualFee / 10);
+            const termNum = parseInt(termName.replace(/[^0-9]/g, '')) || 1;
+            const termTarget = (termNum === 10) ? (totalAnnualFee - termFeeAmount * 9) : termFeeAmount;
+            const termStart = (termNum - 1) * termFeeAmount;
+            const termEnd = termStart + termTarget;
 
-            receiptContent += "--- PAYMENT DETAILS ---\n";
-            receiptContent += `Amount Paid: ${formatCurrency(currentStudentFees.termFee)}\n`;
-            receiptContent += `Status     : PAID\n\n`;
+            // Build payment history from global installments
+            const history = (feeData && feeData.history) ? feeData.history : [];
+            const sortedHistory = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
 
-            receiptContent += "========================================\n";
-            receiptContent += "Thank you for your payment!\n";
-            receiptContent += "This is a computer-generated receipt.\n";
+            let termPayments = [];
+            for (const inst of sortedHistory) {
+                const instAmt = Number(inst.amount) || 0;
+                const idx = sortedHistory.indexOf(inst);
+                const globalBefore = sortedHistory.slice(0, idx).reduce((s, x) => s + (Number(x.amount) || 0), 0);
+                const globalAfter = globalBefore + instAmt;
+                const overlap = Math.min(globalAfter, termEnd) - Math.max(globalBefore, termStart);
+                if (overlap > 0) {
+                    termPayments.push({ amount: overlap, date: inst.date || '' });
+                }
+            }
 
-            const blob = new Blob([receiptContent], { type: 'text/plain' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `${currentStudentData.name}_${termName}_Receipt.txt`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(link.href);
+            const termPaid = termPayments.reduce((s, p) => s + p.amount, 0);
+            const termDue = Math.max(0, termTarget - termPaid);
+            const isPaid = termPaid >= termTarget;
+            const status = isPaid ? 'FULLY PAID' : (termPaid > 0 ? 'PARTIAL PAYMENT' : 'PENDING');
+
+            const finalPaymentDate = isPaid && termPayments.length > 0
+                ? new Date(termPayments[termPayments.length - 1].date).toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' })
+                : '';
+
+            // Build printable HTML receipt
+            const receiptNo = `RCPT-${student.id}-T${termNum}-${Date.now().toString().slice(-5)}`;
+            const generatedDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+            let paymentTableRows = termPayments.map((p, i) => {
+                const dateStr = p.date ? new Date(p.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'N/A';
+                return `<tr>
+                    <td style="padding:8px 12px;border:1px solid #dde;text-align:center;">${i + 1}</td>
+                    <td style="padding:8px 12px;border:1px solid #dde;text-align:center;">${dateStr}</td>
+                    <td style="padding:8px 12px;border:1px solid #dde;text-align:right;">₹${Number(p.amount).toLocaleString('en-IN')}</td>
+                </tr>`;
+            }).join('');
+
+            if (!paymentTableRows) {
+                paymentTableRows = `<tr><td colspan="3" style="padding:10px;text-align:center;color:#888;">No payment records found for this term.</td></tr>`;
+            }
+
+            const receiptHtml = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Fee Receipt – ${termName}</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1a1a2e; }
+  .receipt-wrap { max-width: 650px; margin: 30px auto; border: 2px solid #0d4e78; border-radius: 10px; overflow: hidden; }
+  .receipt-header { background: #0d4e78; color: white; text-align: center; padding: 24px 20px 18px; }
+  .receipt-header h1 { margin: 0 0 4px; font-size: 22px; letter-spacing: 1px; }
+  .receipt-header p { margin: 0; font-size: 13px; opacity: 0.85; }
+  .receipt-meta { display: flex; justify-content: space-between; padding: 12px 20px; background: #f0f4f8; font-size: 13px; border-bottom: 1px solid #dde; }
+  .section { padding: 16px 20px; border-bottom: 1px solid #eef; }
+  .section h3 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #0d4e78; }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
+  .info-row { font-size: 13px; }
+  .info-row span:first-child { color: #666; font-size: 12px; display: block; }
+  .info-row strong { font-size: 14px; }
+  .status-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; background: ${isPaid ? '#dcfce7' : '#fef9c3'}; color: ${isPaid ? '#166534' : '#92400e'}; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: #0d4e78; color: white; }
+  thead th { padding: 10px 12px; text-align: left; }
+  .totals { padding: 14px 20px; background: #f8fafc; }
+  .total-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 14px; }
+  .total-row.final { font-weight: 700; color: #0d4e78; border-top: 1px solid #cce; padding-top: 8px; margin-top: 4px; }
+  .footer { text-align: center; padding: 14px; font-size: 11px; color: #888; background: #f0f4f8; }
+  @media print { body { margin: 0; } .receipt-wrap { border: 2px solid #000; margin: 0; } }
+</style>
+</head>
+<body>
+<div class="receipt-wrap">
+  <div class="receipt-header">
+    <h1>🎓 SRI VAATSALYA ACADEMY</h1>
+    <p>Fee Payment Receipt</p>
+  </div>
+  <div class="receipt-meta">
+    <span><strong>Receipt No:</strong> ${receiptNo}</span>
+    <span><strong>Generated:</strong> ${generatedDate}</span>
+  </div>
+  <div class="section">
+    <h3>Student Details</h3>
+    <div class="info-grid">
+      <div class="info-row"><span>Student Name</span><strong>${student.name}</strong></div>
+      <div class="info-row"><span>Student ID</span><strong>${student.id}</strong></div>
+      <div class="info-row"><span>Course / Group</span><strong>${student.course || '—'}</strong></div>
+      <div class="info-row"><span>Campus</span><strong>${student.campus || '—'}</strong></div>
+    </div>
+  </div>
+  <div class="section">
+    <h3>Fee Summary – ${termName}</h3>
+    <div class="info-grid" style="margin-bottom:10px;">
+      <div class="info-row"><span>Total Term Fee</span><strong>₹${Number(termTarget).toLocaleString('en-IN')}</strong></div>
+      <div class="info-row"><span>Amount Paid</span><strong style="color:#166534;">₹${Number(termPaid).toLocaleString('en-IN')}</strong></div>
+      <div class="info-row"><span>Balance Due</span><strong style="color:${termDue > 0 ? '#dc2626' : '#166534'};">₹${Number(termDue).toLocaleString('en-IN')}</strong></div>
+      <div class="info-row"><span>Payment Status</span><span class="status-badge">${status}</span></div>
+      ${isPaid && finalPaymentDate ? `<div class="info-row" style="grid-column:span 2;"><span>Final Payment Date</span><strong>${finalPaymentDate}</strong></div>` : ''}
+    </div>
+  </div>
+  <div class="section">
+    <h3>Payment History</h3>
+    <table>
+      <thead><tr><th>No.</th><th>Payment Date</th><th style="text-align:right;">Amount Paid</th></tr></thead>
+      <tbody>${paymentTableRows}</tbody>
+    </table>
+  </div>
+  <div class="footer">
+    This is a computer-generated receipt. No signature is required.<br>
+    Sri Vaatsalya Academy – Visakhapatnam | Contact: 7997711665
+  </div>
+</div>
+<script>window.onload = () => window.print();<\/script>
+</body>
+</html>`;
+
+            const receiptWin = window.open('', '_blank', 'width=700,height=800');
+            if (receiptWin) {
+                receiptWin.document.write(receiptHtml);
+                receiptWin.document.close();
+            } else {
+                alert('Please allow popups to view the receipt.');
+            }
         }
 
         function downloadCSV() {
