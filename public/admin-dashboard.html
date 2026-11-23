@@ -1415,7 +1415,7 @@ function editStudent(id) {
     let s = allStudents.find(x => x.id === id);
     if (!s) return;
     
-    if(currentAdminCampus !== "All Campuses" && s.campus !== currentAdminCampus) {
+    if(currentAdminCampus !== "All Campuses" && !matchCampus(s.campus, currentAdminCampus)) {
         alert("Access Denied: This student belongs to another campus.");
         return;
     }
@@ -1479,8 +1479,8 @@ async function saveFee() {
     let sIndex = allStudents.findIndex(s => s.id === id);
     if(sIndex === -1) return;
     
-    if(currentAdminCampus !== "All Campuses" && allStudents[sIndex].campus !== currentAdminCampus) {
-        alert("Access Denied.");
+    if(currentAdminCampus !== "All Campuses" && !matchCampus(allStudents[sIndex].campus, currentAdminCampus)) {
+        alert("Access Denied: You cannot update fees for a student of another campus.");
         return;
     }
 
@@ -1778,8 +1778,8 @@ async function saveAttendance() {
     
     let sIndex = allStudents.findIndex(s => s.id === id);
     if(sIndex > -1) { 
-        if(currentAdminCampus !== "All Campuses" && allStudents[sIndex].campus !== currentAdminCampus) {
-            alert("Access Denied.");
+        if(currentAdminCampus !== "All Campuses" && !matchCampus(allStudents[sIndex].campus, currentAdminCampus)) {
+            alert("Access Denied: This student belongs to another campus.");
             return;
         }
         allStudents[sIndex].att = percent; 
@@ -1873,8 +1873,8 @@ async function saveResult() {
     
     if (!student) return;
     
-    if(currentAdminCampus !== "All Campuses" && student.campus !== currentAdminCampus) {
-        alert("Access Denied.");
+    if(currentAdminCampus !== "All Campuses" && !matchCampus(student.campus, currentAdminCampus)) {
+        alert("Access Denied: This student belongs to another campus.");
         return;
     }
 
