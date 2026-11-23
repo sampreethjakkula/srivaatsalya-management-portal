@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -105,32 +105,32 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <aside class="sidebar">
     <div class="logo"><span>SRI</span> VAATSALYA</div>
     <p>MAIN MENU</p>
-    <button class="active" onclick="showPage('dashboard',this)">ðŸ“Š Dashboard</button>
-    <button onclick="showPage('notices',this)">ðŸ“¢ Notice Board</button>
-    <button onclick="showPage('students',this)">ðŸ‘¨â€ðŸŽ“ Student Management</button>
-    <button onclick="showPage('fees',this)">ðŸ’° Fee Management</button>
-    <button onclick="showPage('targets',this)">ðŸŽ¯ Monthly Collection Target</button>
-    <button onclick="showPage('attendance',this)">ðŸ“… Attendance</button>
-    <button onclick="showPage('results',this)">ðŸ“š Examination Results</button>
-    <button onclick="showPage('achievements',this)">ðŸ† Achievements</button>
-    <button class="logout" onclick="window.location.href='login.html'">â†ª Logout</button>
+    <button class="active" onclick="showPage('dashboard',this)">📊 Dashboard</button>
+    <button onclick="showPage('notices',this)">📢 Notice Board</button>
+    <button onclick="showPage('students',this)">👨‍🎓 Student Management</button>
+    <button onclick="showPage('fees',this)">💰 Fee Management</button>
+    <button onclick="showPage('targets',this)">🎯 Monthly Collection Target</button>
+    <button onclick="showPage('attendance',this)">📅 Attendance</button>
+    <button onclick="showPage('results',this)">📚 Examination Results</button>
+    <button onclick="showPage('achievements',this)">🏆 Achievements</button>
+    <button class="logout" onclick="window.location.href='login.html'">↪ Logout</button>
 </aside>
 
 <main>
 <header class="topbar">
     <div><h2 id="pageTitle">Admin Dashboard</h2><small id="adminCampusLabel" style="font-size: 13px;">Sri Vaatsalya Junior College</small></div>
     <div style="display: flex; align-items: center; gap: 10px; background: #f0f7fc; padding: 10px 18px; border-radius: 30px; border: 1px solid #d4e7f5;">
-        <span style="font-size: 22px;">ðŸ‘¤</span>
+        <span style="font-size: 22px;">👤</span>
         <strong style="color: #164e70; font-size: 19px; font-weight: 800; letter-spacing: 0.3px;" id="adminNameDisplay">Administrator</strong>
     </div>
 </header>
 
 <section id="dashboard" class="page active">
     <div class="cards">
-        <div class="stat"><div class="icon">ðŸ‘¨â€ðŸŽ“</div><p>Total Students</p><h2 id="totalStudents">0</h2></div>
-        <div class="stat"><div class="icon">ðŸ’°</div><p>Total Fee Collection</p><h2 id="totalCollection">â‚¹0</h2></div>
-        <div class="stat"><div class="icon">â³</div><p>Pending Fees</p><h2 id="pendingFees">â‚¹0</h2></div>
-        <div class="stat"><div class="icon">ðŸ“…</div><p>Average Attendance</p><h2 id="averageAttendance">0%</h2></div>
+        <div class="stat"><div class="icon">👨‍🎓</div><p>Total Students</p><h2 id="totalStudents">0</h2></div>
+        <div class="stat"><div class="icon">💰</div><p>Total Fee Collection</p><h2 id="totalCollection">₹0</h2></div>
+        <div class="stat"><div class="icon">⏳</div><p>Pending Fees</p><h2 id="pendingFees">₹0</h2></div>
+        <div class="stat"><div class="icon">📅</div><p>Average Attendance</p><h2 id="averageAttendance">0%</h2></div>
     </div>
     <div class="card">
         <h3>Welcome to Admin Dashboard</h3>
@@ -150,12 +150,12 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <!-- ==================== NOTICE BOARD ==================== -->
 <section id="notices" class="page">
     <div class="card" style="background: #fffafb; border: 1px solid #fca5a5;">
-        <h3 style="color: #991b1b;">âš ï¸ Directives from Administrator</h3>
+        <h3 style="color: #991b1b;">⚠️ Directives from Administrator</h3>
         <div id="directivesList"></div>
     </div>
 
     <div class="card" style="border-left: 5px solid #164e70;">
-        <h3>ðŸ“¢ Post Notice to Students</h3>
+        <h3>📢 Post Notice to Students</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#31536b;">Create announcements specific to your campus. You can target specific courses.</p>
         
         <label>Notice Title</label>
@@ -195,12 +195,12 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 <section id="students" class="page">
     <div class="card" style="background: #f0f5f8; border: 1px dashed #164e70;">
-        <h3>ðŸ“¥ Bulk Import Students (Excel / CSV)</h3>
+        <h3>📥 Bulk Import Students (Excel / CSV)</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#31536b;">Upload an Excel or CSV file. <strong>Warning:</strong> This will replace all current students.</p>
         <div class="actions">
-            <button class="light" onclick="downloadTemplate()"><i>â¬‡</i> 1. Download Template</button>
+            <button class="light" onclick="downloadTemplate()"><i>⬇</i> 1. Download Template</button>
             <label class="primary" style="display:inline-block; padding:10px 14px; border-radius:6px; cursor:pointer; margin:0;">
-                <i>â¬†</i> 2. Upload Excel/CSV File
+                <i>⬆</i> 2. Upload Excel/CSV File
                 <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importExcel(event)">
             </label>
         </div>
@@ -257,15 +257,15 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <h3>Update Student Fee</h3>
         <label>Select Student</label><select id="feeStudent" onchange="autofillFee()"></select>
         <div class="formgrid">
-            <div><label>Total Annual Fee (â‚¹)</label><input type="number" id="feeTotal" placeholder="Enter total fee"></div>
-            <div><label>Amount Paid (â‚¹)</label><input type="number" id="feePaid" placeholder="Enter paid amount"></div>
+            <div><label>Total Annual Fee (₹)</label><input type="number" id="feeTotal" placeholder="Enter total fee"></div>
+            <div><label>Amount Paid (₹)</label><input type="number" id="feePaid" placeholder="Enter paid amount"></div>
         </div>
         <button class="primary" onclick="saveFee()">Update Fee Record</button>
     </div>
 
     <!-- NEW Global Fee Filter Section (Dropdowns) -->
     <div class="card">
-        <h3>ðŸ” Global Fee Management & Filtering</h3>
+        <h3>🔍 Global Fee Management & Filtering</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#31536b;">Filter by Campus, Year, Group, Examination, Term, and Payment Status.</p>
         
         <div class="filter-grid">
@@ -273,9 +273,9 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <label>1. Select Campus</label>
                 <select id="feeFilterCampus" onchange="renderFilteredFees()">
                     <option value="All Campuses">All Campuses</option>
-                    <option value="Sri Vaibhav Campus â€“ Day Scholar">Sri Vaibhav Campus â€“ Day Scholar</option>
-                    <option value="Sri Vaarahi Bhavan â€“ Girls Campus & Hostel">Sri Vaarahi Bhavan â€“ Girls Campus & Hostel</option>
-                    <option value="Sri Virinchi Bhavan â€“ Boys Campus & Hostel">Sri Virinchi Bhavan â€“ Boys Campus & Hostel</option>
+                    <option value="Sri Vaibhav Campus – Day Scholar">Sri Vaibhav Campus – Day Scholar</option>
+                    <option value="Sri Vaarahi Bhavan – Girls Campus & Hostel">Sri Vaarahi Bhavan – Girls Campus & Hostel</option>
+                    <option value="Sri Virinchi Bhavan – Boys Campus & Hostel">Sri Virinchi Bhavan – Boys Campus & Hostel</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -331,7 +331,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
         
         <div style="display:flex; justify-content:flex-end; margin-top:10px;">
-            <button class="red" onclick="resetFeeFilters()">â†º Clear Filters</button>
+            <button class="red" onclick="resetFeeFilters()">↺ Clear Filters</button>
         </div>
     </div>
 
@@ -340,7 +340,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <h3 id="feeTableTitle">Total Full Paid Students (Term 1): 0</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#64748b;" id="feeTableSubtitle">Full Paid Student List (Term 1)</p>
         
-        <input type="text" class="search-bar" id="feeSearchInput" placeholder="ðŸ” Search within results by ID or Name" oninput="renderFilteredFees()">
+        <input type="text" class="search-bar" id="feeSearchInput" placeholder="🔍 Search within results by ID or Name" oninput="renderFilteredFees()">
         
         <div class="tablewrap">
             <table>
@@ -372,9 +372,9 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <label>Campus</label>
                 <select id="tfCampus" onchange="updateCoachingDropdown(); calculateTargets();">
                     <option value="All Campuses">All Campuses</option>
-                    <option value="Sri Vaibhav Campus â€“ Day Scholar">Sri Vaibhav Campus â€“ Day Scholar</option>
-                    <option value="Sri Vaarahi Bhavan â€“ Girls Campus & Hostel">Sri Vaarahi Bhavan â€“ Girls Campus & Hostel</option>
-                    <option value="Sri Virinchi Bhavan â€“ Boys Campus & Hostel">Sri Virinchi Bhavan â€“ Boys Campus & Hostel</option>
+                    <option value="Sri Vaibhav Campus – Day Scholar">Sri Vaibhav Campus – Day Scholar</option>
+                    <option value="Sri Vaarahi Bhavan – Girls Campus & Hostel">Sri Vaarahi Bhavan – Girls Campus & Hostel</option>
+                    <option value="Sri Virinchi Bhavan – Boys Campus & Hostel">Sri Virinchi Bhavan – Boys Campus & Hostel</option>
                 </select>
             </div>
             <div>
@@ -419,15 +419,15 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
             </div>
             <div class="target-card gold">
                 <h4>Expected Collection</h4>
-                <h2 id="tgtExpected">â‚¹0</h2>
+                <h2 id="tgtExpected">₹0</h2>
             </div>
             <div class="target-card green">
                 <h4>Collected Amount</h4>
-                <h2 id="tgtCollected">â‚¹0</h2>
+                <h2 id="tgtCollected">₹0</h2>
             </div>
             <div class="target-card red">
                 <h4>Pending Collection</h4>
-                <h2 id="tgtPending">â‚¹0</h2>
+                <h2 id="tgtPending">₹0</h2>
             </div>
         </div>
         
@@ -449,8 +449,8 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
             </div>
         </div>
 
-        <div class="card" style="box-shadow: none; border: 1px solid #e2e8f0; margin-top: 20px; cursor:pointer;" onclick="openAdminCollectionsModal()" title="Click for details by admin">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items:center;">
+        <div class="card" style="box-shadow: none; border: 1px solid #e2e8f0; margin-top: 20px; cursor: pointer;" onclick="openAdminCollectionsModal()" title="Click to view details by admin">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
                 <h3 style="margin:0;">Collection Progress <span style="font-size:12px;color:#0369a1;font-weight:500;">(Click for details)</span></h3>
                 <h3 style="margin:0; color: #169b6b;" id="tgtPercentage">0%</h3>
             </div>
@@ -458,8 +458,8 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <div class="progress-fill" id="tgtProgressBar"></div>
             </div>
             <div class="progress-labels">
-                <span>Target: <strong id="tgtGoalLabel">â‚¹0</strong></span>
-                <span>Remaining: <strong id="tgtRemainingLabel">â‚¹0</strong></span>
+                <span>Target: <strong id="tgtGoalLabel">₹0</strong></span>
+                <span>Remaining: <strong id="tgtRemainingLabel">₹0</strong></span>
             </div>
         </div>
     </div>
@@ -488,12 +488,12 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <!-- ==================== ATTENDANCE (UPDATED TO DROPDOWNS) ==================== -->
 <section id="attendance" class="page">
     <div class="card" style="background: #f0f5f8; border: 1px dashed #164e70;">
-        <h3>ðŸ“¥ Bulk Update Attendance (Excel / CSV)</h3>
+        <h3>📥 Bulk Update Attendance (Excel / CSV)</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#31536b;">Upload a daily register with <strong>Student ID</strong> and <strong>Status</strong> (Present/Absent).</p>
         <div class="actions">
-            <button class="light" onclick="downloadAttendanceTemplate()"><i>â¬‡</i> 1. Download Template</button>
+            <button class="light" onclick="downloadAttendanceTemplate()"><i>⬇</i> 1. Download Template</button>
             <label class="primary" style="display:inline-block; padding:10px 14px; border-radius:6px; cursor:pointer; margin:0;">
-                <i>â¬†</i> 2. Upload Attendance File
+                <i>⬆</i> 2. Upload Attendance File
                 <input type="file" id="attendanceFileInput" accept=".xlsx, .xls, .csv" style="display: none;" onchange="importAttendanceExcel(event)">
             </label>
         </div>
@@ -508,7 +508,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
     <!-- NEW Global Attendance Filter Section (Dropdowns + Range) -->
     <div class="card">
-        <h3>ðŸ‘¨â€ðŸŽ“ Attendance Overview</h3>
+        <h3>👨‍🎓 Attendance Overview</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#31536b;">Filter students by Campus, Year, Group, Examination, or Attendance Range.</p>
         
         <div class="filter-grid">
@@ -516,9 +516,9 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                 <label>Campus</label>
                 <select id="attFilterCampus" onchange="renderFilteredAttendance()">
                     <option value="All Campuses">All Campuses</option>
-                    <option value="Sri Vaibhav Campus â€“ Day Scholar">Sri Vaibhav Campus â€“ Day Scholar</option>
-                    <option value="Sri Vaarahi Bhavan â€“ Girls Campus & Hostel">Sri Vaarahi Bhavan â€“ Girls Campus & Hostel</option>
-                    <option value="Sri Virinchi Bhavan â€“ Boys Campus & Hostel">Sri Virinchi Bhavan â€“ Boys Campus & Hostel</option>
+                    <option value="Sri Vaibhav Campus – Day Scholar">Sri Vaibhav Campus – Day Scholar</option>
+                    <option value="Sri Vaarahi Bhavan – Girls Campus & Hostel">Sri Vaarahi Bhavan – Girls Campus & Hostel</option>
+                    <option value="Sri Virinchi Bhavan – Boys Campus & Hostel">Sri Virinchi Bhavan – Boys Campus & Hostel</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -554,7 +554,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
 
         <div style="display:flex; justify-content:flex-end; margin-top:10px;">
-            <button class="red" onclick="resetAttFilters()">â†º Reset Filters</button>
+            <button class="red" onclick="resetAttFilters()">↺ Reset Filters</button>
         </div>
     </div>
 
@@ -563,7 +563,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <h3 id="attTableTitle">Total Students Found: 0</h3>
         <p style="font-size:13px; margin-bottom:15px; color:#64748b;">Matching Student List</p>
         
-        <input type="text" class="search-bar" id="attSearchInput" placeholder="ðŸ” Search within results by ID or Name" oninput="renderFilteredAttendance()">
+        <input type="text" class="search-bar" id="attSearchInput" placeholder="🔍 Search within results by ID or Name" oninput="renderFilteredAttendance()">
         
         <div class="tablewrap">
             <table>
@@ -604,7 +604,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <p style="color:#64748b;font-size:13px;margin-bottom:14px;">Upload Excel/CSV to add exam results for multiple students. Required columns: <strong>Student ID, Student Name, Exam Name, Marks, Date</strong>.</p>
         <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
             <button class="primary" onclick="downloadResultsTemplate()">⬇ Download Template</button>
-            <label class="primary" style="cursor:pointer;background:#0d4e78;color:#fff;padding:8px 18px;border-radius:6px;font-weight:600;font-size:14px;">
+            <label class="primary" style="cursor:pointer;background:#0d4e78;color:#fff;padding:8px 18px;border-radius:6px;font-weight:600;font-size:14px;display:inline-block;">
                 📂 Choose File
                 <input type="file" id="resultsFileInput" accept=".xlsx,.xls,.csv" style="display:none;" onchange="previewResultsFile(event)">
             </label>
@@ -620,15 +620,15 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 <section id="achievements" class="page">
     <div class="card">
-        <h3>âœ¨ Add College Achievement</h3>
+        <h3>✨ Add College Achievement</h3>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
             <div><label style="font-weight:600;color:#555;font-size:13px;display:block;margin-bottom:5px;">Achievement Title</label><input id="achievementTitle" placeholder="e.g. JEE Mains AIR 1136" style="width:100%;box-sizing:border-box;"></div>
             <div><label style="font-weight:600;color:#555;font-size:13px;display:block;margin-bottom:5px;">Description</label><input id="achievementDescription" placeholder="Enter description" style="width:100%;box-sizing:border-box;"></div>
         </div>
-        <button class="primary" onclick="addAchievement()" style="padding:11px 28px;font-size:14px;">ðŸ† Add Achievement</button>
+        <button class="primary" onclick="addAchievement()" style="padding:11px 28px;font-size:14px;">🏆 Add Achievement</button>
     </div>
     <div class="card">
-        <h3 style="display:flex;align-items:center;gap:8px;">ðŸ† College Achievements <span id="achievementCount" style="background:#e9bd45;color:#fff;font-size:12px;padding:2px 10px;border-radius:20px;font-weight:700;"></span></h3>
+        <h3 style="display:flex;align-items:center;gap:8px;">🏆 College Achievements <span id="achievementCount" style="background:#e9bd45;color:#fff;font-size:12px;padding:2px 10px;border-radius:20px;font-weight:700;"></span></h3>
         <div id="achievementList"></div>
     </div>
 </section>
@@ -713,7 +713,7 @@ function persist() {
     localStorage.setItem("adminNotices", JSON.stringify(adminNotices));
 }
 
-function money(n) { return "â‚¹" + Number(n || 0).toLocaleString("en-IN"); }
+function money(n) { return "₹" + Number(n || 0).toLocaleString("en-IN"); }
 
 function getGroupAndCoaching(courseString) {
     if (!courseString) return { group: "Unknown", coaching: "Unknown" };
@@ -844,7 +844,7 @@ async function sendDirective(id) {
             if (res && res.notice) newNotice = res.notice;
         } catch (err) {
             console.error("Notice forward error:", err);
-            alert("âŒ Failed to forward directive: " + err.message);
+            alert("❌ Failed to forward directive: " + err.message);
             return;
         }
     }
@@ -853,7 +853,7 @@ async function sendDirective(id) {
     persist();
     toggleForwardBox(id);
     renderNotices();
-    alert(`âœ… Notice successfully sent to: ${target}`);
+    alert(`✅ Notice successfully sent to: ${target}`);
 }
 
 async function postAdminNotice() {
@@ -889,7 +889,7 @@ async function postAdminNotice() {
     persist(); renderNotices();
     document.getElementById("adminNoticeTitle").value = "";
     document.getElementById("adminNoticeDesc").value = "";
-    alert("âœ… Notice published to students successfully!");
+    alert("✅ Notice published to students successfully!");
 }
 
 function renderNotices() {
@@ -903,7 +903,7 @@ function renderNotices() {
             const safeId = String(n.id || n._id || '');
             return `
             <div class="notice-card directive">
-                <h4 style="color:#991b1b;">ðŸš¨ ${n.title}</h4>
+                <h4 style="color:#991b1b;">🚨 ${n.title}</h4>
                 <p>${n.desc || n.content || ''}</p>
                 <div class="notice-meta" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
                     <div>
@@ -955,7 +955,7 @@ function renderNotices() {
 
             <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 6px;">
                 <h4 style="margin: 0; color: #123f60; font-size: 16px;">
-                    ${n.priority === 'Important' ? 'ðŸš¨ ' : ''}${n.title}
+                    ${n.priority === 'Important' ? '🚨 ' : ''}${n.title}
                 </h4>
             </div>
             <p style="margin: 8px 0; color: #555; line-height: 1.5;">${n.desc || n.content || ''}</p>
@@ -970,7 +970,7 @@ function renderNotices() {
 }
 
 async function deleteAdminNotice(id, title) {
-    if (!confirm("âš ï¸ Are you sure you want to delete this notice? This will remove it from students' notice boards.")) return;
+    if (!confirm("⚠️ Are you sure you want to delete this notice? This will remove it from students' notice boards.")) return;
     try {
         const deleteTarget = id || title;
         if (deleteTarget) {
@@ -1007,7 +1007,7 @@ async function deleteAdminNotice(id, title) {
     });
     persist();
     renderNotices();
-    alert("âœ… Notice deleted successfully.");
+    alert("✅ Notice deleted successfully.");
 }
 
 // --- REST OF ADMIN FUNCTIONS ---
@@ -1087,14 +1087,14 @@ function downloadTemplate() {
     ];
     const ws = XLSX.utils.aoa_to_sheet(data);
     XLSX.utils.book_append_sheet(wb, ws, "Students");
-    XLSX.writeFile(wb, `${currentAdminCampus.replace(/[\s\-\â€“]+/g, '_')}_Student_Template.xlsx`);
+    XLSX.writeFile(wb, `${currentAdminCampus.replace(/[\s\-\–]+/g, '_')}_Student_Template.xlsx`);
 }
 
 async function importExcel(event) {
     const file = event.target.files[0];
     if (!file) return;
     
-    if(!confirm("ðŸ“¥ Add students from this file into the system? Existing students will NOT be deleted, and login accounts will be created automatically.")) {
+    if(!confirm("📥 Add students from this file into the system? Existing students will NOT be deleted, and login accounts will be created automatically.")) {
         document.getElementById('excelFileInput').value = ''; return;
     }
     const reader = new FileReader();
@@ -1181,13 +1181,13 @@ async function importExcel(event) {
 
                 persist();
                 renderAll();
-                alert(`âœ… Success! Added/Updated ${newStudents.length} students without removing existing students!\n\nAll students can now log in at login.html using their Student ID and password (default: pass123).`);
+                alert(`✅ Success! Added/Updated ${newStudents.length} students without removing existing students!\n\nAll students can now log in at login.html using their Student ID and password (default: pass123).`);
             } else {
-                alert("âŒ No valid student records found in the file.");
+                alert("❌ No valid student records found in the file.");
             }
         } catch (err) {
             console.error("Student Excel import error:", err);
-            alert("âŒ Failed to process student import file: " + err.message);
+            alert("❌ Failed to process student import file: " + err.message);
         } finally {
             document.getElementById('excelFileInput').value = '';
         }
@@ -1224,7 +1224,7 @@ async function importAttendanceExcel(event) {
             const rows = XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
             if (!rows || rows.length === 0) {
-                alert("âŒ The uploaded file is empty.");
+                alert("❌ The uploaded file is empty.");
                 return;
             }
 
@@ -1325,13 +1325,13 @@ async function importAttendanceExcel(event) {
                 }
                 persist();
                 renderAll();
-                alert(`âœ… Success! Updated attendance for ${updatedCount} students in both browser and cloud database!`);
+                alert(`✅ Success! Updated attendance for ${updatedCount} students in both browser and cloud database!`);
             } else {
-                alert("âŒ No matching student records found in the uploaded file.\n\nPlease ensure your file contains the Student ID (e.g., download the template above).");
+                alert("❌ No matching student records found in the uploaded file.\n\nPlease ensure your file contains the Student ID (e.g., download the template above).");
             }
         } catch (err) {
             console.error("Excel parse error:", err);
-            alert("âŒ Failed to parse attendance file: " + err.message);
+            alert("❌ Failed to parse attendance file: " + err.message);
         } finally {
             document.getElementById('attendanceFileInput').value = '';
         }
@@ -1610,7 +1610,9 @@ function calculateTargets() {
     let monthFilter = document.getElementById("tfMonth").value;
 
     let termLabel = `Term ${termFilter}`;
-    document.getElementById("tgtMonthLabel").textContent = monthFilter ? monthFilter : termLabel;
+    if (document.getElementById("tgtMonthLabel")) {
+        document.getElementById("tgtMonthLabel").textContent = monthFilter ? monthFilter : termLabel;
+    }
 
     let filteredStudents = allStudents.filter(s => {
         if (!matchCampus(s.campus, campusFilter)) return false;
@@ -1674,9 +1676,9 @@ function calculateTargets() {
 
 function generateCampusBreakdown() {
     let campuses = [
-        "Sri Vaibhav Campus â€“ Day Scholar",
-        "Sri Vaarahi Bhavan â€“ Girls Campus & Hostel",
-        "Sri Virinchi Bhavan â€“ Boys Campus & Hostel"
+        "Sri Vaibhav Campus – Day Scholar",
+        "Sri Vaarahi Bhavan – Girls Campus & Hostel",
+        "Sri Virinchi Bhavan – Boys Campus & Hostel"
     ];
     
     let termFilter = parseInt(document.getElementById("tfTerm").value);
@@ -2037,13 +2039,13 @@ function renderAchievements() {
     document.getElementById("achievementList").innerHTML = achievements.map((a, i) => `
     <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;margin-bottom:10px;background:#fafcfe;border:1px solid #e8eff5;border-left:4px solid #e9bd45;border-radius:10px;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(0,0,0,0.07)'" onmouseout="this.style.boxShadow='none'">
         <div style="display:flex;align-items:center;gap:14px;flex:1;">
-            <div style="width:42px;height:42px;background:linear-gradient(135deg,#e9bd45,#f0d78c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">ðŸ†</div>
+            <div style="width:42px;height:42px;background:linear-gradient(135deg,#e9bd45,#f0d78c);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🏆</div>
             <div>
                 <div style="font-weight:700;color:#164e70;font-size:15px;margin-bottom:3px;">${a.title}</div>
                 <div style="color:#666;font-size:13px;">${a.description}</div>
             </div>
         </div>
-        <button onclick="deleteAchievement(${i})" title="Delete achievement" style="width:36px;height:36px;border-radius:50%;border:1px solid #eee;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:16px;transition:all 0.2s;flex-shrink:0;padding:0;" onmouseover="this.style.color='#e74c3c';this.style.borderColor='#e74c3c';this.style.background='#fef2f2'" onmouseout="this.style.color='#ccc';this.style.borderColor='#eee';this.style.background='#fff'">âœ•</button>
+        <button onclick="deleteAchievement(${i})" title="Delete achievement" style="width:36px;height:36px;border-radius:50%;border:1px solid #eee;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#ccc;font-size:16px;transition:all 0.2s;flex-shrink:0;padding:0;" onmouseover="this.style.color='#e74c3c';this.style.borderColor='#e74c3c';this.style.background='#fef2f2'" onmouseout="this.style.color='#ccc';this.style.borderColor='#eee';this.style.background='#fff'">✕</button>
     </div>`).join("");
 }
 
@@ -2269,7 +2271,7 @@ async function openAdminCollectionsModal() {
         });
         const data = await resp.json();
         const modalBody = document.getElementById('adminCollBody');
-        if (!data.success || !data.admins.length) {
+        if (!data.success || !data.admins || !data.admins.length) {
             modalBody.innerHTML = '<p style="color:#64748b;text-align:center;padding:20px;">No collection records found. Payment history will appear here once fees are recorded.</p>';
             return;
         }
