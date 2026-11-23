@@ -104,8 +104,10 @@ window.SchoolAPI = {
   },
 
   // ================= FEES =================
-  async getFees() {
-    const res = await this.request('/api/fees');
+  async getFees(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const endpoint = query ? `/api/fees?${query}` : '/api/fees';
+    const res = await this.request(endpoint);
     return res.fees || {};
   },
 
@@ -221,10 +223,24 @@ window.SchoolAPI = {
     }
   },
 
-  // ================= ADMISSION =================
+  // ================= ADMISSION & ADMIN MANAGEMENT =================
   async submitAdmission(data) {
     return await this.request('/api/admissions', {
       method: 'POST',
+      body: JSON.stringify(data)
+    });
+  },
+
+  async getAdmissions(params = {}) {
+    const query = new URLSearchParams(params).toString();
+    const endpoint = query ? `/api/admissions?${query}` : '/api/admissions';
+    const res = await this.request(endpoint);
+    return res.applications || [];
+  },
+
+  async updateAdmin(username, data) {
+    return await this.request(`/api/auth/users/${encodeURIComponent(username)}`, {
+      method: 'PUT',
       body: JSON.stringify(data)
     });
   },
@@ -250,13 +266,15 @@ window.SchoolAPI = {
   },
 
   // Synchronizes local cache with server state on page load
-  async syncDashboard(role = 'admin') {
+  async syncDashboard(role = 'admin', campus = null) {
     await this.ensureAuth(role);
     try {
+      const studentParams = campus && campus !== 'All Campuses' ? { campus } : {};
+      const feeParams = campus && campus !== 'All Campuses' ? { campus } : {};
       const [students, fees, notices, achievements] = await Promise.all([
-        this.getStudents().catch(() => []),
-        this.getFees().catch(() => ({})),
-        this.getNotices().catch(() => []),
+        this.getStudents(studentParams).catch(() => []),
+        this.getFees(feeParams).catch(() => ({})),
+        this.getNotices('all', campus).catch(() => []),
         this.getAchievements().catch(() => [])
       ]);
 

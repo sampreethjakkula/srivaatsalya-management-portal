@@ -59,6 +59,7 @@ app.use(
 
 // 6. API Endpoints
 app.use('/api/auth', authRoutes);
+app.use('/api/users', authRoutes); // alias for admin management
 app.use('/api/students', studentRoutes);
 app.use('/api/fees', feeRoutes);
 app.use('/api/attendance', attendanceRoutes);

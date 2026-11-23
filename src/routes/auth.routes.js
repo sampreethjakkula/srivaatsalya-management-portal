@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { Users, Students } = require('../data/dbStore');
 const { protect, authorize } = require('../middleware/auth');
+const { normalizeCampus, isValidAdminCampus, CANONICAL_CAMPUSES } = require('../utils/campus');
 
 const signToken = (user) => {
   return jwt.sign(
@@ -116,44 +117,101 @@ router.post('/register-admin', protect, authorize('superadmin'), async (req, res
       return res.status(400).json({ success: false, message: 'Username and password are required.' });
     }
 
+    if (!campus || !isValidAdminCampus(campus)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Campus selection is mandatory. Regular admins must be assigned to exactly one specific campus. "All Campuses" is not permitted.'
+      });
+    }
+
     const cleanUsername = username.trim().toUpperCase();
     const existing = await Users.findOne({ username: cleanUsername });
     if (existing) {
       return res.status(400).json({ success: false, message: 'Admin username already exists.' });
     }
 
+    const assignedCampus = normalizeCampus(campus);
     const hashedPassword = await bcrypt.hash(password, 10);
     const newAdmin = await Users.insert({
       username: cleanUsername,
       password: hashedPassword,
       role: 'admin',
-      name: name || username,
-      campus: campus || 'All Campuses',
+      name: name ? name.trim() : username,
+      campus: assignedCampus,
       createdAt: new Date().toISOString()
     });
 
     res.status(201).json({
       success: true,
       message: 'Admin account created successfully.',
-      admin: { username: newAdmin.username, campus: newAdmin.campus }
+      admin: { username: newAdmin.username, campus: newAdmin.campus, name: newAdmin.name }
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
 });
 
-// @route   GET /api/users  (Super Admin only - list all admins)
+// @route   GET /api/auth/users or /api/users (Super Admin only - list all admins)
 router.get('/users', protect, authorize('superadmin'), async (req, res) => {
   try {
     const users = await Users.find({ role: 'admin' });
     const safeUsers = users.map(u => ({
       username: u.username,
-      name: u.name,
-      campus: u.campus,
+      name: u.name || u.username,
+      campus: u.campus ? normalizeCampus(u.campus) : 'Unassigned',
+      rawCampus: u.campus,
       role: u.role,
       createdAt: u.createdAt
     }));
     res.json({ success: true, count: safeUsers.length, users: safeUsers });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+// @route   PUT /api/auth/users/:username (Super Admin only - update admin name / campus)
+router.put('/users/:username', protect, authorize('superadmin'), async (req, res) => {
+  try {
+    const username = req.params.username.trim().toUpperCase();
+    const { name, campus } = req.body;
+
+    const targetUser = await Users.findOne({ username });
+    if (!targetUser) {
+      return res.status(404).json({ success: false, message: `User "${username}" not found.` });
+    }
+
+    if (username === 'SUPERADMIN' && campus && campus !== 'All Campuses') {
+      return res.status(400).json({ success: false, message: 'Super Admin maintains global access across all campuses.' });
+    }
+
+    const updateFields = {};
+    if (name) updateFields.name = name.trim();
+
+    if (campus !== undefined) {
+      if (targetUser.role === 'admin') {
+        if (!isValidAdminCampus(campus)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Regular admins must be assigned to a specific campus. "All Campuses" is not permitted.'
+          });
+        }
+        updateFields.campus = normalizeCampus(campus);
+      }
+    }
+
+    await Users.update({ username }, { $set: updateFields });
+    const updated = await Users.findOne({ username });
+
+    res.json({
+      success: true,
+      message: `Admin "${username}" updated successfully.`,
+      user: {
+        username: updated.username,
+        name: updated.name,
+        campus: updated.campus,
+        role: updated.role
+      }
+    });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -186,7 +244,7 @@ router.put('/users/:username/password', protect, authorize('superadmin'), async 
   }
 });
 
-// @route   DELETE /api/users/:username  (Super Admin only)
+// @route   DELETE /api/auth/users/:username (Super Admin only)
 router.delete('/users/:username', protect, authorize('superadmin'), async (req, res) => {
   try {
     const username = req.params.username.toUpperCase();

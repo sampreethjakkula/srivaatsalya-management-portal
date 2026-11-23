@@ -3,6 +3,7 @@ const router = express.Router();
 const mongoose = require('mongoose');
 const { Notices } = require('../data/dbStore');
 const { protect, authorize } = require('../middleware/auth');
+const { normalizeCampus, getCampusRegex } = require('../utils/campus');
 
 // @route   GET /api/notices
 router.get('/', async (req, res) => {
@@ -11,7 +12,8 @@ router.get('/', async (req, res) => {
     let query = {};
     if (type && type !== 'all') query.type = type;
     if (campus && campus !== 'All Campuses') {
-      query.$or = [{ campus: 'All Campuses' }, { campus }];
+      const cRegex = getCampusRegex(campus);
+      query.$or = [{ campus: 'All Campuses' }, { campus: cRegex ? { $regex: cRegex } : campus }];
     }
 
     const rawNotices = await Notices.find(query);
@@ -70,8 +72,10 @@ router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => 
     // Determine sender details based on logged in user
     const senderName = req.user.name || req.user.username;
     const senderRole = req.user.role; // 'admin' or 'superadmin'
-    const noticeCampus = campus || req.user.campus || 'All Campuses';
-    const noticeTarget = target || noticeCampus || 'All Students';
+    const noticeCampus = senderRole === 'superadmin'
+      ? (campus && campus !== 'All Campuses' ? normalizeCampus(campus) : 'All Campuses')
+      : normalizeCampus(req.user.campus);
+    const noticeTarget = target || (noticeCampus === 'All Campuses' ? 'All Students' : noticeCampus);
     const notice = await Notices.insert({
       title: title.trim(),
       content: bodyText,

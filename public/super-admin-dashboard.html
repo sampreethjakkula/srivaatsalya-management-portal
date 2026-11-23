@@ -205,13 +205,17 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         <h2 id="pageTitle">Administrator Dashboard</h2>
         <small id="adminCampusLabel">Sri Vaatsalya Junior College - Global Control</small>
     </div>
-    <div class="profile">
-        <select style="margin:0; padding: 8px 12px; width: 200px; font-weight: 600; border-color: #0d4e78; color: #0d4e78;">
-            <option>All Campuses</option>
-            <option>Sri Vaibhav Campus</option>
-            <option>Sri Vaarahi Bhavan</option>
-            <option>Sri Virinchi Bhavan</option>
-        </select>
+    <div class="profile" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px; background:#f0f7fc; padding:5px 12px; border-radius:8px; border:1.5px solid #bae0f7;">
+            <span style="font-size:18px;">🏫</span>
+            <label for="globalCampusFilter" style="margin:0; font-size:12px; font-weight:700; color:#0d4e78; text-transform:uppercase; letter-spacing:0.5px;">Campus:</label>
+            <select id="globalCampusFilter" onchange="onGlobalCampusFilterChange(this.value)" style="margin:0; padding: 7px 12px; min-width: 260px; font-weight: 700; font-size: 13px; border-radius: 6px; border: 1.5px solid #0d4e78; color: #0d4e78; background: #fff; cursor: pointer;">
+                <option value="All Campuses">All Campuses</option>
+                <option value="Sri Vaibhav Campus Day Scholar">Sri Vaibhav Campus Day Scholar</option>
+                <option value="Sri Vaarahi Girls Hostel">Sri Vaarahi Girls Hostel</option>
+                <option value="Sri Virinchi Boys Hostel">Sri Virinchi Boys Hostel</option>
+            </select>
+        </div>
         <span style="display:flex;align-items:center;gap:8px;font-size:18px;font-weight:700;color:#164e70;"><span style="font-size:22px;">👤</span> Administrator</span>
     </div>
 </header>
@@ -234,7 +238,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
         </div>
     </div>
     <div class="card">
-        <h3>Recent Students (All Campuses)</h3>
+        <h3 id="recentStudentsHeading">Recent Students (All Campuses)</h3>
         <div class="tablewrap"><table><thead><tr><th>Student ID</th><th>Name</th><th>Course</th><th>Year</th><th>Campus</th><th style="text-align:center;">Actions</th></tr></thead><tbody id="recentStudents"></tbody></table></div>
     </div>
 </section>
@@ -243,19 +247,20 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 <section id="manageAdmins" class="page">
     <div class="card" style="border-left: 5px solid #0d4e78;">
         <h3 style="color: #0d4e78;">🛡️ Create New Admin Account</h3>
+        <p style="font-size: 13px; color: #555; margin-bottom: 12px;">Regular administrators must always be assigned to exactly one specific campus. "All Campuses" access is reserved exclusively for the Super Administrator.</p>
         <div class="formgrid">
-            <div><label>Admin Username</label><input type="text" id="newAdminUser" placeholder="e.g. administrator"></div>
+            <div><label>Admin Username <span style="color:#dc2626;">*</span></label><input type="text" id="newAdminUser" placeholder="e.g. virinchi_admin"></div>
             <div>
-                <label>Assign Campus</label>
-                <select id="newAdminCampus">
-                    <option value="All Campuses">All Campuses (Global)</option>
-                    <option value="Day Scholar">Sri Vaibhav Campus (Day Scholar)</option>
-                    <option value="Girls Campus">Sri Vaarahi Bhavan (Girls)</option>
-                    <option value="Boys Campus">Sri Virinchi Bhavan (Boys)</option>
+                <label>Assign Campus <span style="color:#dc2626;">* (Mandatory)</span></label>
+                <select id="newAdminCampus" required>
+                    <option value="" disabled selected>-- Select Specific Campus --</option>
+                    <option value="Sri Vaibhav Campus Day Scholar">Sri Vaibhav Campus Day Scholar</option>
+                    <option value="Sri Vaarahi Girls Hostel">Sri Vaarahi Girls Hostel</option>
+                    <option value="Sri Virinchi Boys Hostel">Sri Virinchi Boys Hostel</option>
                 </select>
             </div>
-            <div><label>Password</label><input type="password" id="newAdminPass" placeholder="Enter password"></div>
-            <div><label>Confirm Password</label><input type="password" id="newAdminConfirmPass" placeholder="Confirm password"></div>
+            <div><label>Password <span style="color:#dc2626;">*</span></label><input type="password" id="newAdminPass" placeholder="Enter password"></div>
+            <div><label>Confirm Password <span style="color:#dc2626;">*</span></label><input type="password" id="newAdminConfirmPass" placeholder="Confirm password"></div>
         </div>
         <button class="primary" style="margin-top: 10px; width: 150px;" onclick="createAdminAccount()">Create Admin</button>
     </div>
@@ -744,17 +749,53 @@ function getGroupAndCoaching(courseString) {
    NORMALIZATION HELPERS 
    ===================================================================== */
 const CAMPUS_ALL   = "All Campuses";
-const CAMPUS_DAY   = "Sri Vaibhav Campus – Day Scholar";
-const CAMPUS_GIRLS = "Sri Vaarahi Bhavan – Girls Campus & Hostel";
-const CAMPUS_BOYS  = "Sri Virinchi Bhavan – Boys Campus & Hostel";
+const CAMPUS_DAY   = "Sri Vaibhav Campus Day Scholar";
+const CAMPUS_GIRLS = "Sri Vaarahi Girls Hostel";
+const CAMPUS_BOYS  = "Sri Virinchi Boys Hostel";
+
+let currentGlobalCampus = localStorage.getItem("selectedCampusFilter") || CAMPUS_ALL;
 
 function normalizeCampus(rawCampus) {
     if (!rawCampus) return CAMPUS_DAY;
-    const v = String(rawCampus).toLowerCase();
-    if (v.includes("vaarahi") || v.includes("girls")) return CAMPUS_GIRLS;
-    if (v.includes("virinchi") || v.includes("boys")) return CAMPUS_BOYS;
+    const v = String(rawCampus).toLowerCase().trim();
+    if (v === 'all campuses' || v === 'all' || v === 'global') return CAMPUS_ALL;
+    if (v.includes("vaarahi") || v.includes("girls") || v.includes("girl")) return CAMPUS_GIRLS;
+    if (v.includes("virinchi") || v.includes("boys") || v.includes("boy")) return CAMPUS_BOYS;
     if (v.includes("vaibhav") || v.includes("day")) return CAMPUS_DAY;
-    return rawCampus;
+    return CAMPUS_DAY;
+}
+
+function matchCampus(entityCampus, filterCampus) {
+    if (!filterCampus || filterCampus === CAMPUS_ALL) return true;
+    return normalizeCampus(entityCampus) === normalizeCampus(filterCampus);
+}
+
+function onGlobalCampusFilterChange(newCampus) {
+    currentGlobalCampus = newCampus;
+    localStorage.setItem("selectedCampusFilter", newCampus);
+    
+    // Update header label
+    const label = document.getElementById("adminCampusLabel");
+    if (label) {
+        label.textContent = newCampus === CAMPUS_ALL 
+            ? "Sri Vaatsalya Junior College - Global Control" 
+            : `${newCampus} - Active Campus View`;
+    }
+
+    // Refresh all rendered modules
+    renderAll();
+
+    // If currently on students or fees subpages, update their view
+    const activePage = document.querySelector(".page.active");
+    if (activePage) {
+        if (activePage.id === "students") {
+            if (newCampus === CAMPUS_ALL) initAnalyticsPage();
+            else anSelectCampus(newCampus);
+        } else if (activePage.id === "fees") {
+            if (newCampus === CAMPUS_ALL) initFeesPage();
+            else feeSelectCampus(newCampus);
+        }
+    }
 }
 
 function normalizeYear(rawYear) {
@@ -824,20 +865,69 @@ async function loadAdminAccounts() {
         const table = document.getElementById("adminAccountsTable");
         if (!table) return;
         table.innerHTML = '';
+
+        // Add Chief Administrator (Super Admin) entry at the top
+        const superRow = document.createElement("tr");
+        superRow.innerHTML = `
+            <td><strong>SUPERADMIN</strong></td>
+            <td><span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">All Campuses (Global)</span></td>
+            <td><span class="badge" style="background:#fef3c7; color:#92400e; font-weight:700;">Super Admin</span></td>
+            <td>🔒 Protected</td>
+        `;
+        table.appendChild(superRow);
+
         (data.users || []).forEach(admin => {
+            if (admin.username === 'SUPERADMIN') return;
             const row = document.createElement("tr");
             row.setAttribute('data-username', admin.username);
+
+            const isUnassigned = !admin.campus || admin.campus === 'All Campuses' || admin.campus === 'Unassigned';
+            const campusBadge = isUnassigned
+                ? `<span class="badge" style="background:#fee2e2; color:#dc2626; font-weight:700;">⚠️ Unassigned / Legacy</span>`
+                : `<span class="badge" style="background:#e0f2fe; color:#0369a1; font-weight:700;">${admin.campus}</span>`;
+
             row.innerHTML = `
-                <td>${admin.username}</td><td>${admin.campus || 'All Campuses'}</td>
+                <td><strong>${admin.username}</strong></td>
+                <td>${campusBadge}</td>
                 <td><span class="badge" style="background:#e0e7ff; color:#3730a3;">Admin</span></td>
                 <td>
                     <button class="primary" style="padding:5px 10px;font-size:12px;margin-right:6px;" onclick="changeAdminPassword('${admin.username}')">🔑 Change Password</button>
+                    <button class="gold" style="padding:5px 10px;font-size:12px;margin-right:6px;" onclick="editAdminCampus('${admin.username}', '${admin.campus || ''}')">🏫 Edit Campus</button>
                     <button class="red" style="padding:5px 10px;font-size:12px;" onclick="deleteAdmin('${admin.username}', this)">Delete</button>
                 </td>
             `;
             table.appendChild(row);
         });
     } catch(e) { console.warn('Could not load admins:', e.message); }
+}
+
+async function editAdminCampus(username, currentCampus) {
+    let promptMsg = `Assign specific campus for Admin "${username}":\n\n1. Sri Vaibhav Campus Day Scholar\n2. Sri Vaarahi Girls Hostel\n3. Sri Virinchi Boys Hostel\n\nEnter 1, 2, or 3:`;
+    let choice = prompt(promptMsg);
+    if (!choice) return;
+    let selectedCampus = '';
+    choice = choice.trim();
+    if (choice === '1' || choice.toLowerCase().includes('vaibhav') || choice.toLowerCase().includes('day')) {
+        selectedCampus = 'Sri Vaibhav Campus Day Scholar';
+    } else if (choice === '2' || choice.toLowerCase().includes('vaarahi') || choice.toLowerCase().includes('girl')) {
+        selectedCampus = 'Sri Vaarahi Girls Hostel';
+    } else if (choice === '3' || choice.toLowerCase().includes('virinchi') || choice.toLowerCase().includes('boy')) {
+        selectedCampus = 'Sri Virinchi Boys Hostel';
+    } else {
+        alert("Invalid campus choice. Regular admins must be assigned to one of the 3 specific campuses. 'All Campuses' is not allowed.");
+        return;
+    }
+
+    try {
+        await window.SchoolAPI.request('/api/auth/users/' + encodeURIComponent(username), {
+            method: 'PUT',
+            body: JSON.stringify({ campus: selectedCampus })
+        });
+        alert(`✅ Admin "${username}" has been successfully assigned to: ${selectedCampus}`);
+        await loadAdminAccounts();
+    } catch(err) {
+        alert("Error updating admin campus: " + (err.message || err));
+    }
 }
 
 async function changeAdminPassword(username) {
@@ -881,6 +971,10 @@ async function createAdminAccount() {
     let pass = document.getElementById("newAdminPass").value;
     let confirm = document.getElementById("newAdminConfirmPass").value;
     if (!user || !pass) { alert("Please fill in all fields."); return; }
+    if (!campus || campus === "All Campuses") {
+        alert("Campus selection is mandatory. Regular admins must be assigned to exactly one specific campus. 'All Campuses' is not permitted.");
+        return;
+    }
     if (pass !== confirm) { alert("Passwords do not match."); return; }
     if (!window.SchoolAPI) { alert("API not available."); return; }
     try {
@@ -889,6 +983,7 @@ async function createAdminAccount() {
             body: JSON.stringify({ username: user, password: pass, campus: campus })
         });
         document.getElementById("newAdminUser").value = "";
+        document.getElementById("newAdminCampus").selectedIndex = 0;
         document.getElementById("newAdminPass").value = "";
         document.getElementById("newAdminConfirmPass").value = "";
         alert(`✅ Admin account for "${user.toUpperCase()}" created successfully!`);
@@ -938,9 +1033,18 @@ async function postSuperNotice() {
 function renderNotices() {
     let container = document.getElementById("superNoticeList");
     if (!container) return;
-    const list = (allNotices && allNotices.length > 0) ? allNotices : (globalNotices || []);
+    const rawList = (allNotices && allNotices.length > 0) ? allNotices : (globalNotices || []);
+
+    // Filter notices according to the active global campus filter
+    const list = rawList.filter(n => {
+        if (!currentGlobalCampus || currentGlobalCampus === CAMPUS_ALL) return true;
+        const nCampus = n.campus || n.target || 'All Campuses';
+        if (nCampus === 'All Campuses' || nCampus === 'All' || n.type === 'global' || n.postedBy === 'SUPERADMIN' || n.sender === 'Administrator') return true;
+        return matchCampus(nCampus, currentGlobalCampus);
+    });
+
     if (list.length === 0) {
-        container.innerHTML = "<p style='color:#888;'>No notices published yet.</p>";
+        container.innerHTML = "<p style='color:#888;'>No notices published for the selected campus yet.</p>";
         return;
     }
     container.innerHTML = list.map(n => {
@@ -1028,11 +1132,20 @@ async function deleteSuperNotice(id, title) {
 function updateCoachingDropdown() { /* simplified */ }
 
 function calculateTargets() {
-    let campusFilter = document.getElementById("tfCampus").value;
+    let tfCampusSelect = document.getElementById("tfCampus");
+    if (tfCampusSelect && currentGlobalCampus && currentGlobalCampus !== CAMPUS_ALL) {
+        for (let opt of tfCampusSelect.options) {
+            if (matchCampus(opt.value, currentGlobalCampus)) {
+                tfCampusSelect.value = opt.value;
+                break;
+            }
+        }
+    }
+    let campusFilter = tfCampusSelect ? tfCampusSelect.value : currentGlobalCampus;
     let termFilter = parseInt(document.getElementById("tfTerm").value);
     let monthFilter = document.getElementById("tfMonth").value;
     document.getElementById("tgtMonthLabel").textContent = monthFilter || `Term ${termFilter}`;
-    let filteredStudents = allStudents.filter(s => (campusFilter === "All Campuses" || normalizeCampus(s.campus) === campusFilter));
+    let filteredStudents = allStudents.filter(s => matchCampus(s.campus, campusFilter));
     let totalStudents = filteredStudents.length;
     let expectedCollection = 0, collectedAmount = 0;
     filteredStudents.forEach(s => {
@@ -1212,7 +1325,18 @@ function updateMonthlyPerformance() {
 
 /* ================= LEGACY RENDERERS ================= */
 function renderResults() {
-    document.getElementById("resultTable").innerHTML = results.map((r) => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.exam}</td><td>${r.score}</td></tr>`).join("");
+    let filteredResults = results;
+    if (currentGlobalCampus && currentGlobalCampus !== CAMPUS_ALL) {
+        const campusStudentIds = new Set(allStudents.filter(s => matchCampus(s.campus, currentGlobalCampus)).map(s => s.id));
+        filteredResults = results.filter(r => campusStudentIds.has(r.id));
+    }
+    const table = document.getElementById("resultTable");
+    if (!table) return;
+    if (filteredResults.length === 0) {
+        table.innerHTML = "<tr><td colspan='4' style='text-align:center; color:#888;'>No exam results found for selected campus.</td></tr>";
+        return;
+    }
+    table.innerHTML = filteredResults.map((r) => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.exam}</td><td>${r.score}</td></tr>`).join("");
 }
 
 async function executeDeleteAchievement(targetId) {
@@ -1324,15 +1448,41 @@ function renderAchievements() {
 }
 
 function renderDashboard() {
+    const filteredStudents = (currentGlobalCampus === CAMPUS_ALL) 
+        ? allStudents 
+        : allStudents.filter(s => matchCampus(s.campus, currentGlobalCampus));
+
     let collection = 0, pending = 0;
-    allStudents.forEach(s => { let f = fees[s.id] || { total: 0, paid: 0 }; collection += f.paid; pending += f.total - f.paid; });
-    let totalAtt = 0; allStudents.forEach(s => totalAtt += Number(s.att));
-    let avgAtt = allStudents.length ? Math.round(totalAtt / allStudents.length) : 0;
-    document.getElementById("totalStudents").textContent = allStudents.length;
+    filteredStudents.forEach(s => { 
+        let f = fees[s.id] || { total: 0, paid: 0 }; 
+        collection += f.paid; 
+        pending += f.total - f.paid; 
+    });
+    let totalAtt = 0; 
+    filteredStudents.forEach(s => totalAtt += Number(s.att || 0));
+    let avgAtt = filteredStudents.length ? Math.round(totalAtt / filteredStudents.length) : 0;
+
+    document.getElementById("totalStudents").textContent = filteredStudents.length;
     document.getElementById("totalCollection").textContent = money(collection);
     document.getElementById("pendingFees").textContent = money(pending);
     document.getElementById("averageAttendance").textContent = avgAtt + "%";
-    document.getElementById("recentStudents").innerHTML = allStudents.slice(-5).reverse().map(s => `<tr><td><strong>${s.id}</strong></td><td>${s.name}</td><td>${s.course || '—'}</td><td>${normalizeYear(s.year)}</td><td>${normalizeCampus(s.campus)}</td><td style="text-align:center;"><button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button></td></tr>`).join("");
+
+    const titleSuffix = currentGlobalCampus === CAMPUS_ALL ? "(All Campuses)" : `(${currentGlobalCampus})`;
+    const heading = document.getElementById("recentStudentsHeading");
+    if (heading) heading.textContent = `Recent Students ${titleSuffix}`;
+
+    document.getElementById("recentStudents").innerHTML = filteredStudents.slice(-5).reverse().map(s => `
+        <tr>
+            <td><strong>${s.id}</strong></td>
+            <td>${s.name}</td>
+            <td>${s.course || '—'}</td>
+            <td>${normalizeYear(s.year)}</td>
+            <td>${normalizeCampus(s.campus)}</td>
+            <td style="text-align:center;">
+                <button class="red" style="padding: 4px 10px; font-size: 11px; border-radius: 4px;" onclick="deleteStudentPermanently('${s.id}')">🗑️ Delete</button>
+            </td>
+        </tr>
+    `).join("");
 }
 
 /* =====================================================================
@@ -1403,7 +1553,7 @@ function anRenderAll() {
     anRenderStudentTable();
 }
 
-function anStudentsByCampus() { if (anState.campus === CAMPUS_ALL) return allStudents.slice(); return allStudents.filter(s => normalizeCampus(s.campus) === anState.campus); }
+function anStudentsByCampus() { if (anState.campus === CAMPUS_ALL) return allStudents.slice(); return allStudents.filter(s => matchCampus(s.campus, anState.campus)); }
 function anStudentsByYear() { let list = anStudentsByCampus(); if (anState.year) list = list.filter(s => normalizeYear(s.year) === anState.year); return list; }
 function anStudentsByGroup() { let list = anStudentsByYear(); if (anState.group) list = list.filter(s => normalizeGroup(s.course, s.group) === anState.group); return list; }
 function anFilteredStudents() { let list = anStudentsByGroup(); if (anState.exam) list = list.filter(s => s.exam === anState.exam); return list; }
@@ -1568,7 +1718,7 @@ function feeSelectStatus(status) {
 
 function feeFilteredStudents() {
     let list = allStudents.slice();
-    if (feeState.campus !== CAMPUS_ALL) list = list.filter(s => normalizeCampus(s.campus) === feeState.campus);
+    if (feeState.campus !== CAMPUS_ALL) list = list.filter(s => matchCampus(s.campus, feeState.campus));
     if (feeState.year) list = list.filter(s => normalizeYear(s.year) === feeState.year);
     if (feeState.group) list = list.filter(s => normalizeGroup(s.course, s.group) === feeState.group);
     if (feeState.exam) list = list.filter(s => s.exam === feeState.exam);
@@ -1688,6 +1838,19 @@ window.onload = async function() {
 
     enrichAllStudents();
     persist();
+
+    // Restore Global Campus Filter in Topbar
+    const filterDropdown = document.getElementById("globalCampusFilter");
+    if (filterDropdown && currentGlobalCampus) {
+        filterDropdown.value = currentGlobalCampus;
+        const label = document.getElementById("adminCampusLabel");
+        if (label) {
+            label.textContent = currentGlobalCampus === CAMPUS_ALL 
+                ? "Sri Vaatsalya Junior College - Global Control" 
+                : `${currentGlobalCampus} - Active Campus View`;
+        }
+    }
+
     let now = new Date(); let monthStr = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
     if (document.getElementById("tfMonth")) document.getElementById("tfMonth").value = monthStr;
     renderAll();

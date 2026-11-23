@@ -3,13 +3,18 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const { Users, Students, Fees, Attendance } = require('../data/dbStore');
 const { protect, authorize } = require('../middleware/auth');
+const { buildCampusCondition, normalizeCampus, isSameCampus } = require('../utils/campus');
 
 // @route   GET /api/students
 router.get('/', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {
     const { campus, course, year, search } = req.query;
     let query = {};
-    if (campus && campus !== 'All Campuses') query.campus = campus;
+
+    // Apply strict campus condition (Regular admin is locked to token campus; Superadmin can filter or see all)
+    const campusCondition = buildCampusCondition(req.user, campus);
+    Object.assign(query, campusCondition);
+
     if (course && course !== 'All') query.course = course;
     if (year && year !== 'All') query.year = year;
 
@@ -39,6 +44,14 @@ router.get('/:id', protect, async (req, res) => {
     }
     const student = await Students.findOne({ id: reqStudentId });
     if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });
+
+    // Enforce campus ownership for regular admin
+    if (req.user.role === 'admin') {
+      if (!isSameCampus(student.campus, req.user.campus)) {
+        return res.status(403).json({ success: false, message: 'Access Denied: Student belongs to another campus.' });
+      }
+    }
+
     res.json({ success: true, student });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -61,13 +74,18 @@ router.post('/bulk', protect, authorize('admin', 'superadmin'), async (req, res)
       const cleanId = String(s.id).trim().toUpperCase();
       const studentPassword = s.pass || 'pass123';
 
+      // Campus enforcement: Regular admins can ONLY import into their assigned campus!
+      const assignedCampus = req.user.role === 'superadmin'
+        ? normalizeCampus(s.campus || 'Day Scholar')
+        : normalizeCampus(req.user.campus);
+
       const cleanCourse = s.course ? String(s.course).trim().replace(/\bAP\s+EAPCET\b/gi, 'EAPCET').replace(/\beapset\b/gi, 'EAPCET') : 'BiPC - NEET';
       const studentDoc = {
         id: cleanId,
         name: String(s.name).trim(),
         course: cleanCourse,
         year: s.year || '1st Year',
-        campus: s.campus || req.user.campus || 'Day Scholar',
+        campus: assignedCampus,
         dob: s.dob || 'Not Provided',
         gender: s.gender || 'Not Provided',
         father: s.father || 'Not Provided',
@@ -84,6 +102,10 @@ router.post('/bulk', protect, authorize('admin', 'superadmin'), async (req, res)
       // 1. Insert or update Student
       const existingStudent = await Students.findOne({ id: cleanId });
       if (existingStudent) {
+        // If regular admin, ensure existing student also belongs to their campus
+        if (req.user.role === 'admin' && !isSameCampus(existingStudent.campus, req.user.campus)) {
+          continue; // skip overwriting other campus student
+        }
         await Students.update({ id: cleanId }, { $set: studentDoc });
       } else {
         studentDoc.createdAt = new Date().toISOString();
@@ -158,12 +180,17 @@ router.post('/', protect, authorize('admin', 'superadmin'), async (req, res) => 
 
     const cleanCourse = course ? String(course).trim().replace(/\bAP\s+EAPCET\b/gi, 'EAPCET').replace(/\beapset\b/gi, 'EAPCET') : 'BiPC - NEET';
 
+    // Campus enforcement: Regular admins can ONLY create students in their assigned campus!
+    const assignedCampus = req.user.role === 'superadmin'
+      ? normalizeCampus(campus || 'Day Scholar')
+      : normalizeCampus(req.user.campus);
+
     const newStudent = await Students.insert({
       id: cleanId,
       name: name.trim(),
       course: cleanCourse,
       year: year || '1st Year',
-      campus: campus || req.user.campus || 'Day Scholar',
+      campus: assignedCampus,
       dob: cleanDob || 'Not Provided',
       gender: gender || 'Not Provided',
       father: father || 'Not Provided',
@@ -233,6 +260,17 @@ router.put('/:id', protect, authorize('admin', 'superadmin'), async (req, res) =
     const student = await Students.findOne({ id: studentId });
     if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });
 
+    // Enforce campus ownership: regular admin cannot edit students from another campus
+    if (req.user.role === 'admin') {
+      if (!isSameCampus(student.campus, req.user.campus)) {
+        return res.status(403).json({ success: false, message: 'Access Denied: You cannot modify students from another campus.' });
+      }
+      // Regular admin cannot alter the student's campus
+      delete updateData.campus;
+    } else if (updateData.campus) {
+      updateData.campus = normalizeCampus(updateData.campus);
+    }
+
     await Students.update({ id: studentId }, { $set: updateData });
     const updatedStudent = await Students.findOne({ id: studentId });
 
@@ -248,9 +286,19 @@ router.put('/:id', protect, authorize('admin', 'superadmin'), async (req, res) =
 });
 
 // @route   DELETE /api/students/:id
-router.delete('/:id', protect, authorize('superadmin'), async (req, res) => {
+router.delete('/:id', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {
     const studentId = req.params.id.trim().toUpperCase();
+    const student = await Students.findOne({ id: studentId });
+    if (!student) return res.status(404).json({ success: false, message: 'Student not found.' });
+
+    // Enforce campus ownership for regular admin
+    if (req.user.role === 'admin') {
+      if (!isSameCampus(student.campus, req.user.campus)) {
+        return res.status(403).json({ success: false, message: 'Access Denied: You cannot delete students from another campus.' });
+      }
+    }
+
     await Students.remove({ id: studentId });
     await Users.remove({ username: studentId });
     await Fees.remove({ studentId: studentId });

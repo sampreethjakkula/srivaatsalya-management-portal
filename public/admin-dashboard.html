@@ -624,7 +624,37 @@ const COURSE_FEES = {
 const HOSTEL_FEE = 60000;
 const TRANSPORT_FEE = 15000;
 
-let currentAdminCampus = localStorage.getItem('loggedInAdminCampus') || "All Campuses";
+function normalizeCampus(rawCampus) {
+    if (!rawCampus) return "Sri Vaibhav Campus Day Scholar";
+    const v = String(rawCampus).toLowerCase().trim();
+    if (v.includes("vaarahi") || v.includes("girl")) return "Sri Vaarahi Girls Hostel";
+    if (v.includes("virinchi") || v.includes("boy")) return "Sri Virinchi Boys Hostel";
+    if (v.includes("vaibhav") || v.includes("day")) return "Sri Vaibhav Campus Day Scholar";
+    return rawCampus;
+}
+
+let storedAdminCampus = localStorage.getItem('loggedInAdminCampus') || localStorage.getItem('userCampus') || '';
+try {
+    const u = JSON.parse(localStorage.getItem('user') || '{}');
+    if (u && u.campus) storedAdminCampus = u.campus;
+} catch(e) {}
+
+let currentAdminCampus = normalizeCampus(storedAdminCampus);
+
+function lockCampusFilters() {
+    const campusSelects = ['feeFilterCampus', 'tfCampus', 'attFilterCampus', 'campus'];
+    campusSelects.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.innerHTML = `<option value="${currentAdminCampus}">${currentAdminCampus}</option>`;
+            el.value = currentAdminCampus;
+            el.disabled = true;
+            el.style.backgroundColor = '#f1f5f9';
+            el.style.cursor = 'not-allowed';
+            el.style.fontWeight = 'bold';
+        }
+    });
+}
 
 function updateAdminHeader() {
     let adminName = '';
@@ -1031,13 +1061,14 @@ function parseExcelDob(rawDob) {
 
 function downloadTemplate() {
     const wb = XLSX.utils.book_new();
+    const defaultGender = (currentAdminCampus.includes("Girls") || currentAdminCampus.includes("girl")) ? "Female" : "Male";
     const data = [
         ["Student ID", "Name", "DOB", "Gender", "Father", "Mother", "Phone", "School", "Course", "Year", "Campus", "Transport", "Attendance", "Password"],
-        ["STU111", "Sample Student", "2008-05-15", "Male", "Father Name", "Mother Name", "9876543210", "Previous School", "MPC - JEE Advanced", "1st Year", "Day Scholar", "true", 92, "pass123"]
+        ["STU111", "Sample Student", "2008-05-15", defaultGender, "Father Name", "Mother Name", "9876543210", "Previous School", "MPC - JEE Advanced", "1st Year", currentAdminCampus, "true", 92, "pass123"]
     ];
     const ws = XLSX.utils.aoa_to_sheet(data);
     XLSX.utils.book_append_sheet(wb, ws, "Students");
-    XLSX.writeFile(wb, "Student_Import_Template.xlsx");
+    XLSX.writeFile(wb, `${currentAdminCampus.replace(/[\s\-\–]+/g, '_')}_Student_Template.xlsx`);
 }
 
 async function importExcel(event) {
@@ -1066,13 +1097,12 @@ async function importExcel(event) {
                 // Robust date of birth parsing into standard YYYY-MM-DD
                 let formattedDob = parseExcelDob(row[2]);
 
-                let assignedCampus = currentAdminCampus === "All Campuses" 
-                    ? (row[10] ? String(row[10]).trim() : "Day Scholar") 
-                    : currentAdminCampus;
+                // STRICT: Always assign current admin's campus
+                let assignedCampus = currentAdminCampus;
                     
                 let assignedGender = row[3] ? String(row[3]).trim() : "Male";
-                if (currentAdminCampus === "Girls Campus") assignedGender = "Female";
-                if (currentAdminCampus === "Boys Campus") assignedGender = "Male";
+                if (currentAdminCampus.includes("Girls") || currentAdminCampus.includes("girl")) assignedGender = "Female";
+                if (currentAdminCampus.includes("Boys") || currentAdminCampus.includes("boy")) assignedGender = "Male";
 
                 let studentPass = row[13] ? String(row[13]).trim() : "pass123";
 
@@ -2051,28 +2081,28 @@ window.onload = async function() {
         }
     });
 
-    document.getElementById('adminCampusLabel').textContent = currentAdminCampus === "All Campuses" ? "Sri Vaatsalya Junior College" : `${currentAdminCampus} Administrator`;
+    lockCampusFilters();
+    document.getElementById('adminCampusLabel').textContent = `${currentAdminCampus} Administrator Portal`;
     updateAdminHeader();
-
-    if(currentAdminCampus !== "All Campuses") {
-        document.getElementById("campus").value = currentAdminCampus;
-        document.getElementById("campus").disabled = true; 
-    }
 
     let genderDropdown = document.getElementById("sgender");
     let genderLocked = document.getElementById("sgenderLocked");
 
-    if (currentAdminCampus === "Girls Campus") {
-        genderDropdown.style.display = "none";
-        genderLocked.style.display = "block";
-        genderLocked.value = "Female";
-    } else if (currentAdminCampus === "Boys Campus") {
-        genderDropdown.style.display = "none";
-        genderLocked.style.display = "block";
-        genderLocked.value = "Male";
+    if (currentAdminCampus.includes("Girls") || currentAdminCampus.includes("girl")) {
+        if (genderDropdown) genderDropdown.style.display = "none";
+        if (genderLocked) {
+            genderLocked.style.display = "block";
+            genderLocked.value = "Female";
+        }
+    } else if (currentAdminCampus.includes("Boys") || currentAdminCampus.includes("boy")) {
+        if (genderDropdown) genderDropdown.style.display = "none";
+        if (genderLocked) {
+            genderLocked.style.display = "block";
+            genderLocked.value = "Male";
+        }
     } else {
-        genderDropdown.style.display = "block";
-        genderLocked.style.display = "none";
+        if (genderDropdown) genderDropdown.style.display = "block";
+        if (genderLocked) genderLocked.style.display = "none";
     }
     
     let now = new Date();

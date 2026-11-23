@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { Fees, Students } = require('../data/dbStore');
 const { protect, authorize } = require('../middleware/auth');
+const { buildCampusCondition, isSameCampus } = require('../utils/campus');
 
 // Helper: normalize a fee doc to always expose total/paid/history
 // (works for both Mongoose schema fields AND legacy NeDB field names)
@@ -19,9 +20,25 @@ function normalizeFee(f) {
 // Returns a feeMap keyed by studentId with normalized fields
 router.get('/', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {
+    const { campus } = req.query;
+    let allowedStudentIds = null;
+
+    // Filter fees based on campus access
+    if (req.user.role === 'admin') {
+      const campusCondition = buildCampusCondition(req.user);
+      const campusStudents = await Students.find(campusCondition);
+      allowedStudentIds = new Set(campusStudents.map(s => s.id));
+    } else if (req.user.role === 'superadmin' && campus && campus !== 'All Campuses' && campus !== 'All') {
+      const campusCondition = buildCampusCondition(req.user, campus);
+      const campusStudents = await Students.find(campusCondition);
+      allowedStudentIds = new Set(campusStudents.map(s => s.id));
+    }
+
     const list = await Fees.find({});
+    const filteredList = allowedStudentIds ? list.filter(f => allowedStudentIds.has(f.studentId)) : list;
+
     const feeMap = {};
-    list.forEach(f => {
+    filteredList.forEach(f => {
       const n = normalizeFee(f);
       feeMap[f.studentId] = {
         total:   n.total,
@@ -31,7 +48,7 @@ router.get('/', protect, authorize('admin', 'superadmin'), async (req, res) => {
         history: n.history
       };
     });
-    res.json({ success: true, count: list.length, fees: feeMap, list });
+    res.json({ success: true, count: filteredList.length, fees: feeMap, list: filteredList });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -43,6 +60,13 @@ router.get('/student/:id', protect, async (req, res) => {
     const studentId = req.params.id.trim().toUpperCase();
     if (req.user.role === 'student' && req.user.studentId !== studentId) {
       return res.status(403).json({ success: false, message: 'Forbidden: Cannot access another student fee.' });
+    }
+
+    if (req.user.role === 'admin') {
+      const student = await Students.findOne({ id: studentId });
+      if (student && !isSameCampus(student.campus, req.user.campus)) {
+        return res.status(403).json({ success: false, message: 'Access Denied: Student belongs to another campus.' });
+      }
     }
 
     let fee = await Fees.findOne({ studentId });
@@ -73,6 +97,15 @@ router.post('/payment', protect, authorize('admin', 'superadmin'), async (req, r
     if (!studentId) return res.status(400).json({ success: false, message: 'studentId is required.' });
 
     const cleanId = studentId.trim().toUpperCase();
+
+    // Verify campus ownership if regular admin
+    if (req.user.role === 'admin') {
+      const student = await Students.findOne({ id: cleanId });
+      if (student && !isSameCampus(student.campus, req.user.campus)) {
+        return res.status(403).json({ success: false, message: 'Access Denied: You cannot record payments for students of another campus.' });
+      }
+    }
+
     let fee = await Fees.findOne({ studentId: cleanId });
 
     // Normalize existing doc or create a base object
