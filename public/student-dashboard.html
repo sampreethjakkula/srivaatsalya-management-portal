@@ -712,7 +712,7 @@
 
     </main>
 
-    <script src="js/api.js?v=2.2"></script>
+    <script src="js/api.js?v=2.3"></script>
     <script>
         const COURSE_FEES = { 
             "MPC - JEE Advanced": 150000, 
@@ -812,7 +812,7 @@
                         curFees[loggedInId] = { total: fData.total, paid: fData.paid, history: fData.history };
                         localStorage.setItem('adminFees', JSON.stringify(curFees));
                     }
-                    if (nots && nots.length > 0) {
+                    if (Array.isArray(nots)) {
                         localStorage.setItem('globalNotices', JSON.stringify(nots.filter(n => n.type === 'global' || !n.type)));
                         localStorage.setItem('adminNotices', JSON.stringify(nots.filter(n => n.type === 'admin')));
                     }

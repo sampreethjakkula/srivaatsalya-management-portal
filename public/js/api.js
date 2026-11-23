@@ -161,9 +161,18 @@ window.SchoolAPI = {
   },
 
   async deleteNotice(id) {
-    return await this.request(`/api/notices/${id}`, {
-      method: 'DELETE'
-    });
+    const role = localStorage.getItem('userRole') || 'admin';
+    await this.ensureAuth(role);
+    try {
+      return await this.request(`/api/notices/${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
+    } catch (err) {
+      if (err.message && (err.message.includes('404') || err.message.toLowerCase().includes('not found'))) {
+        return { success: true, message: 'Notice already removed on server.' };
+      }
+      throw err;
+    }
   },
 
   // ================= ACHIEVEMENTS =================
@@ -257,9 +266,10 @@ window.SchoolAPI = {
       if (fees && Object.keys(fees).length > 0) {
         localStorage.setItem('adminFees', JSON.stringify(fees));
       }
-      if (notices) {
-        localStorage.setItem('adminNotices', JSON.stringify(notices));
+      if (Array.isArray(notices)) {
+        localStorage.setItem('adminNotices', JSON.stringify(notices.filter(n => n.type === 'admin')));
         localStorage.setItem('globalNotices', JSON.stringify(notices.filter(n => n.type === 'global' || !n.type)));
+        localStorage.setItem('allNotices', JSON.stringify(notices));
       }
       if (achievements) {
         localStorage.setItem('adminAchievements', JSON.stringify(achievements));

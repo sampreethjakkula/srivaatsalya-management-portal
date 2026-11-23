@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const mongoose = require('mongoose');
 const { Notices } = require('../data/dbStore');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -133,28 +134,43 @@ router.post('/:id/forward', protect, authorize('admin', 'superadmin'), async (re
 
 router.delete('/:id', protect, authorize('admin', 'superadmin'), async (req, res) => {
   try {
-    const notice = await Notices.findOne({ _id: req.params.id });
+    const rawId = req.params.id ? decodeURIComponent(req.params.id).trim() : '';
+    let notice = null;
+
+    if (rawId) {
+      if (mongoose.Types.ObjectId.isValid(rawId)) {
+        notice = await Notices.findOne({ _id: rawId }).catch(() => null);
+      }
+      if (!notice) {
+        notice = await Notices.findOne({ _id: rawId }).catch(() => null);
+      }
+      if (!notice) {
+        notice = await Notices.findOne({ title: rawId }).catch(() => null);
+      }
+    }
+
     if (!notice) {
-      return res.status(404).json({ success: false, message: 'Notice not found.' });
+      // Idempotent delete: if notice is already gone from DB, report success so clients can purge cached ghost notice
+      return res.json({ success: true, message: 'Notice already removed or not found.' });
     }
 
     // Super Admin can delete any notice (both Administrator directives and Campus Admin notices).
-    // Campus Admin can only delete notices created by themselves.
-// Super Admin can delete any notice (both Administrator directives and Campus Admin notices).
-// Campus Admin can only delete notices they created and cannot delete Administrator notices.
-if (req.user.role !== 'superadmin') {
-  const isOwner = notice.postedBy && String(notice.postedBy).toUpperCase() === String(req.user.username).toUpperCase();
-  // Block deletion of Administrator notices
-  if (notice.senderRole === 'superadmin' || notice.sender === 'Administrator') {
-    return res.status(403).json({ success: false, message: 'Admins cannot delete notices created by Administrator.' });
-  }
-  // Allow deletion only if the admin is the owner
-  if (!isOwner) {
-    return res.status(403).json({ success: false, message: 'Admins can delete only notices they created.' });
-  }
-}
+    // Campus Admin can only delete notices they created and cannot delete Administrator notices.
+    if (req.user.role !== 'superadmin') {
+      const isOwner = notice.postedBy && String(notice.postedBy).toUpperCase() === String(req.user.username).toUpperCase();
+      // Block deletion of Administrator notices
+      if (notice.senderRole === 'superadmin' || notice.sender === 'Administrator') {
+        return res.status(403).json({ success: false, message: 'Admins cannot delete notices created by Administrator.' });
+      }
+      // Allow deletion only if the admin is the owner
+      if (!isOwner) {
+        return res.status(403).json({ success: false, message: 'Admins can delete only notices they created.' });
+      }
+    }
 
-    await Notices.remove({ _id: req.params.id });
+    if (notice._id) {
+      await Notices.remove({ _id: notice._id });
+    }
     res.json({ success: true, message: 'Notice removed successfully.' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

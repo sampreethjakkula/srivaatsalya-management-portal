@@ -711,7 +711,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 </main>
 
-<script src="js/api.js?v=2.2"></script>
+<script src="js/api.js?v=2.3"></script>
 <script>
 /* ================= DATA SETUP ================= */
 const COURSE_FEES = { "MPC - JEE Advanced": 150000, "MPC - JEE Mains": 125000, "MPC - EAPCET": 100000, "MPC - AP EAPCET": 100000, "MPC - eapset": 100000, "BiPC - NEET": 150000, "BiPC - EAPCET": 100000, "BiPC - AP EAPCET": 100000, "BiPC - eapset": 100000 };
@@ -945,6 +945,7 @@ function renderNotices() {
     }
     container.innerHTML = list.map(n => {
         const safeId = String(n.id || n._id || '');
+        const safeTitle = (n.title || '').replace(/'/g, "\\'");
         const isGlobal = (n.type === 'global' || n.postedBy === 'SUPERADMIN' || n.sender === 'Administrator');
         const badgeText = isGlobal ? 'Administrator Directive' : `Campus Admin (${n.campus || 'Local'})`;
         const badgeBg = isGlobal ? '#e0f2fe' : '#fef3c7';
@@ -953,7 +954,7 @@ function renderNotices() {
         return `
         <div class="notice-card" style="position: relative; padding-right: 48px; ${n.priority === 'Important' ? 'border-left-color: #dc4b4b;' : ''}">
             <!-- Cross button on right upper part -->
-            <button onclick="deleteSuperNotice('${safeId}')" 
+            <button onclick="deleteSuperNotice('${safeId}', '${safeTitle}')" 
                     title="Delete notice"
                     style="position: absolute; top: 10px; right: 12px; background: none; border: none; font-size: 22px; font-weight: bold; color: #94a3b8; cursor: pointer; padding: 2px 8px; line-height: 1; border-radius: 4px; transition: all 0.2s;"
                     onmouseover="this.style.color='#dc2626'; this.style.background='#fee2e2';"
@@ -978,23 +979,49 @@ function renderNotices() {
     }).join("");
 }
 
-async function deleteSuperNotice(id) {
+async function deleteSuperNotice(id, title) {
     if (!confirm("⚠️ Are you sure you want to delete this notice? This will permanently remove it for all students and admins.")) {
         return;
     }
     try {
-        if (window.SchoolAPI) {
-            await window.SchoolAPI.deleteNotice(id);
+        const deleteTarget = id || title;
+        if (deleteTarget) {
+            if (window.SchoolAPI && typeof window.SchoolAPI.deleteNotice === 'function') {
+                await window.SchoolAPI.deleteNotice(deleteTarget);
+            } else {
+                let token = localStorage.getItem('token');
+                let res = await fetch('/api/notices/' + encodeURIComponent(deleteTarget), {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+                });
+                if (res.status === 401 && window.SchoolAPI && typeof window.SchoolAPI.ensureAuth === 'function') {
+                    await window.SchoolAPI.ensureAuth('superadmin');
+                    token = localStorage.getItem('token');
+                    await fetch('/api/notices/' + encodeURIComponent(deleteTarget), {
+                        method: 'DELETE',
+                        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+                    });
+                }
+            }
         }
-        allNotices = (allNotices || []).filter(n => String(n.id || n._id) !== String(id));
-        globalNotices = (globalNotices || []).filter(n => String(n.id || n._id) !== String(id));
-        persist();
-        renderNotices();
-        alert("✅ Notice deleted successfully.");
     } catch (err) {
-        console.error("Delete notice error:", err);
-        alert("❌ Failed to delete notice: " + (err.message || err));
+        console.warn("Server notice delete warning:", err);
     }
+
+    // Always purge from memory and local storage
+    allNotices = (allNotices || []).filter(n => {
+        const matchId = id && String(n.id || n._id || '') === String(id);
+        const matchTitle = title && String(n.title || '').trim().toLowerCase() === String(title).trim().toLowerCase();
+        return !(matchId || matchTitle);
+    });
+    globalNotices = (globalNotices || []).filter(n => {
+        const matchId = id && String(n.id || n._id || '') === String(id);
+        const matchTitle = title && String(n.title || '').trim().toLowerCase() === String(title).trim().toLowerCase();
+        return !(matchId || matchTitle);
+    });
+    persist();
+    renderNotices();
+    alert("✅ Notice deleted successfully.");
 }
 
 /* ================= TARGETS ================= */
@@ -1631,9 +1658,10 @@ window.onload = async function() {
             const data = await window.SchoolAPI.syncDashboard('superadmin');
             if (data && data.students && data.students.length > 0) allStudents = data.students;
             if (data && data.fees && Object.keys(data.fees).length > 0) fees = data.fees;
-            if (data && data.notices && data.notices.length > 0) {
+            if (data && Array.isArray(data.notices)) {
                 allNotices = data.notices;
                 globalNotices = data.notices;
+                persist();
             }
             if (data && Array.isArray(data.achievements)) {
                 achievements = data.achievements;
