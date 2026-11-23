@@ -48,9 +48,16 @@ table{width:100%;border-collapse:collapse;min-width:600px;font-size:13px}
 th,td{text-align:left;padding:13px;border-bottom:1px solid #e7edf2}
 th{background:#f0f5f8;color:#31536b}
 .badge{background:#dcf5e8;color:#12804e;border-radius:20px;padding:5px 10px;font-size:11px}
+.badge.green{background:#dcf5e8;color:#12804e;}
 .badge.pending{background:#fee2e2;color:#991b1b;}
-.badge.partial{background:#fef3c7;color:#92400e;}
+.badge.partial, .badge.warning{background:#fef3c7;color:#92400e;}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* Filter Grid for Fee Management */
+.filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 15px; }
+.filter-group { display: flex; flex-direction: column; }
+.filter-group label { margin-bottom: 5px; font-size: 12px; color: #475569; font-weight: 700; }
+.filter-group select, .filter-group input { margin: 0; padding: 10px; background: #f8fafc; border: 1px solid #cbd5e1; font-weight: 500; border-radius: 6px; }
 
 /* Notice */
 .notice-card { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0d4e78; border-radius: 8px; padding: 20px; margin-bottom: 15px; transition: all 0.3s ease; }
@@ -595,107 +602,122 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
 
 <!-- ==================== FEES ==================== -->
 <section id="fees" class="page">
-    <div class="analytics-panel">
-        <h3>💰 Global Fee Management &amp; Filtering</h3>
-        <p class="sub">Filter by Campus → Year → Group → Examination → Term → Payment Status to view dynamic fee collections.</p>
-
-        <!-- Step 1: Campus -->
-        <div class="an-step">
-            <span class="an-step-label">1. Select Campus</span>
-            <div class="pill-row" id="feeCampusRow">
-                <button class="pill-btn active" data-campus="All Campuses" onclick="feeSelectCampus('All Campuses')">All Campuses</button>
-                <button class="pill-btn" data-campus="Sri Vaibhav Campus – Day Scholar" onclick="feeSelectCampus('Sri Vaibhav Campus – Day Scholar')">Sri Vaibhav Campus (Day Scholar)</button>
-                <button class="pill-btn" data-campus="Sri Vaarahi Bhavan – Girls Campus & Hostel" onclick="feeSelectCampus('Sri Vaarahi Bhavan – Girls Campus & Hostel')">Sri Vaarahi Bhavan (Girls Campus &amp; Hostel)</button>
-                <button class="pill-btn" data-campus="Sri Virinchi Bhavan – Boys Campus & Hostel" onclick="feeSelectCampus('Sri Virinchi Bhavan – Boys Campus & Hostel')">Sri Virinchi Bhavan (Boys Campus &amp; Hostel)</button>
+    <!-- Update Student Fee Card (Paid Fee Only for Administrator) -->
+    <div class="card">
+        <h3>Update Student Fee</h3>
+        <p style="font-size:13px; margin-bottom:15px; color:#64748b;">Administrator can select a student to review fee details and edit the total paid amount.</p>
+        <label>Select Student</label>
+        <select id="feeStudent" onchange="superAutofillFee()"></select>
+        <div class="formgrid">
+            <div>
+                <label>Total Annual Fee (₹)</label>
+                <input type="number" id="feeTotal" disabled style="background:#f1f5f9; cursor:not-allowed;" title="Administrator can only edit paid fee amount">
+            </div>
+            <div>
+                <label>Total Paid Amount (₹)</label>
+                <input type="number" id="feePaid" placeholder="Enter new paid amount">
             </div>
         </div>
+        <button class="primary" onclick="superSaveFee()">Update Fee Paid Data</button>
+    </div>
 
-        <!-- Step 2: Year -->
-        <div class="an-step" id="feeYearStep" style="display:none;">
-            <span class="an-step-label">2. Select Academic Year</span>
-            <div class="pill-row" id="feeYearRow">
-                <button class="pill-btn" data-year="1st Year" onclick="feeSelectYear('1st Year')">1st Year</button>
-                <button class="pill-btn" data-year="2nd Year" onclick="feeSelectYear('2nd Year')">2nd Year</button>
+    <!-- Global Fee Filter Section (Dropdowns) -->
+    <div class="card">
+        <h3>🔍 Global Fee Management & Filtering</h3>
+        <p style="font-size:13px; margin-bottom:15px; color:#31536b;">Filter by Campus, Year, Group, Examination, Term, and Payment Status.</p>
+        
+        <div class="filter-grid">
+            <div class="filter-group">
+                <label>1. Select Campus</label>
+                <select id="feeFilterCampus" onchange="renderFilteredFees()">
+                    <option value="All Campuses">All Campuses</option>
+                    <option value="Sri Vaibhav Campus – Day Scholar">Sri Vaibhav Campus – Day Scholar</option>
+                    <option value="Sri Vaarahi Bhavan – Girls Campus & Hostel">Sri Vaarahi Bhavan – Girls Campus & Hostel</option>
+                    <option value="Sri Virinchi Bhavan – Boys Campus & Hostel">Sri Virinchi Bhavan – Boys Campus & Hostel</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>2. Select Academic Year</label>
+                <select id="feeFilterYear" onchange="renderFilteredFees()">
+                    <option value="All Years">All Years</option>
+                    <option value="1st Year">1st Year</option>
+                    <option value="2nd Year">2nd Year</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>3. Select Group</label>
+                <select id="feeFilterGroup" onchange="renderFilteredFees()">
+                    <option value="All Groups">All Groups</option>
+                    <option value="MPC">MPC</option>
+                    <option value="BiPC">BiPC</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>4. Select Examination</label>
+                <select id="feeFilterExam" onchange="renderFilteredFees()">
+                    <option value="All Exams">All Exams</option>
+                    <option value="JEE Mains">JEE Mains</option>
+                    <option value="JEE Advanced">JEE Advanced</option>
+                    <option value="EAPCET">EAPCET</option>
+                    <option value="NEET">NEET</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>5. Select Term</label>
+                <select id="feeFilterTerm" onchange="renderFilteredFees()">
+                    <option value="1">Term 1</option>
+                    <option value="2">Term 2</option>
+                    <option value="3">Term 3</option>
+                    <option value="4">Term 4</option>
+                    <option value="5">Term 5</option>
+                    <option value="6">Term 6</option>
+                    <option value="7">Term 7</option>
+                    <option value="8">Term 8</option>
+                    <option value="9">Term 9</option>
+                    <option value="10">Term 10</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>6. Select Fee Status</label>
+                <select id="feeFilterStatus" onchange="renderFilteredFees()">
+                    <option value="All">All Statuses</option>
+                    <option value="Full Paid">Full Paid</option>
+                    <option value="Partially Paid">Partially Paid</option>
+                    <option value="Not Paid">Not Paid</option>
+                </select>
             </div>
         </div>
-
-        <!-- Step 3: Group -->
-        <div class="an-step" id="feeGroupStep" style="display:none;">
-            <span class="an-step-label">3. Select Group</span>
-            <div class="pill-row" id="feeGroupRow">
-                <button class="pill-btn" data-group="MPC" onclick="feeSelectGroup('MPC')">MPC</button>
-                <button class="pill-btn" data-group="BiPC" onclick="feeSelectGroup('BiPC')">BiPC</button>
-            </div>
-        </div>
-
-        <!-- Step 4: Examination -->
-        <div class="an-step" id="feeExamStep" style="display:none;">
-            <span class="an-step-label">4. Select Examination</span>
-            <div class="pill-row" id="feeExamRow"></div>
-        </div>
-
-        <!-- Step 5: Term -->
-        <div class="an-step" id="feeTermStep" style="display:none;">
-            <span class="an-step-label">5. Select Term</span>
-            <div class="pill-row" id="feeTermRow">
-                <button class="pill-btn" data-term="1" onclick="feeSelectTerm(1)">Term 1</button>
-                <button class="pill-btn" data-term="2" onclick="feeSelectTerm(2)">Term 2</button>
-                <button class="pill-btn" data-term="3" onclick="feeSelectTerm(3)">Term 3</button>
-                <button class="pill-btn" data-term="4" onclick="feeSelectTerm(4)">Term 4</button>
-                <button class="pill-btn" data-term="5" onclick="feeSelectTerm(5)">Term 5</button>
-                <button class="pill-btn" data-term="6" onclick="feeSelectTerm(6)">Term 6</button>
-                <button class="pill-btn" data-term="7" onclick="feeSelectTerm(7)">Term 7</button>
-                <button class="pill-btn" data-term="8" onclick="feeSelectTerm(8)">Term 8</button>
-                <button class="pill-btn" data-term="9" onclick="feeSelectTerm(9)">Term 9</button>
-                <button class="pill-btn" data-term="10" onclick="feeSelectTerm(10)">Term 10</button>
-            </div>
-        </div>
-
-        <!-- Step 6: Payment Status -->
-        <div class="an-step" id="feeStatusStep" style="display:none;">
-            <span class="an-step-label">6. Select Fee Payment Status</span>
-            <div class="pill-row" id="feeStatusRow">
-                <button class="pill-btn" data-status="Full Paid" onclick="feeSelectStatus('Full Paid')">Full Paid</button>
-                <button class="pill-btn" data-status="Partially Paid" onclick="feeSelectStatus('Partially Paid')">Partially Paid</button>
-                <button class="pill-btn" data-status="Not Paid" onclick="feeSelectStatus('Not Paid')">Not Paid</button>
-            </div>
-        </div>
-
-        <!-- Reset Filters -->
-        <div style="text-align: right; margin-top: 10px;">
-            <button class="red" onclick="initFeesPage()">↺ Clear Filters</button>
+        
+        <div style="display:flex; justify-content:flex-end; margin-top:10px;">
+            <button class="red" onclick="resetFeeFilters()">↺ Clear Filters</button>
         </div>
     </div>
 
-    <!-- Fee Results Section -->
-    <div class="results-panel" id="feeResultsPanel">
-        <h3 id="feeTotalCountText">Total Students: 0</h3>
-        <p class="sub" id="feeListTitle">Student List</p>
+    <!-- Dynamic Fee Results Table -->
+    <div class="card">
+        <h3 id="feeTableTitle">Total Students (Term 1): 0</h3>
+        <p style="font-size:13px; margin-bottom:15px; color:#64748b;" id="feeTableSubtitle">Student List (Term 1)</p>
         
-        <div class="tablewrap" id="feeTableWrapInner">
-            <div class="search-bar">
-                <input id="feeSearch" placeholder="🔍 Search within results by ID or Name" oninput="renderFeeStudentTable()">
-            </div>
+        <input type="text" class="search-bar" id="feeSearchInput" placeholder="🔍 Search within results by ID or Name" oninput="renderFilteredFees()" style="width:100%; padding:10px 14px; border:1px solid #cbd5e1; border-radius:6px; font-size:14px; margin-bottom:15px;">
+        
+        <div class="tablewrap">
             <table>
                 <thead>
                     <tr>
                         <th>Student ID</th>
                         <th>Student Name</th>
-                        <th>Campus</th>
-                        <th>Year</th>
                         <th>Course</th>
-                        <th>Examination</th>
-                        <th>Term</th>
-                        <th>Total Fee (Term)</th>
-                        <th>Paid Amount (Term)</th>
-                        <th>Balance (Term)</th>
-                        <th>Status</th>
+                        <th>Campus</th>
+                        <th>Total Fee</th>
+                        <th>Paid</th>
+                        <th>Due</th>
+                        <th>Fee Status</th>
+                        <th style="text-align:center;">Action</th>
                     </tr>
                 </thead>
-                <tbody id="feeStudentTable"></tbody>
+                <tbody id="feeTable"></tbody>
             </table>
         </div>
-        <div class="no-results-msg" id="feeEmptyMsg">No students found for the selected filters.</div>
     </div>
 </section>
 
@@ -811,8 +833,10 @@ function onGlobalCampusFilterChange(newCampus) {
             if (newCampus === CAMPUS_ALL) initAnalyticsPage();
             else anSelectCampus(newCampus);
         } else if (activePage.id === "fees") {
-            if (newCampus === CAMPUS_ALL) initFeesPage();
-            else feeSelectCampus(newCampus);
+            if (document.getElementById("feeFilterCampus")) {
+                document.getElementById("feeFilterCampus").value = newCampus;
+            }
+            renderFilteredFees();
         }
     }
 }
@@ -862,6 +886,45 @@ function enrichStudent(s) {
     return s;
 }
 function enrichAllStudents() { allStudents.forEach(enrichStudent); }
+
+function matchYear(studentYear, filterYear) {
+    if (!filterYear || filterYear === "All Years" || filterYear === "All") return true;
+    if (!studentYear) return false;
+    const sy = String(studentYear).toLowerCase().trim();
+    const fy = String(filterYear).toLowerCase().trim();
+    if (sy === fy) return true;
+    if (fy.includes("2") || fy.includes("second") || fy.includes("ii")) {
+        return sy.includes("2") || sy.includes("second") || sy.includes("ii");
+    }
+    if (fy.includes("1") || fy.includes("first") || fy.includes("i")) {
+        return sy.includes("1") || sy.includes("first") || (sy.includes("i") && !sy.includes("ii"));
+    }
+    return false;
+}
+
+function matchGroup(courseOrGroup, filterGroup) {
+    if (!filterGroup || filterGroup === "All Groups" || filterGroup === "All") return true;
+    if (!courseOrGroup) return false;
+    const cg = String(courseOrGroup).toUpperCase().trim();
+    const fg = String(filterGroup).toUpperCase().trim();
+    return cg.includes(fg);
+}
+
+function matchExam(courseOrExam, filterExam) {
+    if (!filterExam || filterExam === "All Exams" || filterExam === "All") return true;
+    if (!courseOrExam) return false;
+    const ce = String(courseOrExam).toUpperCase().trim();
+    const fe = String(filterExam).toUpperCase().trim();
+    if (fe === "JEE MAINS" || fe === "JEE MAIN") {
+        return ce.includes("JEE MAIN") || ce.includes("JEE MAINS") || (ce.includes("JEE") && !ce.includes("ADV"));
+    }
+    if (fe === "JEE ADVANCED" || fe === "JEE ADV") {
+        return ce.includes("ADV");
+    }
+    if (fe === "NEET") return ce.includes("NEET");
+    if (fe === "EAPCET" || fe === "EAMCET") return ce.includes("EAPCET") || ce.includes("EAMCET");
+    return ce.includes(fe);
+}
 
 /* ================= NAV ================= */
 function showPage(id, button) {
@@ -1636,190 +1699,322 @@ function anRenderStudentTable() {
 function resetAnalytics() { initAnalyticsPage(); }
 
 /* =====================================================================
-   FEES PAGE (Campus -> Year -> Group -> Exam -> Term -> Status -> List)
+   FEES MANAGEMENT (Matching Admin Fee Section with Paid Fee Editing & 10-Term Details)
    ===================================================================== */
-const feeState = { campus: CAMPUS_ALL, year: null, group: null, exam: null, term: null, status: null };
-
-function initFeesPage() {
-    enrichAllStudents(); persist();
-    feeState.campus = CAMPUS_ALL; feeState.year = null; feeState.group = null; feeState.exam = null; feeState.term = null; feeState.status = null;
-    
-    document.getElementById('feeYearStep').style.display = 'none';
-    document.getElementById('feeGroupStep').style.display = 'none';
-    document.getElementById('feeExamStep').style.display = 'none';
-    document.getElementById('feeTermStep').style.display = 'none';
-    document.getElementById('feeStatusStep').style.display = 'none';
-    document.getElementById('feeResultsPanel').style.display = 'none';
-    
-    document.querySelectorAll('#feeCampusRow .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.campus === CAMPUS_ALL));
-    document.querySelectorAll('#feeYearRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeGroupRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeTermRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeStatusRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('feeExamRow').innerHTML = '';
-    document.getElementById('feeSearch').value = '';
+function populateSuperFeeDropdown() {
+    const sel = document.getElementById("feeStudent");
+    if (!sel) return;
+    const currentVal = sel.value;
+    let list = (allStudents || []).slice().sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
+    let options = '<option value="">-- Select Student --</option>' + list.map(s => 
+        `<option value="${s.id}">${s.name} (${s.id}) - ${normalizeCampus(s.campus)}</option>`
+    ).join("");
+    sel.innerHTML = options;
+    if (currentVal && list.some(s => s.id === currentVal)) {
+        sel.value = currentVal;
+    }
 }
 
-function feeSelectCampus(campus) {
-    feeState.campus = campus; feeState.year = null; feeState.group = null; feeState.exam = null; feeState.term = null; feeState.status = null;
-    
-    document.querySelectorAll('#feeCampusRow .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.campus === campus));
-    document.getElementById('feeYearStep').style.display = 'block';
-    document.getElementById('feeGroupStep').style.display = 'none';
-    document.getElementById('feeExamStep').style.display = 'none';
-    document.getElementById('feeTermStep').style.display = 'none';
-    document.getElementById('feeStatusStep').style.display = 'none';
-    document.getElementById('feeResultsPanel').style.display = 'none';
-    
-    document.querySelectorAll('#feeYearRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeGroupRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeTermRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeStatusRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('feeExamRow').innerHTML = '';
+function superAutofillFee() {
+    const sel = document.getElementById("feeStudent");
+    const id = sel ? sel.value : "";
+    const s = allStudents.find(x => x.id === id);
+    if (!s) {
+        if (document.getElementById("feeTotal")) document.getElementById("feeTotal").value = "";
+        if (document.getElementById("feePaid")) document.getElementById("feePaid").value = "";
+        return;
+    }
+    const f = fees[id] || { total: (s.fee || 100000), paid: 0 };
+    if (document.getElementById("feeTotal")) document.getElementById("feeTotal").value = f.total || s.fee || 100000;
+    if (document.getElementById("feePaid")) document.getElementById("feePaid").value = f.paid !== undefined ? f.paid : 0;
 }
 
-function feeSelectYear(year) {
-    feeState.year = year; feeState.group = null; feeState.exam = null; feeState.term = null; feeState.status = null;
-    
-    document.querySelectorAll('#feeYearRow .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.year === year));
-    document.getElementById('feeGroupStep').style.display = 'block';
-    document.getElementById('feeExamStep').style.display = 'none';
-    document.getElementById('feeTermStep').style.display = 'none';
-    document.getElementById('feeStatusStep').style.display = 'none';
-    document.getElementById('feeResultsPanel').style.display = 'none';
-    
-    document.querySelectorAll('#feeGroupRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeTermRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeStatusRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('feeExamRow').innerHTML = '';
+async function superSaveFee() {
+    const sel = document.getElementById("feeStudent");
+    const id = sel ? sel.value : "";
+    if (!id) {
+        alert("⚠️ Please select a student first.");
+        return;
+    }
+    const s = allStudents.find(x => x.id === id);
+    const paidInput = document.getElementById("feePaid");
+    const newPaid = Number(paidInput ? paidInput.value : 0);
+    if (isNaN(newPaid) || newPaid < 0) {
+        alert("⚠️ Please enter a valid non-negative paid amount.");
+        return;
+    }
+
+    if (!fees[id]) {
+        fees[id] = { total: (s && s.fee) || 100000, paid: 0, history: [] };
+    }
+    const totalFee = Number(fees[id].total) || (s && s.fee) || 100000;
+    const oldPaid = Number(fees[id].paid) || 0;
+    fees[id].paid = newPaid;
+
+    if (!fees[id].history) fees[id].history = [];
+    const diff = newPaid - oldPaid;
+    if (diff !== 0) {
+        fees[id].history.push({
+            date: new Date().toISOString().split("T")[0],
+            amount: Math.abs(diff),
+            method: "Administrator Adjustment",
+            note: diff > 0 ? `Paid fee updated (+₹${diff.toLocaleString()})` : `Paid fee adjusted (-₹${Math.abs(diff).toLocaleString()})`
+        });
+    }
+
+    persist();
+    if (typeof renderFilteredFees === "function") renderFilteredFees();
+    if (typeof renderDashboard === "function") renderDashboard();
+    if (typeof calculateTargets === "function") calculateTargets();
+
+    if (window.SchoolAPI && window.SchoolAPI.recordFee) {
+        try {
+            await window.SchoolAPI.recordFee({
+                studentId: id,
+                total: totalFee,
+                paid: newPaid,
+                history: fees[id].history
+            });
+        } catch (err) {
+            console.error("SchoolAPI.recordFee error:", err);
+        }
+    }
+
+    alert(`✅ Fee paid data for ${s ? s.name : id} updated successfully to ${money(newPaid)}!`);
 }
 
-function feeSelectGroup(group) {
-    feeState.group = group; feeState.exam = null; feeState.term = null; feeState.status = null;
-    
-    document.querySelectorAll('#feeGroupRow .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.group === group));
-    document.getElementById('feeExamStep').style.display = 'block';
-    document.getElementById('feeTermStep').style.display = 'none';
-    document.getElementById('feeStatusStep').style.display = 'none';
-    document.getElementById('feeResultsPanel').style.display = 'none';
-    
-    document.querySelectorAll('#feeTermRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeStatusRow .pill-btn').forEach(b => b.classList.remove('active'));
-    
-    // Populate exams based on group
-    const row = document.getElementById('feeExamRow');
-    const options = validExamsForGroup(group);
-    row.innerHTML = options.map(ex => `<button class="pill-btn" data-exam="${ex}" onclick="feeSelectExam('${ex}')">${ex}</button>`).join('');
-}
+function renderFilteredFees() {
+    const tableEl = document.getElementById("feeTable");
+    if (!tableEl) return;
 
-function feeSelectExam(exam) {
-    feeState.exam = exam; feeState.term = null; feeState.status = null;
-    document.querySelectorAll('#feeExamRow .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.exam === exam));
-    document.getElementById('feeTermStep').style.display = 'block';
-    document.getElementById('feeStatusStep').style.display = 'none';
-    document.getElementById('feeResultsPanel').style.display = 'none';
-    document.querySelectorAll('#feeTermRow .pill-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('#feeStatusRow .pill-btn').forEach(b => b.classList.remove('active'));
-}
+    let fCampus = document.getElementById("feeFilterCampus") ? document.getElementById("feeFilterCampus").value : "All Campuses";
+    let fYear = document.getElementById("feeFilterYear") ? document.getElementById("feeFilterYear").value : "All Years";
+    let fGroup = document.getElementById("feeFilterGroup") ? document.getElementById("feeFilterGroup").value : "All Groups";
+    let fExam = document.getElementById("feeFilterExam") ? document.getElementById("feeFilterExam").value : "All Exams";
+    let termNum = document.getElementById("feeFilterTerm") ? parseInt(document.getElementById("feeFilterTerm").value) || 1 : 1;
+    let fStatus = document.getElementById("feeFilterStatus") ? document.getElementById("feeFilterStatus").value : "All";
 
-function feeSelectTerm(term) {
-    feeState.term = term; feeState.status = null;
-    document.querySelectorAll('#feeTermRow .pill-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.term) === term));
-    document.getElementById('feeStatusStep').style.display = 'block';
-    document.getElementById('feeResultsPanel').style.display = 'none';
-    document.querySelectorAll('#feeStatusRow .pill-btn').forEach(b => b.classList.remove('active'));
-}
+    let filtered = (allStudents || []).filter(s => {
+        if (!matchCampus(s.campus, fCampus)) return false;
+        if (!matchYear(s.year, fYear)) return false;
+        if (!matchGroup(s.course, fGroup)) return false;
+        if (!matchExam(s.course, fExam)) return false;
 
-function feeSelectStatus(status) {
-    feeState.status = status;
-    document.querySelectorAll('#feeStatusRow .pill-btn').forEach(b => b.classList.toggle('active', b.dataset.status === status));
-    renderFeeStudentTable();
-    document.getElementById('feeResultsPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
+        let f = fees[s.id] || { total: (s.fee || 100000), paid: 0 };
+        let termFee = (Number(f.total) || 100000) / 10;
+        let paidForThisTerm = Math.min(Math.max(0, (Number(f.paid) || 0) - (termNum - 1) * termFee), termFee);
 
-function feeFilteredStudents() {
-    let list = allStudents.slice();
-    if (feeState.campus !== CAMPUS_ALL) list = list.filter(s => matchCampus(s.campus, feeState.campus));
-    if (feeState.year) list = list.filter(s => normalizeYear(s.year) === feeState.year);
-    if (feeState.group) list = list.filter(s => normalizeGroup(s.course, s.group) === feeState.group);
-    if (feeState.exam) list = list.filter(s => s.exam === feeState.exam);
-    return list;
-}
+        let status = "Not Paid";
+        if (paidForThisTerm >= termFee && termFee > 0) status = "Full Paid";
+        else if (paidForThisTerm > 0) status = "Partially Paid";
 
-function renderFeeStudentTable() {
-    if (!feeState.status || !feeState.term) return;
-    
-    let list = feeFilteredStudents();
-    const termFeeAmount = 1/10; // Each term is 1/10th of the total fee
-    
-    // Apply status filter
-    list = list.filter(s => {
-        const f = fees[s.id] || { total: 0, paid: 0 };
-        const expectedTermFee = f.total * termFeeAmount;
-        // Calculate how much was paid up to this term
-        const paidUpToThisTerm = Math.min(f.paid, f.total); 
-        const paidForSelectedTerm = Math.min(Math.max(0, paidUpToThisTerm - (feeState.term - 1) * expectedTermFee), expectedTermFee);
-        
-        if (feeState.status === 'Full Paid') return expectedTermFee > 0 && paidForSelectedTerm >= expectedTermFee;
-        if (feeState.status === 'Partially Paid') return paidForSelectedTerm > 0 && paidForSelectedTerm < expectedTermFee;
-        if (feeState.status === 'Not Paid') return paidForSelectedTerm === 0;
+        if (fStatus !== "All" && status !== fStatus) return false;
+
         return true;
     });
 
-    // Apply search
-    const q = (document.getElementById('feeSearch').value || '').toLowerCase().trim();
-    if (q) list = list.filter(s => (s.id + ' ' + s.name).toLowerCase().includes(q));
-
-    // Sort by ID
-    list = list.slice().sort((a, b) => String(a.id).localeCompare(String(b.id)));
-
-    const resultsPanel = document.getElementById('feeResultsPanel');
-    const tbody = document.getElementById('feeStudentTable');
-    const emptyMsg = document.getElementById('feeEmptyMsg');
-    const tableWrapInner = document.getElementById('feeTableWrapInner');
-    const totalText = document.getElementById('feeTotalCountText');
-    const listTitle = document.getElementById('feeListTitle');
-
-    resultsPanel.style.display = 'block';
-    totalText.textContent = `Total ${feeState.status} Students (Term ${feeState.term}): ${list.length}`;
-    listTitle.textContent = `${feeState.status} Student List (Term ${feeState.term})`;
-
-    if (list.length === 0) {
-        tbody.innerHTML = '';
-        tableWrapInner.style.display = 'none';
-        emptyMsg.style.display = 'block';
-        return;
+    let searchQ = (document.getElementById("feeSearchInput") ? document.getElementById("feeSearchInput").value : "").toLowerCase().trim();
+    if (searchQ) {
+        filtered = filtered.filter(s => (s.id + " " + s.name).toLowerCase().includes(searchQ));
     }
-    
-    emptyMsg.style.display = 'none';
-    tableWrapInner.style.display = 'block';
 
-    tbody.innerHTML = list.map(s => {
-        const f = fees[s.id] || { total: 0, paid: 0 };
-        const expectedTermFee = f.total * termFeeAmount;
-        const paidUpToThisTerm = Math.min(f.paid, f.total);
-        const paidForSelectedTerm = Math.min(Math.max(0, paidUpToThisTerm - (feeState.term - 1) * expectedTermFee), expectedTermFee);
-        const balanceForSelectedTerm = expectedTermFee - paidForSelectedTerm;
-        
-        let badgeClass = '';
-        if (feeState.status === 'Full Paid') badgeClass = '';
-        else if (feeState.status === 'Partially Paid') badgeClass = 'partial';
-        else if (feeState.status === 'Not Paid') badgeClass = 'pending';
-        
-        return `<tr>
-            <td>${s.id}</td>
-            <td>${s.name}</td>
+    let statusText = fStatus === "All" ? "All" : fStatus;
+    if (document.getElementById("feeTableTitle")) {
+        document.getElementById("feeTableTitle").textContent = `Total ${statusText} Students (Term ${termNum}): ${filtered.length}`;
+    }
+    if (document.getElementById("feeTableSubtitle")) {
+        document.getElementById("feeTableSubtitle").textContent = `${statusText} Student List (Term ${termNum})`;
+    }
+
+    tableEl.innerHTML = filtered.map(s => {
+        let f = fees[s.id] || { total: (s.fee || 100000), paid: 0 };
+        let total = Number(f.total) || (s.fee || 100000);
+        let paid = Number(f.paid) || 0;
+        let dueAmount = Math.max(0, total - paid);
+        let termFee = total / 10;
+        let paidForThisTerm = Math.min(Math.max(0, paid - (termNum - 1) * termFee), termFee);
+
+        let badgeClass = "green";
+        let statusLabel = "Full Paid";
+        if (paidForThisTerm <= 0) { badgeClass = "pending"; statusLabel = "Not Paid"; }
+        else if (paidForThisTerm < termFee) { badgeClass = "warning"; statusLabel = "Partial"; }
+
+        return `<tr style="cursor:pointer;" onclick="openStudentTermFeeModal('${s.id}')" title="Click to view full term-wise fee breakdown">
+            <td><strong>${s.id}</strong></td>
+            <td><strong style="color:#0d4e78;">${s.name}</strong></td>
+            <td>${s.course || '—'}</td>
             <td>${normalizeCampus(s.campus)}</td>
-            <td>${normalizeYear(s.year)}</td>
-            <td>${normalizeGroup(s.course, s.group)}</td>
-            <td>${s.exam || '—'}</td>
-            <td>Term ${feeState.term}</td>
-            <td>${money(expectedTermFee)}</td>
-            <td>${money(paidForSelectedTerm)}</td>
-            <td>${money(balanceForSelectedTerm)}</td>
-            <td><span class="badge ${badgeClass}">${feeState.status}</span></td>
+            <td>${money(total)}</td>
+            <td style="color:#169b6b; font-weight:bold;">${money(paid)}</td>
+            <td style="color:#dc4b4b; font-weight:bold;">${money(dueAmount)}</td>
+            <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+            <td style="text-align:center;">
+                <button type="button" class="primary" style="padding:5px 12px;font-size:12px;border-radius:6px;" onclick="event.stopPropagation(); openStudentTermFeeModal('${s.id}')">📊 Fee Details</button>
+            </td>
         </tr>`;
+    }).join("") || `<tr><td colspan="9" style="text-align:center; padding:20px; color:#888;">No students found for the selected filters.</td></tr>`;
+}
+
+function resetFeeFilters() {
+    if (document.getElementById("feeFilterCampus")) document.getElementById("feeFilterCampus").value = "All Campuses";
+    if (document.getElementById("feeFilterYear")) document.getElementById("feeFilterYear").value = "All Years";
+    if (document.getElementById("feeFilterGroup")) document.getElementById("feeFilterGroup").value = "All Groups";
+    if (document.getElementById("feeFilterExam")) document.getElementById("feeFilterExam").value = "All Exams";
+    if (document.getElementById("feeFilterTerm")) document.getElementById("feeFilterTerm").value = "1";
+    if (document.getElementById("feeFilterStatus")) document.getElementById("feeFilterStatus").value = "All";
+    if (document.getElementById("feeSearchInput")) document.getElementById("feeSearchInput").value = "";
+    renderFilteredFees();
+}
+
+function initFeesPage() {
+    enrichAllStudents();
+    persist();
+    populateSuperFeeDropdown();
+    if (document.getElementById("feeFilterCampus")) {
+        document.getElementById("feeFilterCampus").value = (currentGlobalCampus && currentGlobalCampus !== CAMPUS_ALL) ? currentGlobalCampus : "All Campuses";
+    }
+    renderFilteredFees();
+}
+
+/* =============== STUDENT TERM-WISE FEE BREAKDOWN MODAL =============== */
+function openStudentTermFeeModal(studentId) {
+    const s = allStudents.find(x => x.id === studentId);
+    if (!s) return;
+    const f = fees[studentId] || { total: 0, paid: 0, history: [] };
+    const totalFee = Number(f.total) || (s.fee || 100000);
+    const paidAmount = Number(f.paid) || 0;
+    const dueAmount = Math.max(0, totalFee - paidAmount);
+    const termFeeAmount = Math.round(totalFee / 10);
+
+    const history = (f.history || f.paymentHistory || []);
+    const sortedHistory = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Calculate 10 terms breakdown
+    let remainingPaid = paidAmount;
+    let terms = [];
+    for (let t = 1; t <= 10; t++) {
+        let termTarget = (t === 10) ? (totalFee - termFeeAmount * 9) : termFeeAmount;
+        let termPaid = 0;
+        if (remainingPaid >= termTarget) {
+            termPaid = termTarget;
+            remainingPaid -= termTarget;
+        } else if (remainingPaid > 0) {
+            termPaid = remainingPaid;
+            remainingPaid = 0;
+        } else {
+            termPaid = 0;
+        }
+        let termDue = Math.max(0, termTarget - termPaid);
+        let isPaid = termPaid >= termTarget;
+        let isPartial = termPaid > 0 && termPaid < termTarget;
+
+        let termStart = (t - 1) * termFeeAmount;
+        let termEnd = termStart + termTarget;
+        let termPayments = [];
+        for (const inst of sortedHistory) {
+            const instAmt = Number(inst.amount) || 0;
+            const idx = sortedHistory.indexOf(inst);
+            const globalBefore = sortedHistory.slice(0, idx).reduce((acc, x) => acc + (Number(x.amount) || 0), 0);
+            const globalAfter = globalBefore + instAmt;
+            const overlap = Math.min(globalAfter, termEnd) - Math.max(globalBefore, termStart);
+            if (overlap > 0) {
+                termPayments.push({ amount: overlap, date: inst.date || '' });
+            }
+        }
+
+        let dateDisplay = 'Payment due as per schedule';
+        if (isPaid && termPayments.length > 0) {
+            const lastDate = termPayments[termPayments.length - 1].date;
+            dateDisplay = `Fully Paid on ${lastDate ? new Date(lastDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : 'Recent'}`;
+        } else if (isPartial && termPayments.length > 0) {
+            const lastDate = termPayments[termPayments.length - 1].date;
+            dateDisplay = `Last Paid: ${lastDate ? new Date(lastDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : 'Recent'}`;
+        }
+
+        terms.push({
+            num: t,
+            target: termTarget,
+            paid: termPaid,
+            due: termDue,
+            isPaid,
+            isPartial,
+            dateDisplay
+        });
+    }
+
+    let cardsHtml = terms.map(t => {
+        let badgeBg = t.isPaid ? '#dcfce7' : (t.isPartial ? '#fef3c7' : '#fee2e2');
+        let badgeColor = t.isPaid ? '#166534' : (t.isPartial ? '#b45309' : '#991b1b');
+        let badgeText = t.isPaid ? 'Fully Paid' : (t.isPartial ? 'Partially Paid' : 'Pending');
+        let borderCol = t.isPaid ? '#86efac' : (t.isPartial ? '#fcd34d' : '#fca5a5');
+        let cardBg = t.isPaid ? '#ffffff' : (t.isPartial ? '#fffdf5' : '#fffafb');
+
+        return `
+        <div style="background:${cardBg}; border:1px solid ${borderCol}; border-radius:12px; padding:18px; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:15px; font-weight:700; color:#1e293b;">Term ${t.num} Fee</span>
+                <span style="background:${badgeBg}; color:${badgeColor}; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase;">${badgeText}</span>
+            </div>
+            <div style="font-size:22px; font-weight:800; color:${t.isPaid ? '#166534' : (t.isPartial ? '#b45309' : '#dc2626')}; margin-bottom:8px;">
+                ${money(t.target)}
+            </div>
+            <div style="display:flex; justify-content:space-between; background:#f8fafc; padding:8px 12px; border-radius:6px; margin:10px 0; border:1px solid #e2e8f0; font-size:13px;">
+                <div>
+                    <span style="color:#64748b; display:block; font-size:11px; font-weight:700; text-transform:uppercase;">Paid</span>
+                    <strong style="color:${t.paid > 0 ? '#166534' : '#64748b'};">${money(t.paid)}</strong>
+                </div>
+                <div style="text-align:right;">
+                    <span style="color:#64748b; display:block; font-size:11px; font-weight:700; text-transform:uppercase;">Due</span>
+                    <strong style="color:${t.due > 0 ? '#dc2626' : '#166534'};">${money(t.due)}</strong>
+                </div>
+            </div>
+            <div style="font-size:12px; color:${t.isPaid ? '#166534' : (t.isPartial ? '#92400e' : '#64748b')}; font-weight:500;">
+                📅 ${t.dateDisplay}
+            </div>
+        </div>`;
     }).join('');
+
+    let modalHtml = `
+    <div id="studentTermFeeModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:14px;width:min(960px,96vw);max-height:90vh;overflow-y:auto;padding:26px 28px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+            <button onclick="document.getElementById('studentTermFeeModal').remove()" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">✕</button>
+            <div style="border-bottom:1px solid #e2e8f0; padding-bottom:14px; margin-bottom:18px;">
+                <h3 style="margin:0 0 6px; font-size:20px; color:#0d4e78;">🎓 Student Fee Details – ${s.name} (${s.id})</h3>
+                <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:#475569;">
+                    <span><strong>Campus:</strong> ${normalizeCampus(s.campus)}</span>
+                    <span><strong>Course:</strong> ${s.course || '—'}</span>
+                    <span><strong>Academic Year:</strong> ${normalizeYear(s.year)}</span>
+                </div>
+            </div>
+
+            <!-- Summary Bar -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:22px;">
+                <div style="background:#f0f9ff; border-left:4px solid #0284c7; padding:12px 16px; border-radius:8px;">
+                    <span style="font-size:12px; color:#0369a1; text-transform:uppercase; font-weight:700;">Total Annual Fee</span>
+                    <h3 style="margin:4px 0 0; color:#0c4a6e; font-size:20px;">${money(totalFee)}</h3>
+                </div>
+                <div style="background:#f0fdf4; border-left:4px solid #16a34a; padding:12px 16px; border-radius:8px;">
+                    <span style="font-size:12px; color:#15803d; text-transform:uppercase; font-weight:700;">Total Paid</span>
+                    <h3 style="margin:4px 0 0; color:#14532d; font-size:20px;">${money(paidAmount)}</h3>
+                </div>
+                <div style="background:#fef2f2; border-left:4px solid #dc2626; padding:12px 16px; border-radius:8px;">
+                    <span style="font-size:12px; color:#b91c1c; text-transform:uppercase; font-weight:700;">Remaining Due</span>
+                    <h3 style="margin:4px 0 0; color:#7f1d1d; font-size:20px;">${money(dueAmount)}</h3>
+                </div>
+            </div>
+
+            <h4 style="margin:0 0 14px; color:#1e293b; font-size:16px;">10-Term Fee Breakdown (Like Student Dashboard)</h4>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;">
+                ${cardsHtml}
+            </div>
+            
+            <div style="text-align:right; margin-top:22px;">
+                <button class="primary" onclick="document.getElementById('studentTermFeeModal').remove()" style="padding:10px 22px;">Close</button>
+            </div>
+        </div>
+    </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 
 /* ================= BOOT ================= */
@@ -2028,6 +2223,8 @@ async function deleteStudentPermanently(studentId) {
 function renderAll() {
     renderNotices(); calculateTargets();
     renderResults(); renderAchievements(); renderDashboard();
+    if (typeof populateSuperFeeDropdown === 'function') populateSuperFeeDropdown();
+    if (typeof renderFilteredFees === 'function') renderFilteredFees();
 }
 renderAll();
 

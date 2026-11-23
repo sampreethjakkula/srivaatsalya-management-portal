@@ -354,6 +354,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                         <th>Paid</th>
                         <th>Due</th>
                         <th>Fee Status</th>
+                        <th style="text-align:center;">Action</th>
                     </tr>
                 </thead>
                 <tbody id="feeTable"></tbody>
@@ -1554,17 +1555,20 @@ function renderFilteredFees() {
 
         let dueAmount = Math.max(0, f.total - f.paid);
 
-        return `<tr>
+        return `<tr style="cursor:pointer;" onclick="openStudentTermFeeModal('${s.id}')" title="Click to view full term-wise fee breakdown">
             <td><strong>${s.id}</strong></td>
-            <td>${s.name}</td>
+            <td><strong style="color:#0d4e78;">${s.name}</strong></td>
             <td>${s.course}</td>
             <td>${s.campus}</td>
             <td>${money(f.total)}</td>
             <td style="color:#169b6b; font-weight:bold;">${money(f.paid)}</td>
             <td style="color:#dc4b4b; font-weight:bold;">${money(dueAmount)}</td>
             <td><span class="badge ${badgeClass}">${statusLabel}</span></td>
+            <td style="text-align:center;">
+                <button type="button" class="primary" style="padding:5px 12px;font-size:12px;border-radius:6px;" onclick="event.stopPropagation(); openStudentTermFeeModal('${s.id}')">📊 Fee Details</button>
+            </td>
         </tr>`;
-    }).join("") || `<tr><td colspan="8" style="text-align:center; padding:20px; color:#888;">No students found for the selected filters.</td></tr>`;
+    }).join("") || `<tr><td colspan="9" style="text-align:center; padding:20px; color:#888;">No students found for the selected filters.</td></tr>`;
 }
 
 function resetFeeFilters() {
@@ -2312,6 +2316,147 @@ async function openAdminCollectionsModal() {
 function toggleAdminPayments(id) {
     const el = document.getElementById(id);
     if (el) el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
+}
+
+/* =============== STUDENT TERM-WISE FEE BREAKDOWN MODAL =============== */
+function openStudentTermFeeModal(studentId) {
+    const s = allStudents.find(x => x.id === studentId);
+    if (!s) return;
+    const f = fees[studentId] || { total: 0, paid: 0, history: [] };
+    const totalFee = Number(f.total) || 100000;
+    const paidAmount = Number(f.paid) || 0;
+    const dueAmount = Math.max(0, totalFee - paidAmount);
+    const termFeeAmount = Math.round(totalFee / 10);
+
+    const history = (f.history || f.paymentHistory || []);
+    const sortedHistory = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Calculate 10 terms breakdown
+    let remainingPaid = paidAmount;
+    let terms = [];
+    for (let t = 1; t <= 10; t++) {
+        let termTarget = (t === 10) ? (totalFee - termFeeAmount * 9) : termFeeAmount;
+        let termPaid = 0;
+        if (remainingPaid >= termTarget) {
+            termPaid = termTarget;
+            remainingPaid -= termTarget;
+        } else if (remainingPaid > 0) {
+            termPaid = remainingPaid;
+            remainingPaid = 0;
+        } else {
+            termPaid = 0;
+        }
+        let termDue = Math.max(0, termTarget - termPaid);
+        let isPaid = termPaid >= termTarget;
+        let isPartial = termPaid > 0 && termPaid < termTarget;
+
+        let termStart = (t - 1) * termFeeAmount;
+        let termEnd = termStart + termTarget;
+        let termPayments = [];
+        for (const inst of sortedHistory) {
+            const instAmt = Number(inst.amount) || 0;
+            const idx = sortedHistory.indexOf(inst);
+            const globalBefore = sortedHistory.slice(0, idx).reduce((acc, x) => acc + (Number(x.amount) || 0), 0);
+            const globalAfter = globalBefore + instAmt;
+            const overlap = Math.min(globalAfter, termEnd) - Math.max(globalBefore, termStart);
+            if (overlap > 0) {
+                termPayments.push({ amount: overlap, date: inst.date || '' });
+            }
+        }
+
+        let dateDisplay = 'Payment due as per schedule';
+        if (isPaid && termPayments.length > 0) {
+            const lastDate = termPayments[termPayments.length - 1].date;
+            dateDisplay = `Fully Paid on ${lastDate ? new Date(lastDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : 'Recent'}`;
+        } else if (isPartial && termPayments.length > 0) {
+            const lastDate = termPayments[termPayments.length - 1].date;
+            dateDisplay = `Last Paid: ${lastDate ? new Date(lastDate).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) : 'Recent'}`;
+        }
+
+        terms.push({
+            num: t,
+            target: termTarget,
+            paid: termPaid,
+            due: termDue,
+            isPaid,
+            isPartial,
+            dateDisplay
+        });
+    }
+
+    let cardsHtml = terms.map(t => {
+        let badgeBg = t.isPaid ? '#dcfce7' : (t.isPartial ? '#fef3c7' : '#fee2e2');
+        let badgeColor = t.isPaid ? '#166534' : (t.isPartial ? '#b45309' : '#991b1b');
+        let badgeText = t.isPaid ? 'Fully Paid' : (t.isPartial ? 'Partially Paid' : 'Pending');
+        let borderCol = t.isPaid ? '#86efac' : (t.isPartial ? '#fcd34d' : '#fca5a5');
+        let cardBg = t.isPaid ? '#ffffff' : (t.isPartial ? '#fffdf5' : '#fffafb');
+
+        return `
+        <div style="background:${cardBg}; border:1px solid ${borderCol}; border-radius:12px; padding:18px; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:15px; font-weight:700; color:#1e293b;">Term ${t.num} Fee</span>
+                <span style="background:${badgeBg}; color:${badgeColor}; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; text-transform:uppercase;">${badgeText}</span>
+            </div>
+            <div style="font-size:22px; font-weight:800; color:${t.isPaid ? '#166534' : (t.isPartial ? '#b45309' : '#dc2626')}; margin-bottom:8px;">
+                ${money(t.target)}
+            </div>
+            <div style="display:flex; justify-content:space-between; background:#f8fafc; padding:8px 12px; border-radius:6px; margin:10px 0; border:1px solid #e2e8f0; font-size:13px;">
+                <div>
+                    <span style="color:#64748b; display:block; font-size:11px; font-weight:700; text-transform:uppercase;">Paid</span>
+                    <strong style="color:${t.paid > 0 ? '#166534' : '#64748b'};">${money(t.paid)}</strong>
+                </div>
+                <div style="text-align:right;">
+                    <span style="color:#64748b; display:block; font-size:11px; font-weight:700; text-transform:uppercase;">Due</span>
+                    <strong style="color:${t.due > 0 ? '#dc2626' : '#166534'};">${money(t.due)}</strong>
+                </div>
+            </div>
+            <div style="font-size:12px; color:${t.isPaid ? '#166534' : (t.isPartial ? '#92400e' : '#64748b')}; font-weight:500;">
+                📅 ${t.dateDisplay}
+            </div>
+        </div>`;
+    }).join('');
+
+    let modalHtml = `
+    <div id="studentTermFeeModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;">
+        <div style="background:#fff;border-radius:14px;width:min(960px,96vw);max-height:90vh;overflow-y:auto;padding:26px 28px;position:relative;box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+            <button onclick="document.getElementById('studentTermFeeModal').remove()" style="position:absolute;top:16px;right:18px;background:none;border:none;font-size:24px;cursor:pointer;color:#64748b;">✕</button>
+            <div style="border-bottom:1px solid #e2e8f0; padding-bottom:14px; margin-bottom:18px;">
+                <h3 style="margin:0 0 6px; font-size:20px; color:#0d4e78;">🎓 Student Fee Details – ${s.name} (${s.id})</h3>
+                <div style="display:flex; gap:18px; flex-wrap:wrap; font-size:13px; color:#475569;">
+                    <span><strong>Campus:</strong> ${s.campus}</span>
+                    <span><strong>Course:</strong> ${s.course}</span>
+                    <span><strong>Academic Year:</strong> ${s.year}</span>
+                </div>
+            </div>
+
+            <!-- Summary Bar -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:14px; margin-bottom:22px;">
+                <div style="background:#f0f9ff; border-left:4px solid #0284c7; padding:12px 16px; border-radius:8px;">
+                    <span style="font-size:12px; color:#0369a1; text-transform:uppercase; font-weight:700;">Total Annual Fee</span>
+                    <h3 style="margin:4px 0 0; color:#0c4a6e; font-size:20px;">${money(totalFee)}</h3>
+                </div>
+                <div style="background:#f0fdf4; border-left:4px solid #16a34a; padding:12px 16px; border-radius:8px;">
+                    <span style="font-size:12px; color:#15803d; text-transform:uppercase; font-weight:700;">Total Paid</span>
+                    <h3 style="margin:4px 0 0; color:#14532d; font-size:20px;">${money(paidAmount)}</h3>
+                </div>
+                <div style="background:#fef2f2; border-left:4px solid #dc2626; padding:12px 16px; border-radius:8px;">
+                    <span style="font-size:12px; color:#b91c1c; text-transform:uppercase; font-weight:700;">Remaining Due</span>
+                    <h3 style="margin:4px 0 0; color:#7f1d1d; font-size:20px;">${money(dueAmount)}</h3>
+                </div>
+            </div>
+
+            <h4 style="margin:0 0 14px; color:#1e293b; font-size:16px;">10-Term Fee Breakdown (Like Student Dashboard)</h4>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;">
+                ${cardsHtml}
+            </div>
+            
+            <div style="text-align:right; margin-top:22px;">
+                <button class="primary" onclick="document.getElementById('studentTermFeeModal').remove()" style="padding:10px 22px;">Close</button>
+            </div>
+        </div>
+    </div>`;
+
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
 }
 </script>
 </body>
