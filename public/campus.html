@@ -43,102 +43,228 @@
         .dropdown-content a:hover { background-color: #f1f1f1; color: var(--primary-blue); }
         .dropdown-content a span { display: block; font-size: 0.8rem; color: #777; font-weight: 400; margin-top: 2px; }
 
-        /* PROFESSIONAL RESPONSIVE LOGIN BUTTON & DROPDOWN */
-        .login-nav-item { position: relative; display: inline-block; }
+        /* ==================== PREMIUM CLICK-TO-SLIDE-DOWN LOGIN BUTTON ==================== */
+        .login-nav-item {
+            position: relative;
+            display: inline-block;
+        }
+
         .nav-login-btn {
             display: inline-flex !important;
             align-items: center;
-            gap: 8px;
+            gap: 9px;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0a2540 100%) !important;
+            color: #ffffff !important;
+            padding: 9px 22px !important;
+            border-radius: 30px !important;
+            font-weight: 700 !important;
+            font-size: 0.95rem !important;
+            letter-spacing: 0.5px;
+            border: 2px solid #d4af37 !important;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.25), 0 2px 6px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            user-select: none;
+            white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            font-family: inherit;
+        }
+
+        .nav-login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.25), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .nav-login-btn:hover::before {
+            left: 100%;
+        }
+
+        .nav-login-btn:hover {
             background: linear-gradient(135deg, #d4af37 0%, #f1c40f 100%) !important;
             color: #0a3d62 !important;
-            padding: 8px 18px !important;
-            border-radius: 25px;
-            font-weight: 800 !important;
-            font-size: 0.92rem !important;
-            letter-spacing: 0.5px;
-            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            text-decoration: none;
-            white-space: nowrap;
-        }
-        .nav-login-btn:hover {
-            background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%) !important;
-            color: #ffffff !important;
+            border-color: #ffffff !important;
             transform: translateY(-2px);
-            box-shadow: 0 6px 18px rgba(212, 175, 55, 0.55);
+            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
         }
-        .nav-login-btn:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
-        .nav-login-btn .nav-login-chevron { font-size: 0.75rem; transition: transform 0.3s ease; }
-        .login-nav-item:hover .nav-login-chevron { transform: rotate(180deg); }
 
-        .login-dropdown-menu {
-            display: none;
+        .nav-login-btn:active {
+            transform: translateY(0) scale(0.97);
+        }
+
+        .nav-login-btn.active {
+            background: linear-gradient(135deg, #d4af37 0%, #f1c40f 100%) !important;
+            color: #0a3d62 !important;
+            border-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.4);
+        }
+
+        .nav-login-btn .btn-icon {
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .nav-login-btn .btn-chevron {
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-login-btn.active .btn-chevron {
+            transform: rotate(180deg);
+        }
+
+        /* SLIDE DOWN MENU CONTAINER */
+        .login-slidedown-menu {
             position: absolute;
-            top: 100%;
+            top: calc(100% + 12px);
             right: 0;
-            min-width: 290px;
+            width: 320px;
             background: #ffffff;
-            border-radius: 12px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 5px 15px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            border-top: 4px solid var(--accent-gold);
-            margin-top: 10px;
-            padding: 8px 0;
+            border-radius: 16px;
+            border: 1px solid rgba(13, 78, 120, 0.15);
+            border-top: 4px solid #d4af37;
+            box-shadow: 0 20px 45px rgba(10, 61, 98, 0.22), 0 6px 15px rgba(0, 0, 0, 0.08);
             z-index: 999999;
-            animation: loginFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            padding: 10px;
+            
+            /* Smooth Slide-down animation */
+            max-height: 0;
+            opacity: 0;
+            visibility: hidden;
+            overflow: hidden;
+            transform: translateY(-15px) scale(0.96);
             transform-origin: top right;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                        opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+                        visibility 0.35s ease;
         }
-        @keyframes loginFadeIn {
-            from { opacity: 0; transform: translateY(-8px) scale(0.97); }
-            to { opacity: 1; transform: translateY(0) scale(1); }
+
+        .login-slidedown-menu.active {
+            max-height: 450px;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0) scale(1);
         }
-        .login-nav-item:hover .login-dropdown-menu { display: block; }
-        .login-dropdown-header {
-            padding: 8px 18px 6px;
+
+        .slidedown-header {
+            padding: 8px 14px 10px;
             font-size: 0.72rem;
-            font-weight: 700;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #888888;
-            border-bottom: 1px solid #f0f0f0;
-            margin-bottom: 4px;
+            letter-spacing: 1.2px;
+            color: #8293a4;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
-        .login-dropdown-item {
+
+        .slidedown-options {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding-top: 8px;
+        }
+
+        .slide-item {
             display: flex !important;
             align-items: center;
-            gap: 12px;
-            padding: 12px 18px !important;
+            gap: 14px;
+            padding: 12px 14px !important;
+            border-radius: 10px;
             color: #1e293b !important;
             text-decoration: none;
-            transition: all 0.2s ease !important;
-            border-bottom: 1px solid #f8f9fa;
+            transition: all 0.22s ease !important;
+            background: #ffffff;
+            border: 1px solid transparent;
             text-transform: none !important;
             font-weight: 500 !important;
         }
-        .login-dropdown-item:last-child { border-bottom: none; }
-        .login-dropdown-item:hover { background: #f4f8fb !important; padding-left: 22px !important; }
-        .role-icon-box {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
+
+        .slide-item:hover {
+            background: #f8fafc !important;
+            border-color: #e2e8f0;
+            transform: translateX(4px);
+        }
+
+        .slide-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
+            font-size: 1.1rem;
             flex-shrink: 0;
-            transition: transform 0.2s ease;
+            transition: transform 0.25s ease;
         }
-        .role-student .role-icon-box { background: #e8f4fd; color: #0284c7; }
-        .role-admin .role-icon-box { background: #fef3c7; color: #d97706; }
-        .role-superadmin .role-icon-box { background: #ede9fe; color: #7c3aed; }
-        .login-dropdown-item:hover .role-icon-box { transform: scale(1.1); }
-        .role-info { flex: 1; display: flex; flex-direction: column; }
-        .role-title { font-size: 0.95rem; font-weight: 700; color: #0a3d62; display: block; }
-        .role-desc { font-size: 0.75rem; color: #64748b; display: block; margin-top: 1px; }
-        .role-arrow { font-size: 0.8rem; color: #cbd5e1; transition: transform 0.2s ease, color 0.2s ease; }
-        .login-dropdown-item:hover .role-arrow { transform: translateX(4px); color: #0a3d62; }
+
+        .slide-item:hover .slide-icon {
+            transform: scale(1.12);
+        }
+
+        .role-student .slide-icon { background: #e0f2fe; color: #0284c7; }
+        .role-admin .slide-icon { background: #fef3c7; color: #d97706; }
+        .role-superadmin .slide-icon { background: #ede9fe; color: #7c3aed; }
+
+        .slide-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0a3d62;
+            line-height: 1.2;
+            display: block;
+        }
+
+        .slide-desc {
+            font-size: 0.76rem;
+            color: #64748b;
+            margin-top: 2px;
+            display: block;
+        }
+
+        .slide-badge {
+            font-size: 0.68rem;
+            font-weight: 700;
+            color: #94a3b8;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: #f1f5f9;
+            transition: all 0.2s;
+        }
+
+        .slide-item:hover .slide-badge {
+            background: #0a3d62;
+            color: #ffffff;
+        }
+
+        @media (max-width: 1050px) {
+            .login-slidedown-menu {
+                position: static;
+                width: 100%;
+                box-shadow: none;
+                margin-top: 8px;
+            }
+        }
 
         .nav-admissions-btn {
             background-color: var(--accent-gold);
@@ -239,40 +365,45 @@
                     <li><a href="index.html#contact">Contact</a></li>
 
                     <!-- PROFESSIONAL RESPONSIVE LOGIN BUTTON WITH ROLE DROPDOWN -->
-                    <li class="login-nav-item dropdown">
-                        <a href="login.html" class="nav-login-btn" id="loginBtnNav" aria-haspopup="true" aria-expanded="false">
-                            <i class="fa-solid fa-user-circle"></i>
-                            <span>Login</span>
-                            <i class="fa-solid fa-chevron-down nav-login-chevron"></i>
-                        </a>
-                        <div class="login-dropdown-menu">
-                            <div class="login-dropdown-header">Select Portal</div>
-                            <a href="student-login.html" class="login-dropdown-item role-student">
-                                <div class="role-icon-box"><i class="fa-solid fa-user-graduate"></i></div>
-                                <div class="role-info">
-                                    <span class="role-title">Student Login</span>
-                                    <span class="role-desc">View fees, attendance & marks</span>
-                                </div>
-                                <i class="fa-solid fa-arrow-right role-arrow"></i>
-                            </a>
-                            <a href="admin-login.html" class="login-dropdown-item role-admin">
-                                <div class="role-icon-box"><i class="fa-solid fa-chalkboard-user"></i></div>
-                                <div class="role-info">
-                                    <span class="role-title">Admin Login</span>
-                                    <span class="role-desc">Branch staff & fee management</span>
-                                </div>
-                                <i class="fa-solid fa-arrow-right role-arrow"></i>
-                            </a>
-                            <a href="administrator-login.html" class="login-dropdown-item role-superadmin">
-                                <div class="role-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
-                                <div class="role-info">
-                                    <span class="role-title">Administrator Login</span>
-                                    <span class="role-desc">Principal & executive controls</span>
-                                </div>
-                                <i class="fa-solid fa-arrow-right role-arrow"></i>
-                            </a>
+                    <!-- PROFESSIONAL CLICK-TO-SLIDE-DOWN LOGIN BUTTON (NEW TAB REDIRECTION) -->
+        <li class="login-nav-item" id="loginNavWrapper">
+            <button type="button" class="nav-login-btn" id="loginToggleBtn" onclick="toggleLoginMenu(event)" aria-haspopup="true" aria-expanded="false">
+                <span class="btn-icon"><i class="fa-solid fa-lock"></i></span>
+                <span class="btn-text">Login</span>
+                <span class="btn-chevron"><i class="fa-solid fa-chevron-down"></i></span>
+            </button>
+            <div class="login-slidedown-menu" id="loginSlideMenu">
+                <div class="slidedown-header">
+                    <span>Select Login Portal</span>
+                </div>
+                <div class="slidedown-options">
+                    <a href="student-login.html" target="_blank" rel="noopener noreferrer" class="slide-item role-student" onclick="closeLoginMenu()">
+                        <div class="slide-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                        <div class="slide-details">
+                            <span class="slide-title">Student Login</span>
+                            <span class="slide-desc">Attendance, marks & fees</span>
                         </div>
-                    </li>
+                        <span class="slide-badge">New Tab <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </a>
+                    <a href="admin-login.html" target="_blank" rel="noopener noreferrer" class="slide-item role-admin" onclick="closeLoginMenu()">
+                        <div class="slide-icon"><i class="fa-solid fa-chalkboard-user"></i></div>
+                        <div class="slide-details">
+                            <span class="slide-title">Admin Login</span>
+                            <span class="slide-desc">Campus staff & fee entries</span>
+                        </div>
+                        <span class="slide-badge">New Tab <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </a>
+                    <a href="administrator-login.html" target="_blank" rel="noopener noreferrer" class="slide-item role-superadmin" onclick="closeLoginMenu()">
+                        <div class="slide-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="slide-details">
+                            <span class="slide-title">Administrator Login</span>
+                            <span class="slide-desc">Principal & system control</span>
+                        </div>
+                        <span class="slide-badge">New Tab <i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+                    </a>
+                </div>
+            </div>
+        </li>
 
                     <li>
                         <a href="admission-form.html" target="_blank" class="nav-admissions-btn">
@@ -396,6 +527,39 @@
     <footer>
         <p>&copy; 2024 Sri Vaatsalya Educational Institutions. All Rights Reserved.</p>
     </footer>
+
+
+<script>
+function toggleLoginMenu(e) {
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    const menu = document.getElementById('loginSlideMenu');
+    const btn = document.getElementById('loginToggleBtn');
+    if (!menu) return;
+    const isOpen = menu.classList.toggle('active');
+    if (btn) btn.classList.toggle('active', isOpen);
+}
+
+function closeLoginMenu() {
+    const menu = document.getElementById('loginSlideMenu');
+    const btn = document.getElementById('loginToggleBtn');
+    if (menu) menu.classList.remove('active');
+    if (btn) btn.classList.remove('active');
+}
+
+document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('loginNavWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        closeLoginMenu();
+    }
+});
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeLoginMenu();
+});
+</script>
 
 </body>
 </html>
