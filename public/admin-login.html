@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Admin Login - Sri Vaatsalya Junior College</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-blue: #0a3d62;
+            --accent-gold: #d4af37;
+            --bg-light: #f4f7f9;
+            --white: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, rgba(15,23,42,0.95), rgba(10,61,98,0.88)),
+                        url('classroom.png') center/cover no-repeat fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: var(--white);
+            width: 100%;
+            max-width: 440px;
+            border-radius: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            padding: 40px 35px;
+            position: relative;
+            overflow: hidden;
+            border-top: 6px solid #2563eb;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .logo-icon {
+            font-size: 34px;
+            color: #1e3a8a;
+            margin-bottom: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #eff6ff;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 2px solid rgba(37,99,235,0.3);
+        }
+
+        .login-header h1 {
+            color: var(--primary-blue);
+            font-size: 23px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 13.5px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 16px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 15px 13px 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14.5px;
+            color: var(--text-dark);
+            outline: none;
+            transition: all 0.3s;
+            background: #f8fafc;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+            background: var(--white);
+            box-shadow: 0 0 0 4px rgba(37,99,235,0.1);
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            font-size: 13px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .remember-me input {
+            width: 16px;
+            height: 16px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+
+        .login-btn {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            color: var(--white);
+            border: none;
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 15.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(30,41,59,0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(30,41,59,0.4);
+            filter: brightness(1.1);
+        }
+
+        .login-btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 22px;
+        }
+
+        .back-link a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .back-link a:hover {
+            color: var(--accent-gold);
+        }
+
+        .error-msg {
+            display: none;
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 20px;
+            border: 1px solid #f87171;
+        }
+
+        .default-info {
+            background: #eff6ff;
+            color: #1e40af;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 9px 12px;
+            margin-bottom: 20px;
+            font-size: 12px;
+            text-align: center;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-card">
+    <div class="login-header">
+        <div class="logo-icon">
+            <i class="fa-solid fa-user-tie"></i>
+        </div>
+        <h1>Campus Admin Login</h1>
+        <p>Sri Vaatsalya Junior College</p>
+        <span class="role-badge"><i class="fa-solid fa-building-shield"></i> Campus Operations</span>
+    </div>
+
+    <div class="default-info">
+        <strong>Default Admin Login:</strong><br>
+        Username: <code>admin</code> | Password: <code>admin123</code>
+    </div>
+
+    <div class="error-msg" id="errorMsg">
+        <i class="fa-solid fa-circle-exclamation"></i> Invalid Admin Username or Password!
+    </div>
+
+    <!-- EXCLUSIVELY CAMPUS ADMIN LOGIN FORM -->
+    <form id="adminForm" onsubmit="return handleAdminLogin(event)">
+        <div class="form-group">
+            <label>Admin Username</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-user-tie"></i>
+                <input type="text" id="adminId" placeholder="Enter your Admin username" required autofocus>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <div class="input-wrapper">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="adminPassword" placeholder="Enter your password" required>
+            </div>
+        </div>
+
+        <div class="form-options">
+            <label class="remember-me">
+                <input type="checkbox" id="rememberMe">
+                Remember me
+            </label>
+        </div>
+
+        <button type="submit" class="login-btn" id="submitBtn">
+            Sign In to Admin Dashboard
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+        </button>
+    </form>
+
+    <div class="back-link">
+        <a href="index.html">
+            <i class="fa-solid fa-arrow-left"></i> Back to Sri Vaatsalya Website
+        </a>
+    </div>
+</div>
+
+<script src="js/api.js"></script>
+<script>
+function showError(msg) {
+    const errorEl = document.getElementById('errorMsg');
+    errorEl.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> ' + msg;
+    errorEl.style.display = 'block';
+    setTimeout(() => { errorEl.style.display = 'none'; }, 4000);
+}
+
+async function handleAdminLogin(event) {
+    event.preventDefault();
+    const adminId = document.getElementById('adminId').value.trim();
+    const password = document.getElementById('adminPassword').value;
+
+    if (!adminId || !password) {
+        showError('Please enter Admin Username and Password.');
+        return false;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+
+    // 1. Try Backend API first
+    if (window.SchoolAPI && window.SchoolAPI.login) {
+        try {
+            const res = await window.SchoolAPI.login(adminId, password, 'admin');
+            if (res.success) {
+                localStorage.setItem('loggedInAdminCampus', res.user?.campus || 'All Campuses');
+                localStorage.setItem('loggedInAdmin', res.user?.username || adminId);
+                window.location.href = './admin-dashboard.html';
+                return false;
+            }
+        } catch (err) {
+            console.warn('Backend login fallback:', err.message);
+        }
+    }
+
+    // 2. Local Fallback authentication
+    if (adminId.toLowerCase() === 'admin' && password === 'admin123') {
+        localStorage.setItem('loggedInAdminCampus', 'All Campuses');
+        localStorage.setItem('loggedInAdmin', 'admin');
+        window.location.href = './admin-dashboard.html';
+        return false;
+    }
+
+    // Check systemAdmins in localStorage
+    try {
+        const admins = JSON.parse(localStorage.getItem('systemAdmins') || '[]');
+        const found = admins.find(a => String(a.username).trim().toLowerCase() === adminId.toLowerCase() && a.password === password);
+        if (found) {
+            localStorage.setItem('loggedInAdminCampus', found.campus || 'All Campuses');
+            localStorage.setItem('loggedInAdmin', found.username);
+            window.location.href = './admin-dashboard.html';
+            return false;
+        }
+    } catch (e) {}
+
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In to Admin Dashboard <i class="fa-solid fa-arrow-right-to-bracket"></i>';
+    showError('Invalid Admin Username or Password!');
+    return false;
+}
+</script>
+</body>
+</html>

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Programs | Sri Vaatsalya</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         /* --- CSS VARIABLES --- */
         :root {
@@ -41,6 +42,116 @@
         .dropdown-content a:last-child { border-bottom: none; }
         .dropdown-content a:hover { background-color: #f1f1f1; color: var(--primary-blue); }
         .dropdown-content a span { display: block; font-size: 0.8rem; color: #777; font-weight: 400; margin-top: 2px; }
+
+        /* PROFESSIONAL RESPONSIVE LOGIN BUTTON & DROPDOWN */
+        .login-nav-item { position: relative; display: inline-block; }
+        .nav-login-btn {
+            display: inline-flex !important;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #d4af37 0%, #f1c40f 100%) !important;
+            color: #0a3d62 !important;
+            padding: 8px 18px !important;
+            border-radius: 25px;
+            font-weight: 800 !important;
+            font-size: 0.92rem !important;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(212, 175, 55, 0.35);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .nav-login-btn:hover {
+            background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(212, 175, 55, 0.55);
+        }
+        .nav-login-btn:active { transform: translateY(0); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2); }
+        .nav-login-btn .nav-login-chevron { font-size: 0.75rem; transition: transform 0.3s ease; }
+        .login-nav-item:hover .nav-login-chevron { transform: rotate(180deg); }
+
+        .login-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 290px;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25), 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-top: 4px solid var(--accent-gold);
+            margin-top: 10px;
+            padding: 8px 0;
+            z-index: 999999;
+            animation: loginFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            transform-origin: top right;
+        }
+        @keyframes loginFadeIn {
+            from { opacity: 0; transform: translateY(-8px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .login-nav-item:hover .login-dropdown-menu { display: block; }
+        .login-dropdown-header {
+            padding: 8px 18px 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #888888;
+            border-bottom: 1px solid #f0f0f0;
+            margin-bottom: 4px;
+        }
+        .login-dropdown-item {
+            display: flex !important;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px !important;
+            color: #1e293b !important;
+            text-decoration: none;
+            transition: all 0.2s ease !important;
+            border-bottom: 1px solid #f8f9fa;
+            text-transform: none !important;
+            font-weight: 500 !important;
+        }
+        .login-dropdown-item:last-child { border-bottom: none; }
+        .login-dropdown-item:hover { background: #f4f8fb !important; padding-left: 22px !important; }
+        .role-icon-box {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+        .role-student .role-icon-box { background: #e8f4fd; color: #0284c7; }
+        .role-admin .role-icon-box { background: #fef3c7; color: #d97706; }
+        .role-superadmin .role-icon-box { background: #ede9fe; color: #7c3aed; }
+        .login-dropdown-item:hover .role-icon-box { transform: scale(1.1); }
+        .role-info { flex: 1; display: flex; flex-direction: column; }
+        .role-title { font-size: 0.95rem; font-weight: 700; color: #0a3d62; display: block; }
+        .role-desc { font-size: 0.75rem; color: #64748b; display: block; margin-top: 1px; }
+        .role-arrow { font-size: 0.8rem; color: #cbd5e1; transition: transform 0.2s ease, color 0.2s ease; }
+        .login-dropdown-item:hover .role-arrow { transform: translateX(4px); color: #0a3d62; }
+
+        .nav-admissions-btn {
+            background-color: var(--accent-gold);
+            color: var(--primary-blue) !important;
+            padding: 8px 18px !important;
+            border-radius: 25px;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 10px rgba(212,175,55,0.4);
+            transition: transform 0.3s, background-color 0.3s !important;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .nav-admissions-btn:hover { background-color: #f1c40f; transform: translateY(-2px); }
 
         /* --- PAGE HEADER --- */
         .page-header { text-align: center; padding: 60px 20px; background: linear-gradient(to right, #1d4f73, #317399, #1d4f73); color: white; margin-bottom: 40px; }
@@ -118,16 +229,54 @@
                             <a href="campus.html#virinchi">Sri Virinchi Bhavan <span>Boys Campus & Hostel</span></a>
                         </div>
                     </li>
-                    <!-- 2. HOME -->
                     <li><a href="index.html">Home</a></li>
-                    <!-- 3. RESULTS -->
                     <li><a href="results.html">Results</a></li>
-                    <!-- 4. PROGRAMS -->
                     <li><a href="programs.html" class="active">Programs</a></li>
-                    <!-- 5. HOSTEL & CLASSROOMS -->
                     <li><a href="campus.html#hostels">Hostel & Classrooms</a></li>
-                    <!-- 6. CONTACT -->
+                    <li><a href="gallery.html">Gallery</a></li>
                     <li><a href="index.html#contact">Contact</a></li>
+
+                    <!-- PROFESSIONAL RESPONSIVE LOGIN BUTTON WITH ROLE DROPDOWN -->
+                    <li class="login-nav-item dropdown">
+                        <a href="login.html" class="nav-login-btn" id="loginBtnNav" aria-haspopup="true" aria-expanded="false">
+                            <i class="fa-solid fa-user-circle"></i>
+                            <span>Login</span>
+                            <i class="fa-solid fa-chevron-down nav-login-chevron"></i>
+                        </a>
+                        <div class="login-dropdown-menu">
+                            <div class="login-dropdown-header">Select Portal</div>
+                            <a href="student-login.html" class="login-dropdown-item role-student">
+                                <div class="role-icon-box"><i class="fa-solid fa-user-graduate"></i></div>
+                                <div class="role-info">
+                                    <span class="role-title">Student Login</span>
+                                    <span class="role-desc">View fees, attendance & marks</span>
+                                </div>
+                                <i class="fa-solid fa-arrow-right role-arrow"></i>
+                            </a>
+                            <a href="admin-login.html" class="login-dropdown-item role-admin">
+                                <div class="role-icon-box"><i class="fa-solid fa-chalkboard-user"></i></div>
+                                <div class="role-info">
+                                    <span class="role-title">Admin Login</span>
+                                    <span class="role-desc">Branch staff & fee management</span>
+                                </div>
+                                <i class="fa-solid fa-arrow-right role-arrow"></i>
+                            </a>
+                            <a href="administrator-login.html" class="login-dropdown-item role-superadmin">
+                                <div class="role-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+                                <div class="role-info">
+                                    <span class="role-title">Administrator Login</span>
+                                    <span class="role-desc">Principal & executive controls</span>
+                                </div>
+                                <i class="fa-solid fa-arrow-right role-arrow"></i>
+                            </a>
+                        </div>
+                    </li>
+
+                    <li>
+                        <a href="admission-form.html" target="_blank" class="nav-admissions-btn">
+                            Admissions Open
+                        </a>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -234,7 +383,7 @@
         <!-- CALL TO ACTION -->
         <div class="cta-section">
             <h2>Ready to Join Sri Vaatsalya?</h2>
-            <p>Admissions are open for the 2026 Academic Year. Secure your seat today.</p>
+            <p>Admissions are open for the 2027 Academic Year. Secure your seat today.</p>
             <a href="index.html#contact" class="cta-btn">Contact Admissions</a>
         </div>
 
@@ -242,7 +391,10 @@
 
     <!-- FOOTER -->
     <footer>
-        <p>&copy; 2024 Sri Vaatsalya Educational Institutions. All Rights Reserved.</p>
+        <p style="margin-bottom:6px; font-weight:600; color:var(--accent-gold);">
+            <i class="fa-solid fa-phone"></i> Corporate Admissions: +91 9908353814 / 7997711665
+        </p>
+        <p>&copy; 2027 Sri Vaatsalya Educational Institutions. All Rights Reserved.</p>
     </footer>
 
     <!-- JAVASCRIPT FOR TABS -->

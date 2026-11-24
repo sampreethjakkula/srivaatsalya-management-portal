@@ -10,6 +10,7 @@ const FeeModel = require('../models/Fee');
 const AttendanceModel = require('../models/Attendance');
 const NoticeModel = require('../models/Notice');
 const AdmissionModel = require('../models/Admission');
+const GalleryModel = require('../models/Gallery');
 
 const dataDir = path.join(__dirname, '../../data');
 
@@ -20,6 +21,7 @@ const localFees = Datastore.create({ filename: path.join(dataDir, 'fees.db'), au
 const localAttendance = Datastore.create({ filename: path.join(dataDir, 'attendance.db'), autoload: true });
 const localNotices = Datastore.create({ filename: path.join(dataDir, 'notices.db'), autoload: true });
 const localAdmissions = Datastore.create({ filename: path.join(dataDir, 'admissions.db'), autoload: true });
+const localGallery = Datastore.create({ filename: path.join(dataDir, 'gallery.db'), autoload: true });
 
 const isMongoActive = () => mongoose.connection.readyState === 1;
 
@@ -74,6 +76,7 @@ const Fees = createStore(FeeModel, localFees);
 const Attendance = createStore(AttendanceModel, localAttendance);
 const Notices = createStore(NoticeModel, localNotices);
 const Admissions = createStore(AdmissionModel, localAdmissions);
+const Gallery = createStore(GalleryModel, localGallery);
 
 // Seed function for cloud & local
 const seedDB = async () => {
@@ -185,5 +188,6 @@ module.exports = {
   Attendance,
   Notices,
   Admissions,
+  Gallery,
   seedDB
 };

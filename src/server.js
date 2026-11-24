@@ -16,6 +16,7 @@ const feeRoutes = require('./routes/fee.routes');
 const attendanceRoutes = require('./routes/attendance.routes');
 const noticeRoutes = require('./routes/notice.routes');
 const admissionRoutes = require('./routes/admission.routes');
+const galleryRoutes = require('./routes/gallery.routes');
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/api/fees', feeRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/notices', noticeRoutes);
 app.use('/api/admissions', admissionRoutes);
+app.use('/api/gallery', galleryRoutes);
 
 // Achievements API (persisted in MongoDB Atlas via unified store)
 const { Notices } = require('./data/dbStore');

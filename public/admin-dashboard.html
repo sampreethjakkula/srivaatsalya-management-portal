@@ -113,6 +113,7 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
     <button onclick="showPage('attendance',this)">📅 Attendance</button>
     <button onclick="showPage('results',this)">📚 Examination Results</button>
     <button onclick="showPage('achievements',this)">🏆 Achievements</button>
+    <button onclick="showPage('gallery',this)">🖼️ Gallery Management</button>
     <button class="logout" onclick="window.location.href='login.html'">↪ Logout</button>
 </aside>
 
@@ -310,13 +311,6 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                     <option value="1">Term 1</option>
                     <option value="2">Term 2</option>
                     <option value="3">Term 3</option>
-                    <option value="4">Term 4</option>
-                    <option value="5">Term 5</option>
-                    <option value="6">Term 6</option>
-                    <option value="7">Term 7</option>
-                    <option value="8">Term 8</option>
-                    <option value="9">Term 9</option>
-                    <option value="10">Term 10</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -398,13 +392,6 @@ main{margin-left:65px;width:calc(100% - 65px);padding:12px}
                     <option value="1">Term 1</option>
                     <option value="2">Term 2</option>
                     <option value="3">Term 3</option>
-                    <option value="4">Term 4</option>
-                    <option value="5">Term 5</option>
-                    <option value="6">Term 6</option>
-                    <option value="7">Term 7</option>
-                    <option value="8">Term 8</option>
-                    <option value="9">Term 9</option>
-                    <option value="10">Term 10</option>
                 </select>
             </div>
             <div>
@@ -802,7 +789,8 @@ function showPage(id, button) {
     document.getElementById(id).classList.add("active");
     document.querySelectorAll(".sidebar button").forEach(b => b.classList.remove("active"));
     if (button) button.classList.add("active");
-    const titles = { dashboard: "Admin Dashboard", notices: "Notice Board", students: "Student Management", fees: "Fee Management", targets: "Monthly Collection Target", attendance: "Attendance", results: "Examination Results", achievements: "Achievements" };
+    const titles = { dashboard: "Admin Dashboard", notices: "Notice Board", students: "Student Management", fees: "Fee Management", targets: "Monthly Collection Target", attendance: "Attendance", results: "Examination Results", achievements: "Achievements", gallery: "Gallery Management" };
+    if (id === "gallery" && typeof loadAdminGallery === "function") loadAdminGallery();
     document.getElementById("pageTitle").textContent = titles[id];
     renderAll();
 }
@@ -1519,7 +1507,7 @@ function renderFilteredFees() {
 
         // Fee Status Logic
         let f = fees[s.id] || { total: 0, paid: 0 };
-        let termFee = f.total / 10;
+        let termFee = f.total / 3;
         let paidForThisTerm = Math.min(Math.max(0, f.paid - (termNum - 1) * termFee), termFee);
         
         let status = "Not Paid";
@@ -1545,7 +1533,7 @@ function renderFilteredFees() {
     // Render Table
     document.getElementById("feeTable").innerHTML = filtered.map(s => {
         let f = fees[s.id] || { total: 0, paid: 0 };
-        let termFee = f.total / 10;
+        let termFee = f.total / 3;
         let paidForThisTerm = Math.min(Math.max(0, f.paid - (termNum - 1) * termFee), termFee);
         
         let badgeClass = "green";
@@ -1635,7 +1623,7 @@ function calculateTargets() {
 
     filteredStudents.forEach(s => {
         let f = fees[s.id] || { total: 0, paid: 0 };
-        let termFee = f.total / 10; 
+        let termFee = f.total / 3; 
         expectedCollection += termFee;
 
         let paidForThisTerm = Math.min(Math.max(0, f.paid - (termFilter - 1) * termFee), termFee);
@@ -1696,7 +1684,7 @@ function generateCampusBreakdown() {
 
         campusStudents.forEach(s => {
             let f = fees[s.id] || { total: 0, paid: 0 };
-            let termFee = f.total / 10;
+            let termFee = f.total / 3;
             expected += termFee;
             
             let paidForThisTerm = Math.min(Math.max(0, f.paid - (termFilter - 1) * termFee), termFee);
@@ -1743,7 +1731,7 @@ function generateGroupBreakdown() {
 
         matchStudents.forEach(s => {
             let f = fees[s.id] || { total: 0, paid: 0 };
-            let termFee = f.total / 10;
+            let termFee = f.total / 3;
             expected += termFee;
             
             let paidForThisTerm = Math.min(Math.max(0, f.paid - (termFilter - 1) * termFee), termFee);
@@ -2326,7 +2314,7 @@ function openStudentTermFeeModal(studentId) {
     const totalFee = Number(f.total) || 100000;
     const paidAmount = Number(f.paid) || 0;
     const dueAmount = Math.max(0, totalFee - paidAmount);
-    const termFeeAmount = Math.round(totalFee / 10);
+    const termFeeAmount = Math.round(totalFee / 3);
 
     const history = (f.history || f.paymentHistory || []);
     const sortedHistory = [...history].sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -2334,8 +2322,8 @@ function openStudentTermFeeModal(studentId) {
     // Calculate 10 terms breakdown
     let remainingPaid = paidAmount;
     let terms = [];
-    for (let t = 1; t <= 10; t++) {
-        let termTarget = (t === 10) ? (totalFee - termFeeAmount * 9) : termFeeAmount;
+    for (let t = 1; t <= 3; t++) {
+        let termTarget = (t === 3) ? (totalFee - termFeeAmount * 2) : termFeeAmount;
         let termPaid = 0;
         if (remainingPaid >= termTarget) {
             termPaid = termTarget;
@@ -2445,7 +2433,7 @@ function openStudentTermFeeModal(studentId) {
                 </div>
             </div>
 
-            <h4 style="margin:0 0 14px; color:#1e293b; font-size:16px;">10-Term Fee Breakdown (Like Student Dashboard)</h4>
+            <h4 style="margin:0 0 14px; color:#1e293b; font-size:16px;">3-Term Fee Breakdown (Strictly 3 Terms)</h4>
             <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px;">
                 ${cardsHtml}
             </div>

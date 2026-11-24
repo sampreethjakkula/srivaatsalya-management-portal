@@ -641,7 +641,7 @@
                     <div class="fee-type-icon"><i class="fa-solid fa-graduation-cap"></i></div>
                     <h4>Total Annual Fee</h4>
                     <div class="amount" id="tuitionAmountDisplay">₹0</div>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">(Divided into 10 Equal Terms)</p>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px; font-weight: 600;">(Divided into 3 Equal Terms)</p>
                 </div>
                 <div class="fee-type-card paid" id="paidFeeCard">
                     <div class="fee-type-icon" style="color: #10b981;"><i class="fa-solid fa-circle-check"></i></div>
@@ -670,10 +670,10 @@
             <!-- Schedule Header showing term division -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 25px 0 15px 0; flex-wrap: wrap; gap: 10px;">
                 <h3 style="font-size: 18px; color: var(--primary-blue); font-weight: 800; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-calendar-days"></i> 10-Term Fee Breakdown
+                    <i class="fa-solid fa-calendar-days"></i> 3-Term Fee Breakdown
                 </h3>
                 <span style="font-size: 13px; color: var(--text-muted); font-weight: 600; background: #f1f5f9; padding: 6px 14px; border-radius: 20px;">
-                    Each Term = Total Fee ÷ 10: <strong id="termBaseRate" style="color: var(--primary-blue);">₹0</strong>
+                    Each Term = Total Fee ÷ 3: <strong id="termBaseRate" style="color: var(--primary-blue);">₹0</strong>
                 </span>
             </div>
 
@@ -1061,7 +1061,7 @@
                 document.getElementById('dueAmountCardDisplay').textContent = formatCurrency(totalPendingFee);
             }
             if (document.getElementById('termBaseRate')) {
-                document.getElementById('termBaseRate').textContent = formatCurrency(Math.round(totalAnnualFee / 10));
+                document.getElementById('termBaseRate').textContent = formatCurrency(Math.round(totalAnnualFee / 3));
             }
             
             if (isHostel) {
@@ -1078,7 +1078,7 @@
                 document.getElementById('transportFeeCard').style.display = "none"; 
             }
 
-            const termFeeAmount = Math.round(totalAnnualFee / 10);
+            const termFeeAmount = Math.round(totalAnnualFee / 3);
             currentStudentFees.termFee = termFeeAmount;
             currentStudentFees.totalFee = totalAnnualFee;
             currentStudentFees.pending = totalPendingFee;
@@ -1100,9 +1100,9 @@
             let runningBalance = 0;
             let histIdx = 0;
 
-            for (let term = 1; term <= 10; term++) {
-                let thisTermTarget = (term === 10)
-                    ? (totalAnnualFee - (termFeeAmount * 9))
+            for (let term = 1; term <= 3; term++) {
+                let thisTermTarget = (term === 3)
+                    ? (totalAnnualFee - (termFeeAmount * 2))
                     : termFeeAmount;
 
                 let termStart = (term - 1) * termFeeAmount;
@@ -1227,10 +1227,10 @@
             }
 
             if (document.getElementById('paidCountHint')) {
-                document.getElementById('paidCountHint').textContent = clearedTermsCount + " of 10 Terms Cleared";
+                document.getElementById('paidCountHint').textContent = clearedTermsCount + " of 3 Terms Cleared";
             }
             if (document.getElementById('dueCountHint')) {
-                document.getElementById('dueCountHint').textContent = pendingTermsCount + " of 10 Terms Due";
+                document.getElementById('dueCountHint').textContent = pendingTermsCount + " of 3 Terms Due";
             }
 
             document.getElementById('fullPendingFee').textContent = formatCurrency(totalPendingFee);
@@ -1515,9 +1515,9 @@
             const allFees = JSON.parse(localStorage.getItem('adminFees') || '{}');
             const feeData = allFees[student.id];
             const totalAnnualFee = (feeData && feeData.total && Number(feeData.total) > 0) ? Number(feeData.total) : (currentStudentFees.totalFee || 100000);
-            const termFeeAmount = Math.round(totalAnnualFee / 10);
+            const termFeeAmount = Math.round(totalAnnualFee / 3);
             const termNum = parseInt(termName.replace(/[^0-9]/g, '')) || 1;
-            const termTarget = (termNum === 10) ? (totalAnnualFee - termFeeAmount * 9) : termFeeAmount;
+            const termTarget = (termNum === 3) ? (totalAnnualFee - termFeeAmount * 2) : termFeeAmount;
             const termStart = (termNum - 1) * termFeeAmount;
             const termEnd = termStart + termTarget;
 

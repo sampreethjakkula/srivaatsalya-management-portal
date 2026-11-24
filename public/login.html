@@ -3,11 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Login - Sri Vaatsalya Academy</title>
+    <title>Portal Access - Sri Vaatsalya Junior College</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <script>
+        // Check URL parameter and redirect immediately to the dedicated single-role login page
+        (function() {
+            const params = new URLSearchParams(window.location.search);
+            const role = params.get('role');
+            if (role === 'student') {
+                window.location.replace('student-login.html');
+            } else if (role === 'admin') {
+                window.location.replace('admin-login.html');
+            } else if (role === 'superadmin' || role === 'administrator') {
+                window.location.replace('administrator-login.html');
+            }
+        })();
+    </script>
 
     <style>
         :root {
@@ -27,10 +42,8 @@
         }
 
         body {
-            background:
-                linear-gradient(135deg, rgba(10,61,98,.95), rgba(10,61,98,.85)),
-                url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2000&auto=format&fit=crop')
-                center/cover;
+            background: linear-gradient(135deg, rgba(10,61,98,0.95), rgba(10,61,98,0.85)),
+                        url('classroom.png') center/cover no-repeat fixed;
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -38,585 +51,164 @@
             padding: 20px;
         }
 
-        .login-card {
+        .gateway-card {
             background: var(--white);
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
             border-radius: 20px;
-            box-shadow: 0 25px 50px rgba(0,0,0,.2);
-            padding: 40px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 6px;
-            background: var(--accent-gold);
-        }
-
-        .login-header {
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            padding: 40px 35px;
             text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .logo-icon {
-            font-size: 40px;
-            color: var(--primary-blue);
-            margin-bottom: 15px;
-            display: inline-block;
-            background: #e6f0f9;
-            width: 70px;
-            height: 70px;
-            line-height: 70px;
-            border-radius: 50%;
-        }
-
-        .login-header h1 {
-            color: var(--primary-blue);
-            font-size: 24px;
-            font-weight: 800;
-            margin-bottom: 8px;
-        }
-
-        .login-header p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .role-tabs {
-            display: flex;
-            background: #f1f5f9;
-            border-radius: 10px;
-            padding: 5px;
-            margin-bottom: 30px;
-        }
-
-        .role-tab {
-            flex: 1;
-            padding: 12px 2px;
-            text-align: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            cursor: pointer;
-            border-radius: 8px;
-            transition: .3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .role-tab i {
-            font-size: 16px;
-        }
-
-        .role-tab.active {
-            background: var(--white);
-            color: var(--primary-blue);
-            box-shadow: 0 4px 10px rgba(0,0,0,.05);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-
-        .input-wrapper {
-            position: relative;
-        }
-
-        .input-wrapper i {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-            font-size: 16px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 14px 15px 14px 45px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 15px;
-            color: var(--text-dark);
-            outline: none;
-            transition: .3s;
-            background: #f8fafc;
-        }
-
-        .form-group input:focus {
-            border-color: var(--primary-blue);
-            background: var(--white);
-            box-shadow: 0 0 0 4px rgba(10,61,98,.1);
-        }
-
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            font-size: 13px;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-
-        .remember-me input {
-            width: 16px;
-            height: 16px;
-            accent-color: var(--primary-blue);
-            cursor: pointer;
-        }
-
-        .forgot-password {
-            color: var(--primary-blue);
-            font-weight: 600;
-            text-decoration: none;
-        }
-
-        .login-btn {
-            background: var(--primary-blue);
-            color: var(--white);
-            border: none;
-            width: 100%;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: .3s;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .login-btn:hover {
-            background: #072a44;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(10,61,98,.2);
-        }
-
-        .error-msg {
-            display: none;
-            background: #fee2e2;
-            color: #b91c1c;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            text-align: center;
-            margin-bottom: 20px;
-            border: 1px solid #f87171;
-        }
-
-        .login-form {
-            display: none;
-        }
-
-        .login-form.active {
-            display: block;
-            animation: fadeIn .4s ease;
-        }
-
-        .default-login-info {
-            background: #eff6ff;
-            color: #164e80;
-            border: 1px solid #bfdbfe;
-            border-radius: 8px;
-            padding: 11px;
-            margin-bottom: 20px;
-            font-size: 12px;
-            text-align: center;
-            line-height: 1.7;
+            border-top: 6px solid var(--accent-gold);
+            animation: fadeIn 0.4s ease;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @media(max-width:480px) {
-            .login-card {
-                padding: 30px 20px;
-            }
+        .gateway-card h1 {
+            color: var(--primary-blue);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
 
-            .role-tab {
-                font-size: 11px;
-            }
+        .gateway-card p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+
+        .roles-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .role-option-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-dark);
+            text-align: left;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .role-option-btn:hover {
+            transform: translateY(-3px);
+            border-color: var(--accent-gold);
+            background: #fff;
+            box-shadow: 0 10px 20px rgba(10,61,98,0.1);
+        }
+
+        .role-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .icon-student { background: #e0f2fe; color: #0284c7; }
+        .icon-admin { background: #fef3c7; color: #b45309; }
+        .icon-super { background: #f3e8ff; color: #7e22ce; }
+
+        .role-info h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 3px;
+        }
+
+        .role-info p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        .back-link {
+            margin-top: 25px;
+        }
+
+        .back-link a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+
+        .back-link a:hover {
+            color: var(--accent-gold);
         }
     </style>
 </head>
-
 <body>
 
-<div class="login-card">
-
-    <div class="login-header">
-        <div class="logo-icon">
-            <i class="fa-solid fa-school"></i>
-        </div>
-
-        <h1>Sri Vaatsalya Portal</h1>
-        <p>Select your role to continue</p>
+<div class="gateway-card">
+    <div style="font-size:38px; color:var(--primary-blue); margin-bottom:12px;">
+        <i class="fa-solid fa-graduation-cap"></i>
     </div>
+    <h1>Sri Vaatsalya Portals</h1>
+    <p>Please select your login role to proceed to your dedicated portal</p>
 
-    <div class="role-tabs">
-
-        <div class="role-tab active" onclick="switchRole('student',this)">
-            <i class="fa-solid fa-user-graduate"></i>
-            Student
-        </div>
-
-        <div class="role-tab" onclick="switchRole('admin',this)">
-            <i class="fa-solid fa-user-tie"></i>
-            Admin
-        </div>
-
-        <div class="role-tab" onclick="switchRole('superadmin',this)">
-            <i class="fa-solid fa-user-shield"></i>
-            Administrator
-        </div>
-
-    </div>
-
-    <div class="error-msg" id="errorMsg">
-        <i class="fa-solid fa-circle-exclamation"></i>
-        Invalid ID or Password!
-    </div>
-
-    <!-- STUDENT LOGIN -->
-
-    <form id="studentForm"
-          class="login-form active"
-          onsubmit="return validateLogin(event,'student')">
-
-        <div class="form-group">
-            <label>Student ID</label>
-
-            <div class="input-wrapper">
-                <i class="fa-solid fa-id-card"></i>
-
-                <input type="text"
-                       id="studentId"
-                       placeholder="Enter Student ID"
-                       required>
+    <div class="roles-list">
+        <!-- 1. Student Login -->
+        <a href="student-login.html" class="role-option-btn">
+            <div class="role-icon-box icon-student">
+                <i class="fa-solid fa-user-graduate"></i>
             </div>
-        </div>
-
-        <div class="form-group">
-            <label>Password</label>
-
-            <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-
-                <input type="password"
-                       id="studentPassword"
-                       placeholder="Enter password"
-                       required>
+            <div class="role-info">
+                <h3>Student Login</h3>
+                <p>View personal profile, attendance, 3-term fees & exam results</p>
             </div>
-        </div>
+            <i class="fa-solid fa-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
+        </a>
 
-        <div class="form-options">
-            <label class="remember-me">
-                <input type="checkbox">
-                Remember me
-            </label>
-
-            <a href="#" class="forgot-password">Forgot Password?</a>
-        </div>
-
-        <button type="submit" class="login-btn">
-            Student Login
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-        </button>
-
-    </form>
-
-    <!-- ADMIN LOGIN -->
-
-    <form id="adminForm"
-          class="login-form"
-          onsubmit="return validateLogin(event,'admin')">
-
-        <div class="form-group">
-            <label>Admin Username</label>
-
-            <div class="input-wrapper">
+        <!-- 2. Admin Login -->
+        <a href="admin-login.html" class="role-option-btn">
+            <div class="role-icon-box icon-admin">
                 <i class="fa-solid fa-user-tie"></i>
-
-                <input type="text"
-                       id="adminId"
-                       placeholder="Enter Admin Username"
-                       required>
             </div>
-        </div>
-
-        <div class="form-group">
-            <label>Password</label>
-
-            <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-
-                <input type="password"
-                       id="adminPassword"
-                       placeholder="Enter Admin Password"
-                       required>
+            <div class="role-info">
+                <h3>Admin Login</h3>
+                <p>Manage campus students, attendance, fee collection & notices</p>
             </div>
-        </div>
+            <i class="fa-solid fa-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
+        </a>
 
-        <div class="form-options">
-            <label class="remember-me">
-                <input type="checkbox">
-                Remember me
-            </label>
-        </div>
-
-        <button type="submit"
-                class="login-btn"
-                style="background:#1e293b;">
-
-            Admin Login
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-
-        </button>
-
-    </form>
-
-    <!-- ADMINISTRATOR LOGIN -->
-
-    <form id="superadminForm"
-          class="login-form"
-          onsubmit="return validateLogin(event,'superadmin')">
-
-        <div class="form-group">
-            <label>Administrator Username</label>
-
-            <div class="input-wrapper">
+        <!-- 3. Administrator Login -->
+        <a href="administrator-login.html" class="role-option-btn">
+            <div class="role-icon-box icon-super">
                 <i class="fa-solid fa-user-shield"></i>
-
-                <input type="text"
-                       id="superadminId"
-                       placeholder="Enter Administrator Username"
-                       required>
             </div>
-        </div>
-
-        <div class="form-group">
-            <label>Password</label>
-
-            <div class="input-wrapper">
-                <i class="fa-solid fa-lock"></i>
-
-                <input type="password"
-                       id="superadminPassword"
-                       placeholder="Enter Administrator Password"
-                       required>
+            <div class="role-info">
+                <h3>Administrator Login</h3>
+                <p>Full multi-campus administration, targets, fees & staff oversight</p>
             </div>
-        </div>
+            <i class="fa-solid fa-chevron-right" style="margin-left:auto; color:#94a3b8;"></i>
+        </a>
+    </div>
 
-        <div class="form-options">
-            <label class="remember-me">
-                <input type="checkbox">
-                Remember me
-            </label>
-        </div>
-
-        <button type="submit"
-                class="login-btn"
-                style="background:#123b70;">
-
-            Administrator Login
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-
-        </button>
-
-    </form>
-
+    <div class="back-link">
+        <a href="index.html">
+            <i class="fa-solid fa-arrow-left"></i> Return to Main Website
+        </a>
+    </div>
 </div>
-
-<script src="js/api.js"></script>
-<script>
-
-/* SWITCH LOGIN ROLE */
-
-function switchRole(role, element) {
-
-    document.querySelectorAll('.role-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
-
-    document.querySelectorAll('.login-form').forEach(form => {
-        form.classList.remove('active');
-    });
-
-    document.getElementById('errorMsg').style.display = 'none';
-
-    element.classList.add('active');
-
-    document.getElementById(role + 'Form').classList.add('active');
-}
-
-
-/* DISPLAY ERROR */
-
-function showError(message) {
-
-    const errorMsg = document.getElementById('errorMsg');
-
-    errorMsg.innerHTML =
-        '<i class="fa-solid fa-circle-exclamation"></i> ' + message;
-
-    errorMsg.style.display = 'block';
-
-    setTimeout(() => {
-        errorMsg.style.display = 'none';
-    }, 4000);
-}
-
-
-/* DEFAULT STUDENT PROFILE */
-
-function createDefaultStudentProfile() {
-
-    let students = [];
-
-    try {
-        students = JSON.parse(
-            localStorage.getItem('adminStudentsData') || '[]'
-        );
-
-        if (!Array.isArray(students)) {
-            students = [];
-        }
-
-    } catch (error) {
-        students = [];
-    }
-
-    let defaultStudent = students.find(
-        s => String(s.id).trim().toUpperCase() === 'STUDENT'
-    );
-
-    if (!defaultStudent) {
-
-        defaultStudent = {
-            id: 'STUDENT',
-            name: 'Default Student',
-            course: 'BiPC - NEET',
-            year: '1st Year',
-            campus: 'Day Scholar',
-            dob: 'Not Provided',
-            gender: 'Not Provided',
-            father: 'Not Provided',
-            mother: 'Not Provided',
-            phone: 'Not Provided',
-            school: 'Not Provided',
-            transport: false,
-            att: 95,
-            results: [],
-            pass: 'student123'
-        };
-
-        students.push(defaultStudent);
-
-    } else {
-
-        defaultStudent.pass = 'student123';
-
-    }
-
-    localStorage.setItem(
-        'adminStudentsData',
-        JSON.stringify(students)
-    );
-
-    return true;
-}
-
-
-/* LOGIN VALIDATION VIA NODE.JS & MONGODB BACKEND */
-
-async function validateLogin(event, role) {
-
-    event.preventDefault();
-
-    document.getElementById('errorMsg').style.display = 'none';
-
-    let username = '';
-    let password = '';
-
-    if (role === 'student') {
-        username = document.getElementById('studentId').value.trim();
-        password = document.getElementById('studentPassword').value;
-    } else if (role === 'admin') {
-        username = document.getElementById('adminId').value.trim();
-        password = document.getElementById('adminPassword').value;
-    } else if (role === 'superadmin') {
-        username = document.getElementById('superadminId').value.trim();
-        password = document.getElementById('superadminPassword').value;
-    }
-
-    if (!username || !password) {
-        showError('Please enter both ID/Username and Password.');
-        return false;
-    }
-
-    try {
-        const res = await window.SchoolAPI.login(username, password, role);
-
-        if (res.success) {
-            if (role === 'student') {
-                window.location.href = './student-dashboard.html';
-            } else if (role === 'admin') {
-                localStorage.setItem('loggedInAdminCampus', res.user.campus || 'All Campuses');
-                localStorage.setItem('loggedInAdmin', res.user.username);
-                localStorage.setItem('loggedInAdminName', res.user.name || res.user.username);
-                localStorage.setItem('userName', res.user.name || res.user.username);
-                window.location.href = './admin-dashboard.html';
-            } else if (role === 'superadmin') {
-                localStorage.setItem('loggedInSuperAdmin', 'true');
-                window.location.href = './super-admin-dashboard.html';
-            }
-            return false;
-        } else {
-            showError(res.message || 'Authentication failed.');
-            return false;
-        }
-    } catch (err) {
-        showError(err.message || 'Invalid Credentials! Please verify ID and Password.');
-        return false;
-    }
-}
-
-</script>
 
 </body>
 </html>
